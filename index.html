@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Temp</title>
+    <script type="text/javascript" src="app.js"></script>
+  </head>
+  <body>
+    <section>
+      <h1>Login Screen</h1>
+      <h3>Enter your email address</h3>
+      <input id="email-box">
+      <h3>Enter your password</h3>
+      <input  id="password-box">
+      <button id="login" onclick="login()">Login</button>
+      <button id="logOut" onclick="logOut()">LogOut</button>
+    </section>
+
+    <section>
+      <h1>Create an account:</h1>
+      <h3>Enter your email address</h3>
+      <input id="newEmail-box">
+      <h3>Enter your password</h3>
+      <input  id="newPassword-box">
+      <button id="create" onclick="create()">Create</button>
+    </section>
+    <script src="https://www.gstatic.com/firebasejs/3.6.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-messaging.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyAuC_xqXKk99bTeaCluuoJhqNfJFQNlv1E",
+        authDomain: "epproject-a2ea7.firebaseapp.com",
+        databaseURL: "https://epproject-a2ea7.firebaseio.com",
+        storageBucket: "epproject-a2ea7.appspot.com",
+        messagingSenderId: "638364827583"
+      };
+      firebase.initializeApp(config);
+    </script>
+  </body>
+  <script>
+    function login() {
+      var email = document.getElementById("email-box").value;
+      var password = document.getElementById("password-box").value;
+
+      //sign in a user
+      firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        alert('problem')
+        // ...
+      });
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          //var user = firebase.auth().currentUser;
+          alert('Welcome ' + user.email)
+        } else {
+          // No user is signed in.
+        }
+      });
+    }
+
+    function logOut() {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          //sign a user out
+          firebase.auth().signOut().then(function() {
+            // Sign-out successful.
+            alert('Goodbye ' +  user.email);
+          }, function(error) {
+            // An error happened.
+            alert('There was a problem signing out');
+          });
+        } else {
+          // No user is signed in.
+          alert('No user signed in')
+        }
+      });
+
+    }
+
+    function create() {
+      var email = document.getElementById("newEmail-box").value;
+      var password = document.getElementById("newPassword-box").value;
+
+      //creating a new user
+      firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        alert(errorMessage)
+        // ...
+      });
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          //var user = firebase.auth().currentUser;
+          alert('Welcome ' + user.email)
+        } else {
+          // No user is signed in.
+        }
+      });
+
+      var user = firebase.auth().currentUser;
+
+      user.sendEmailVerification().then(function() {
+        // Email sent.
+      },function(error) {
+        // An error happened.
+      });
+    }
+  </script>
+</html>
