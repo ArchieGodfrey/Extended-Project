@@ -1,9 +1,5 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
+import actions from "ExtendedProject/Actions"
+import PostContents from 'ExtendedProject/postContents'
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator,ListView, TouchableHighlight, TextInput,Button,AsyncStorage
@@ -22,7 +18,7 @@ firebase.initializeApp(config);
 
 const FirebaseURL = 'https://epproject-a2ea7.firebaseio.com';
 
-export default class ExtendedProject extends Component {
+class ExtendedProject extends Component {
   constructor (props) {
     super(props);
     this.database = firebase.database();
@@ -32,12 +28,14 @@ export default class ExtendedProject extends Component {
     textEntered: false,
     Username: "",
     password: "",
-    //postTitle: "",
+    postTitle: "",
     postDesc: "",
     postImage: "",
     postDate: "",
-    Following: []
+    Following: [],
+    postIndex: 0,
     }
+    this.previousValue = new Animated.Value(500)
     this.spinValue = new Animated.Value(0)
     this.moveYValue = new Animated.Value(-210)
     this.feedValue = new Animated.Value(0)
@@ -68,7 +66,6 @@ export default class ExtendedProject extends Component {
              } catch (error) {
                // Error retrieving data
                this.setState({modalVisible: true});
-               //alert(global.failed)
              }
   }
   login () {
@@ -139,8 +136,15 @@ export default class ExtendedProject extends Component {
     this.setState({modalVisible: true});
   }
 
-  loadFeed (title,description) {
-    alert("new")
+  newPost () {
+    var postTitle = "New post"
+    var postDesc = "New desc"
+    var newPostKey = firebase.database().ref("UserID/Archie").child('posts').push().key;
+    var postsRef = firebase.database().ref("UserID/Archie/posts")
+    postsRef.child(newPostKey).update( {
+      title: postTitle,
+      desc: postDesc
+    });
   }
 
   loadFollowers (childData) {
@@ -158,7 +162,19 @@ export default class ExtendedProject extends Component {
         })
     }
 
-  previousPost () {
+    previousPost() {
+      this.setState({postIndex: this.state.postIndex + 1})
+      this.setState({postTitle: actions.postTitleList[this.state.postIndex]})
+      this.setState({postDesc: actions.postDescList[this.state.postIndex]})
+    }
+
+    nextPost () {
+      this.setState({postIndex: this.state.postIndex - 1})
+      this.setState({postTitle: actions.postTitleList[this.state.postIndex]})
+      this.setState({postDesc: actions.postDescList[this.state.postIndex]})
+    }
+
+  getPosts () {
     var {
       postTitle
     } = this.state
@@ -166,31 +182,28 @@ export default class ExtendedProject extends Component {
     var query = firebase.database().ref("UserID/Archie/Following/UserID").orderByKey();
     query.once("value")
       .then(function(snapshot) {
-        var i = 1
         snapshot.forEach(function(childSnapshot) {
           // key will be "ada" the first time and "alan" the second time
           var key = childSnapshot.key;
           // childData will be the actual contents of the child
           var followedUserID = childSnapshot.val();
-          //alert("childData" + childData)
+          //alert("childData" + followedUserID)
           var newRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts")
           newRef.once("value")
             .then(function(newSnapshot) {
-                var newChildData = newSnapshot.val();
-                //alert("ref " + newChildSnapshot.key)
-                var postTitleRef = firebase.database().ref("UserID/Miles/posts/title") //("UserID/" + newChildSnapshot.key + "/posts/title")
-                postTitleRef.on('value', (titleSnapshot) => {
-                  //this.postTitle = titleSnapshot.val()
-                  //alert(this.postTitle)
-                  postTitle = titleSnapshot.val()
-                  loadFeed(postTitle, "desc").bind(this)
+              var newChildData = newSnapshot.val();
+              var postTitleRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/title")
+              postTitleRef.on('value', (titleSnapshot) => {
+                actions.postTitle = titleSnapshot.val()
+              })
+              var postDescRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/description")
+              postDescRef.on('value', (descSnapshot) => {
+                actions.postDesc = descSnapshot.val()
+                actions.newPost(actions.postTitle,actions.postDesc)
               })
             })
           });
         });
-        //this.setState({postTitle: window.newTitle })
-        //alert(window.newTitle )
-        alert(this.state.postTitle)
     }
 
   getpreviousPost () {
@@ -234,9 +247,6 @@ export default class ExtendedProject extends Component {
     this.setState({postDesc: postDesc})
   }
 
-  nextPost () {
-    alert(this.postTitle)
-  }
   render() {
     const spin = this.spinValue.interpolate({
       inputRange: [0, 1],
@@ -296,7 +306,8 @@ export default class ExtendedProject extends Component {
       </TouchableHighlight>
 
 
-    <Animated.View style={{paddingLeft:this.feedValue, flex:1, transform: [{ translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
+
+    <Animated.View style={{flex:1, transform: [{ translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
       <View style={styles.Imagecontainer}>
         <Image
           style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/luggageCase.jpg')}/>
@@ -325,11 +336,15 @@ export default class ExtendedProject extends Component {
       <TouchableHighlight onPress={this.previousPost.bind(this)} style={{position: 'absolute', top: 535, right: 50,padding:25}} underlayColor="#f1f1f1">
         <Text style={{fontSize: 20}}>Previous</Text>
       </TouchableHighlight>
-      <TouchableHighlight onPress={this.nextPost.bind(this)} style={{position: 'absolute', top: 535, left: 50,padding:25}} underlayColor="#f1f1f1">
+      <TouchableHighlight onPress={this.newPost.bind(this)} style={{position: 'absolute', top: 535, left: 50,padding:25}} underlayColor="#f1f1f1">
         <Text style={{fontSize: 20}}>Next</Text>
       </TouchableHighlight>
       <Image
         style={styles.PageTurn} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/PageTurn.png')}/>
+      </Animated.View>
+
+      <Animated.View style={{paddingLeft:this.previousValue, flex:1, transform: [{ translateY: this.moveYValue}, {translateX: this.previousValue}] }}>
+        <PostContents />
       </Animated.View>
 
 
@@ -351,19 +366,20 @@ export default class ExtendedProject extends Component {
       </Animated.View>
     </View>
   )};
-    componentDidMount () {
-      this.tryLogin()
+
+  componentWillMount () {
+    this.tryLogin()
+  }
+  componentDidMount () {
+    this.getPosts()
   }
 
-
-
-closeLogin () {
-  alert('Hi')
+moveLeft () {
   Animated.sequence([
     Animated.timing(
-      this.startYValue,
+      this.previousValue,
       {
-        toValue: -1000,
+        toValue: 0,
         duration: 550,
         easing: Easing.linear
       }
