@@ -1,5 +1,5 @@
 import PostContents from 'ExtendedProject/postContents'
-
+import index from 'ExtendedProject/index.ios'
 class actions {
   constructor (props) {
   this.postTitle = "Original"
@@ -16,8 +16,13 @@ class actions {
   this.UserID = ""
   this.Username = ""
   this.password = ""
+  this.otherName = ""
+  this.otherUserID = ""
   this.spun = false
   this.crossSpun = false
+  this.pressed = false
+  this.following = false
+  this.foundUsers = []
 }
 
   loadPost(title,desc,date,likes,userID) {
@@ -38,6 +43,11 @@ class actions {
       return 0;
     });
     //this.readArray(this.postList)
+  }
+
+  searchFunction(ID, name) {
+    this.foundUsers.push({USERID: ID,
+                        NAME: name})
   }
 
   tryLike(thisUser) {
@@ -67,11 +77,17 @@ class actions {
       } else {
         this.spun = false
       }
-    } else {
+    } else if (num == 0) {
       if (this.crossSpun == false) {
         this.crossSpun = true
       } else {
         this.crossSpun = false
+      }
+    } else {
+      if (this.pressed == false) {
+        this.pressed = true
+      } else {
+        this.pressed = false
       }
     }
   }

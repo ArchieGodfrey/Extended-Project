@@ -25,16 +25,16 @@ class ExtendedProject extends Component {
     super(props);
     this.database = firebase.database();
     //this.firebase = new Firebase(FirebaseURL);
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
     modalVisible: false,
     textEntered: false,
     otherUserID: "",
-    otherUsername: "",
     otherName: "",
-    otherPassword: "",
     UserID: "",
     Username: "",
     name: "",
+    profDesc: "",
     password: "",
     postTitle: "",
     postDesc: "",
@@ -42,11 +42,16 @@ class ExtendedProject extends Component {
     postDate: "",
     postLikes: 0,
     liked: false,
+    following: "Follow",
+    searchQuery: "",
+    resultsOpacity: 0,
+    dataSource: ds.cloneWithRows([])
     }
     this.clearText = this.clearText.bind(this);
     this.postIndex = 0
     this.newPostValue = new Animated.Value(500)
     this.previousValue = new Animated.Value(500)
+    this.profileValue = new Animated.Value(500)
     this.spinValue = new Animated.Value(0)
     this.crossValue = new Animated.Value(0)
     this.crossXValue = new Animated.Value(0)
@@ -55,7 +60,9 @@ class ExtendedProject extends Component {
     this.feedValue = new Animated.Value(0)
     this.accountValue = new Animated.Value(-500)
     this.otherAccountValue = new Animated.Value(-500)
+    this.otherAccountXValue = new Animated.Value(100)
     this.settingsValue = new Animated.Value(-500)
+    this.searchValue = new Animated.Value(500)
   }
 
   clearText() {
@@ -69,9 +76,27 @@ class ExtendedProject extends Component {
       AsyncStorage.getItem('@userID:key').then((value) => {
         this.setState({UserID: value});
       });
+    } catch (error) {
+      // Error retrieving data
+      this.logOut()
+    }
+    try {
       AsyncStorage.getItem('@name:key').then((value) => {
         this.setState({name: value});
       });
+    } catch (error) {
+      // Error retrieving data
+      this.logOut()
+    }
+    try {
+      AsyncStorage.getItem('@profDesc:key').then((value) => {
+        this.setState({profDesc: value});
+      });
+    } catch (error) {
+      // Error retrieving data
+      this.logOut()
+    }
+    try {
       AsyncStorage.getItem('@username:key').then((value) => {
        this.setState({Username: value});
        if (this.state.Username !== null){
@@ -96,7 +121,6 @@ class ExtendedProject extends Component {
        // Error retrieving data
        this.logOut()
      }
-
   this.setState({Username: actions.Username});
   this.setState({UserID: actions.UserID});
   this.setState({password: actions.password});
@@ -193,9 +217,12 @@ class ExtendedProject extends Component {
     AsyncStorage.getItem('@userID:key').then((value) => {
              this.setState({UserID: value});
              });;
+    AsyncStorage.getItem('@profDesc:key').then((value) => {
+              this.setState({profDesc: value});
+              });;
     AsyncStorage.getItem('@userID:key').then((value) => {
              this.setState({Username: value});
-        });;
+              });;
     AsyncStorage.getItem('@password:key').then((value) => {
              this.setState({password: value});
              });;
@@ -222,10 +249,36 @@ class ExtendedProject extends Component {
     var user = firebase.auth().currentUser;
     firebase.auth().signOut().then(function() {
       // Sign-out successful.
-      AsyncStorage.setItem('@userID:key', "");
-      AsyncStorage.setItem('@name:key', "");
-      AsyncStorage.setItem('@username:key', "");
-      AsyncStorage.setItem('@password:key', "");
+      try {
+       AsyncStorage.setItem('@userID:key', "");
+      } catch (error) {
+        // Error saving data
+        alert('error saving username')
+      }
+      try {
+       AsyncStorage.setItem('@name:key', "");
+      } catch (error) {
+        // Error saving data
+        alert('error saving username')
+      }
+      try {
+       AsyncStorage.setItem('@profDesc:key', "");
+      } catch (error) {
+        // Error saving data
+        alert('error saving username')
+      }
+      try {
+       AsyncStorage.setItem('@username:key', "");
+      } catch (error) {
+        // Error saving data
+        alert('error saving username')
+      }
+      try {
+       AsyncStorage.setItem('@password:key', "");
+      } catch (error) {
+        // Error saving data
+        alert('error saving username')
+      }
     }, function(error) {
       // An error happened.
       alert('There was a problem signing out');
@@ -237,7 +290,6 @@ class ExtendedProject extends Component {
     var timeKey = moment().format('MMDDYYYYhmmss')
     var postTitle = this.state.postTitle
     var postDesc = this.state.postDesc
-    var newPostKey = firebase.database().ref("UserID/"+ this.state.UserID).child('posts').push().key;
     var postsRef = firebase.database().ref("UserID/"+ this.state.UserID + "/posts")
     postsRef.child(timeKey).update( {
       title: postTitle,
@@ -303,15 +355,15 @@ class ExtendedProject extends Component {
                    newSnapshot.forEach(function(newChildSnapshot) {
                      actions.date = newChildSnapshot.key;
                      var postTitleRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts/" + newChildSnapshot.key + "/title")
-                     postTitleRef.on('value', (titleSnapshot) => {
+                     postTitleRef.once('value', (titleSnapshot) => {
                        actions.postTitle = titleSnapshot.val()
                      })
                      var postDescRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts/" + newChildSnapshot.key + "/desc")
-                     postDescRef.on('value', (descSnapshot) => {
+                     postDescRef.once('value', (descSnapshot) => {
                        actions.postDesc = descSnapshot.val()
                      })
                      var postLikesRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts/" + newChildSnapshot.key + "/likes")
-                     postLikesRef.on('value', (likesSnapshot) => {
+                     postLikesRef.once('value', (likesSnapshot) => {
                        actions.postLikes = likesSnapshot.val()
                        actions.loadPost(actions.postTitle,actions.postDesc,actions.date,actions.postLikes,childSnapshot.key)
                      })
@@ -333,8 +385,18 @@ class ExtendedProject extends Component {
     }
   }
 
-  editProfile() {
-    alert("edit")
+  saveProfile() {
+    var name = this.state.name
+    var profDesc = this.state.profDesc
+    var postsRef = firebase.database().ref("UserID/"+ this.state.UserID)
+    postsRef.update( {
+      Name: name,
+      ProfDesc: profDesc
+    });
+    AsyncStorage.setItem('@name:key', name);
+    AsyncStorage.setItem('@profDesc:key', profDesc);
+    this.clearText()
+    this.accountLeft()
   }
 
   likePost() {
@@ -349,7 +411,7 @@ class ExtendedProject extends Component {
             if (childSnapshot.key !== UserID) {
               alert("liked")
               var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm").format('MMDDYYYYhmmss'))
-              postsRef.child("likes").on('value', (likesSnapshot) => {
+              postsRef.child("likes").once('value', (likesSnapshot) => {
                 actions.postLikes = likesSnapshot.val()
                 actions.postLikes = actions.postLikes + 1
               })
@@ -374,6 +436,99 @@ class ExtendedProject extends Component {
     })
     this.setState({postLikes: actions.postLikes})
   }
+
+  searchForUser () {
+    let {
+      searchQuery
+    } = this.state
+    actions.foundUsers = []
+    var query = firebase.database().ref("UserID").orderByKey();
+    query.once("value")
+      .then(function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+          // key will be "ada" the first time and "alan" the second time
+          var key = childSnapshot.key;
+          // childData will be the actual contents of the child
+          //alert(childSnapshot.key)
+          var newRef = firebase.database().ref("UserID/" + childSnapshot.key + "/Name")
+          //alert(newRef)
+          newRef.once("value")
+            .then(function(newSnapshot) {
+              if (searchQuery == newSnapshot.val()) {
+                actions.searchFunction(childSnapshot.key, newSnapshot.val())
+              }
+            })
+        })
+  })
+  this.setState({resultsOpacity:1})
+  dismissKeyboard()
+}
+getResults() {
+  var results = []
+  actions.foundUsers.map(function(item) {
+      actions.otherUserID = item.USERID
+      actions.otherName = item.NAME
+      results.push(item.NAME)
+    }
+  )
+  this.setState({dataSource: this.state.dataSource.cloneWithRows(actions.foundUsers)})
+}
+
+showAccountInfo(otherUserID) {
+  var userRef = firebase.database().ref("UserID/" + otherUserID + "/Name")
+  userRef.once('value', (Snapshot) => {
+    this.setState({otherName: Snapshot.val()})
+  })
+  var followRef = firebase.database().ref("UserID/"+ otherUserID + "/followers")
+  followRef.once("value")
+    .then(function(snapshot) {
+      if (snapshot.val() !== null) {
+        snapshot.forEach(function(childSnapshot) {
+          if (childSnapshot.key !== UserID) {
+            actions.following = false
+          } else {
+            actions.following = true
+          }
+        })
+      } else {
+        actions.following = false
+      }
+  })
+  this.setState({following: actions.following})
+  this.showOtherAccount()
+}
+
+followUser(otherUserID) {
+  let {
+    UserID
+  } = this.state
+  var followRef = firebase.database().ref("UserID/"+ otherUserID + "/followers")
+  followRef.once("value")
+    .then(function(snapshot) {
+      if (snapshot.val() !== null) {
+        snapshot.forEach(function(childSnapshot) {
+          if (childSnapshot.key !== UserID) {
+            followRef.child(UserID).update( {
+              User: UserID
+            });
+            var userRef = firebase.database().ref("UserID/"+ UserID + "/following")
+            userRef.child(otherUserID).update( {
+              User: otherUserID
+            });
+          }
+        })
+      } else {
+        followRef.child(UserID).update( {
+          User: UserID
+        });
+        var userRef = firebase.database().ref("UserID/"+ UserID + "/following")
+        userRef.child(otherUserID).update( {
+          User: otherUserID
+        });
+      }
+  })
+  this.setState({following: "Following"})
+}
 
   render() {
     const spin = this.spinValue.interpolate({
@@ -462,14 +617,22 @@ class ExtendedProject extends Component {
         </TouchableHighlight>
         <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.editXValue}]}}>
           <TouchableHighlight
-          onPress={this.editProfile.bind(this)}
+          onPress={this.accountLeft.bind(this)}
           style={{width: 40,height: 30}}
           underlayColor="#f1f1f1">
           <Animated.Image
             style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/EditIcon.png')}/>
         </TouchableHighlight>
       </Animated.View>
-
+      <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.otherAccountXValue}]}}>
+        <TouchableHighlight
+        onPress={this.closeOtherAccount.bind(this)}
+        style={{width: 40,height: 30}}
+        underlayColor="#f1f1f1">
+        <Animated.Image
+          style={{height: 25, width: 28 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/BackIcon.png')}/>
+      </TouchableHighlight>
+    </Animated.View>
       </View>
 
 
@@ -484,12 +647,17 @@ class ExtendedProject extends Component {
       </TouchableHighlight>
 
       <TouchableHighlight
+        onPress={this.followFunc.bind(this)} style={{padding: 10 }} underlayColor="#f1f1f1">
+        <Animated.Text style={styles.row}> Follow </Animated.Text>
+      </TouchableHighlight>
+
+      <TouchableHighlight
         onPress={this.settingsFunc.bind(this)} style={{padding: 10 }} underlayColor="#f1f1f1">
         <Animated.Text style={styles.row}> Settings </Animated.Text>
       </TouchableHighlight>
 
 
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, position: 'absolute', top: 280, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
         <View style={styles.Imagecontainer}>
           <Image
             style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/luggageCase.jpg')}/>
@@ -547,12 +715,59 @@ class ExtendedProject extends Component {
       </Animated.View>
 
 
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 275,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.accountValue}] }}>
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.accountValue}] }}>
           <Image
             style={{position: 'absolute', top: 25, left: 25, height: 56, width: 51}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar2.png')}/>
           <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.name}</Text>
           <Text style={{position: 'absolute', top: 60, left: 100, fontSize: 20}}>EMAIL: {this.state.Username}</Text>
-          <Text style={{position: 'absolute', top: 100, left: 25, fontSize: 20}}>User profile info would go here</Text>
+          <Text style={{position: 'absolute', top: 100, left: 25, fontSize: 20}}>{this.state.profDesc}</Text>
+      </Animated.View>
+
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.profileValue}]}}>
+        <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Edit your profile</Text>
+        <TextInput
+        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 300, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Enter your name'}
+        value={this.state.name}
+        onChange={(event) => this.setState({name: event.nativeEvent.text})}
+        ref={component => this._titleInput = component}
+        />
+        <TextInput
+        style={{position: 'absolute', top: 95, left: 40, height: 80, width: 300, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Enter a description'}
+        multiline={true}
+        value={this.state.profDesc}
+        onChange={(event) => this.setState({profDesc: event.nativeEvent.text})}
+        ref={component => this._descInput = component}
+        />
+      <TouchableHighlight onPress={this.saveProfile.bind(this)} style={{position: 'absolute', top: 155, left: 130, padding:25}} underlayColor="#f1f1f1">
+          <Text style={{fontSize: 20}}>Save</Text>
+        </TouchableHighlight>
+      </Animated.View>
+
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.searchValue}]}}>
+        <Text style={{position: 'absolute', top: 10, left: 150, fontSize: 25}}>Search</Text>
+        <TextInput
+        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 225, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Search for a name'}
+        onChange={(event) => this.setState({searchQuery: event.nativeEvent.text})}
+        ref={component => this._titleInput = component}
+        />
+      <TouchableHighlight onPress={this.searchForUser.bind(this)} style={{position: 'absolute', top: 60, left: 275}} underlayColor="#f1f1f1">
+          <Text style={{fontSize: 20}}>Search</Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={this.getResults.bind(this)} style={{opacity: this.state.resultsOpacity, position: 'absolute', top: 100, left: 25}} underlayColor="#f1f1f1">
+            <Text style={{fontSize: 20}}>Press to show results...</Text>
+          </TouchableHighlight>
+        <ListView
+          enableEmptySections={true}
+          style={{position: 'absolute', top: 150, left: 25}}
+          dataSource={this.state.dataSource}
+          renderRow={(rowData) =>
+          <TouchableHighlight style={{height:40, width:325, borderColor: "black", borderWidth:1, justifyContent: "center"}} onPress={() => this.showAccountInfo(rowData.USERID)}>
+            <Text  style={{fontSize: 25}}>{rowData.NAME}</Text>
+          </TouchableHighlight>}
+        />
       </Animated.View>
 
 
@@ -566,10 +781,9 @@ class ExtendedProject extends Component {
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 275,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.otherAccountValue}] }}>
           <Image
             style={{position: 'absolute', top: 25, left: 25, height: 56, width: 51}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar2.png')}/>
-          <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.name}</Text>
-          <Text style={{position: 'absolute', top: 60, left: 100, fontSize: 20}}>EMAIL: {this.state.Username}</Text>
-          <TouchableHighlight onPress={this.logOut.bind(this)} style={{position: 'absolute', top: 200, left: 130}} underlayColor="#f1f1f1">
-            <Text style={{fontSize: 20}}>Log Out</Text>
+          <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.otherName}</Text>
+          <TouchableHighlight onPress={() => this.followUser(actions.otherUserID)} style={{position: 'absolute', top: 200, left: 130}} underlayColor="#f1f1f1">
+            <Text style={{fontSize: 20}}>Following: {this.state.following}</Text>
           </TouchableHighlight>
       </Animated.View>
     </View>
@@ -583,7 +797,6 @@ class ExtendedProject extends Component {
   }
 
 rotateCross () {
-  alert("rotate")
   if (actions.crossSpun == false) {
     actions.alternateSpin(0)
     Animated.parallel([
@@ -637,6 +850,27 @@ rotateCross () {
   }
 }
 
+showOtherAccount() {
+  Animated.sequence([
+    Animated.timing(
+      this.otherAccountValue,
+      {
+        toValue: 0,
+        duration: 550,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.otherAccountXValue,
+      {
+        toValue: 0,
+        duration: 550,
+        easing: Easing.linear
+      }
+    )
+  ]).start()
+}
+
 moveLeft () {
   //alert("Left")
   Animated.parallel([
@@ -646,16 +880,35 @@ moveLeft () {
         toValue: 0,
         duration: 550,
         easing: Easing.linear
-      }),
-    Animated.timing(
-      this.feedValue,
-      {
-        toValue: -500,
-        duration: 550,
-        easing: Easing.linear
       })
   ]).start()
 };
+
+accountLeft () {
+  if (actions.pressed == false) {
+    actions.alternateSpin(2)
+    Animated.parallel([
+      Animated.timing(
+        this.profileValue,
+        {
+          toValue: 0,
+          duration: 550,
+          easing: Easing.linear
+        })
+    ]).start()
+  } else {
+    actions.alternateSpin(2)
+    Animated.parallel([
+      Animated.timing(
+        this.profileValue,
+        {
+          toValue: 500,
+          duration: 550,
+          easing: Easing.linear
+        })
+      ]).start()
+  }
+}
 moveRight () {
   Animated.sequence([
     Animated.timing(
@@ -676,6 +929,14 @@ editFunc () {
       {
         toValue: 100,
         duration: 400,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.otherAccountXValue,
+      {
+        toValue: 100,
+        duration: 550,
         easing: Easing.linear
       }
     ),
@@ -701,6 +962,14 @@ newPostFunc () {
       }
     ),
     Animated.timing(
+      this.otherAccountXValue,
+      {
+        toValue: 100,
+        duration: 550,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
       this.crossXValue,
       {
         toValue: 0,
@@ -708,6 +977,43 @@ newPostFunc () {
         easing: Easing.linear
       }
     )
+  ]).start()
+}
+
+closeOtherAccount() {
+  Animated.parallel([
+    Animated.timing(
+      this.editXValue,
+      {
+        toValue: 100,
+        duration: 400,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.crossXValue,
+      {
+        toValue: 100,
+        duration: 550,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.otherAccountXValue,
+      {
+        toValue: 100,
+        duration: 550,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.otherAccountValue,
+      {
+        toValue: -500,
+        duration: 400,
+        easing: Easing.linear
+      }
+    ),
   ]).start()
 }
 
@@ -723,6 +1029,14 @@ settingFunc () {
     ),
     Animated.timing(
       this.crossXValue,
+      {
+        toValue: 100,
+        duration: 550,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.otherAccountXValue,
       {
         toValue: 100,
         duration: 550,
@@ -795,6 +1109,14 @@ accountFunc () {
         easing: Easing.linear
       }
     ),
+    Animated.timing(
+      this.searchValue,
+      {
+        toValue: 500,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ),
       Animated.timing(
         this.accountValue,
         {
@@ -825,6 +1147,14 @@ feedFunc () {
         easing: Easing.linear
       }
     ),
+    Animated.timing(
+      this.searchValue,
+      {
+        toValue: 500,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ),
       Animated.timing(
         this.feedValue,
         {
@@ -836,6 +1166,46 @@ feedFunc () {
   ]).start()
   this.menuFunc()
 };
+
+followFunc () {
+  this.settingFunc()
+  Animated.parallel([
+    Animated.timing(
+      this.feedValue,
+      {
+        toValue: 500,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.accountValue,
+      {
+        toValue: -500,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.settingsValue,
+      {
+        toValue: -500,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.searchValue,
+      {
+        toValue: 0,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ),
+  ]).start()
+  this.menuFunc()
+};
+
 settingsFunc () {
   this.settingFunc()
   Animated.parallel([
@@ -889,8 +1259,6 @@ const styles = StyleSheet.create({
     fontSize: 36,
   },
   Imagecontainer: {
-    padding:175,
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000000',
