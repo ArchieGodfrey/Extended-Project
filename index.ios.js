@@ -49,10 +49,12 @@ class ExtendedProject extends Component {
     this.previousValue = new Animated.Value(500)
     this.spinValue = new Animated.Value(0)
     this.crossValue = new Animated.Value(0)
+    this.crossXValue = new Animated.Value(0)
+    this.editXValue = new Animated.Value(100)
     this.moveYValue = new Animated.Value(-210)
     this.feedValue = new Animated.Value(0)
     this.accountValue = new Animated.Value(-500)
-    otherAccountValue = new Animated.Value(-500)
+    this.otherAccountValue = new Animated.Value(-500)
     this.settingsValue = new Animated.Value(-500)
   }
 
@@ -332,7 +334,7 @@ class ExtendedProject extends Component {
   }
 
   editProfile() {
-    
+    alert("edit")
   }
 
   likePost() {
@@ -452,13 +454,22 @@ class ExtendedProject extends Component {
         </Text>
         <TouchableHighlight
           onPress={this.rotateCross.bind(this)}
-          style={{width: 40,height: 30 }}
-          underlayColor="#f1f1f1"
-          style={{position: 'absolute',top: 28, height:25, width:25, left: 325}}>
+          style={{width: 40,height: 30, position: 'absolute',top: 28, height:25, width:25, left: 325 }}
+          underlayColor="#f1f1f1">
           <Animated.Image
-           style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
+           style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [ {translateX: this.crossXValue}, {rotate: cross}]}}
         source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/PlusIcon.png')}/>
         </TouchableHighlight>
+        <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.editXValue}]}}>
+          <TouchableHighlight
+          onPress={this.editProfile.bind(this)}
+          style={{width: 40,height: 30}}
+          underlayColor="#f1f1f1">
+          <Animated.Image
+            style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/EditIcon.png')}/>
+        </TouchableHighlight>
+      </Animated.View>
+
       </View>
 
 
@@ -478,7 +489,7 @@ class ExtendedProject extends Component {
       </TouchableHighlight>
 
 
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, transform: [{ translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
         <View style={styles.Imagecontainer}>
           <Image
             style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/luggageCase.jpg')}/>
@@ -515,7 +526,7 @@ class ExtendedProject extends Component {
           style={styles.PageTurn} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/PageTurn.png')}/>
       </Animated.View>
 
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 275,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.previousValue}]}}>
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.previousValue}]}}>
         <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Create a new post</Text>
         <TextInput
         style={{position: 'absolute', top: 50, left: 40, height: 40, width: 300, borderColor: 'gray', borderWidth: 1}}
@@ -542,10 +553,6 @@ class ExtendedProject extends Component {
           <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.name}</Text>
           <Text style={{position: 'absolute', top: 60, left: 100, fontSize: 20}}>EMAIL: {this.state.Username}</Text>
           <Text style={{position: 'absolute', top: 100, left: 25, fontSize: 20}}>User profile info would go here</Text>
-          <TouchableHighlight onPress={this.editProfile.bind(this)} style={{transform: [{ translateY: this.moveYValue}, {translateX: this.accountValue}]}} underlayColor="#f1f1f1">
-            <Image
-              style={styles.PageTurn} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/EditIcon.png')}/>
-          </TouchableHighlight>
       </Animated.View>
 
 
@@ -576,6 +583,7 @@ class ExtendedProject extends Component {
   }
 
 rotateCross () {
+  alert("rotate")
   if (actions.crossSpun == false) {
     actions.alternateSpin(0)
     Animated.parallel([
@@ -660,6 +668,70 @@ moveRight () {
     )
   ]).start()
 };
+
+editFunc () {
+  Animated.sequence([
+    Animated.timing(
+      this.crossXValue,
+      {
+        toValue: 100,
+        duration: 400,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.editXValue,
+      {
+        toValue: 0,
+        duration: 550,
+        easing: Easing.linear
+      }
+    )
+  ]).start()
+}
+
+newPostFunc () {
+  Animated.sequence([
+    Animated.timing(
+      this.editXValue,
+      {
+        toValue: 100,
+        duration: 400,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.crossXValue,
+      {
+        toValue: 0,
+        duration: 550,
+        easing: Easing.linear
+      }
+    )
+  ]).start()
+}
+
+settingFunc () {
+  Animated.sequence([
+    Animated.timing(
+      this.editXValue,
+      {
+        toValue: 100,
+        duration: 400,
+        easing: Easing.linear
+      }
+    ),
+    Animated.timing(
+      this.crossXValue,
+      {
+        toValue: 100,
+        duration: 550,
+        easing: Easing.linear
+      }
+    )
+  ]).start()
+}
+
 menuFunc () {
   if (actions.spun == false) {
     actions.alternateSpin(1)
@@ -705,6 +777,7 @@ menuFunc () {
 
 };
 accountFunc () {
+  this.editFunc()
   Animated.parallel([
     Animated.timing(
       this.feedValue,
@@ -734,6 +807,7 @@ accountFunc () {
   this.menuFunc()
 };
 feedFunc () {
+  this.newPostFunc()
   Animated.parallel([
     Animated.timing(
       this.accountValue,
@@ -763,6 +837,7 @@ feedFunc () {
   this.menuFunc()
 };
 settingsFunc () {
+  this.settingFunc()
   Animated.parallel([
     Animated.timing(
       this.feedValue,
