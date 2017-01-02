@@ -16,6 +16,8 @@ class actions {
   this.UserID = ""
   this.Username = ""
   this.password = ""
+  this.name = ""
+  this.profDesc = ""
   this.otherName = ""
   this.otherUserID = ""
   this.spun = false
@@ -92,10 +94,10 @@ class actions {
     }
   }
 
-  setUserInfo(username,password,userID) {
-    this.UserID = userID
-    this.Username = username
-    this.password = password
+  setUserInfo() {
+    return this.UserID
+    //this.Username,
+    //this.password
     //alert("User Info " + this.UserID + this.Username + this.password)
   }
 }

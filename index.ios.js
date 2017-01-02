@@ -36,16 +36,17 @@ class ExtendedProject extends Component {
     name: "",
     profDesc: "",
     password: "",
-    postTitle: "",
-    postDesc: "",
+    postTitle: "Loading",
+    postDesc: "Loading",
     postImage: "",
-    postDate: "",
+    postDate: "Loading",
     postLikes: 0,
     liked: false,
     following: "Follow",
     searchQuery: "",
     resultsOpacity: 0,
-    dataSource: ds.cloneWithRows([])
+    dataSource: ds.cloneWithRows([]),
+    key: false
     }
     this.clearText = this.clearText.bind(this);
     this.postIndex = 0
@@ -74,15 +75,16 @@ class ExtendedProject extends Component {
   tryLogin() {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
-        this.setState({UserID: value});
+        actions.UserID = value
       });
     } catch (error) {
       // Error retrieving data
       this.logOut()
     }
+
     try {
       AsyncStorage.getItem('@name:key').then((value) => {
-        this.setState({name: value});
+        actions.name = value;
       });
     } catch (error) {
       // Error retrieving data
@@ -90,7 +92,7 @@ class ExtendedProject extends Component {
     }
     try {
       AsyncStorage.getItem('@profDesc:key').then((value) => {
-        this.setState({profDesc: value});
+        actions.profDesc= value;
       });
     } catch (error) {
       // Error retrieving data
@@ -98,34 +100,41 @@ class ExtendedProject extends Component {
     }
     try {
       AsyncStorage.getItem('@username:key').then((value) => {
-       this.setState({Username: value});
-       if (this.state.Username !== null){
+       actions.Username = value;
+       if (actions.Username !== null){
          // We have data!!
          actions.goodLogin()
          AsyncStorage.getItem('@password:key').then((value) => {
-          this.setState({password: value});
-          //alert(this.state.UserID)
-          actions.setUserInfo(this.state.Username, this.state.password,this.state.UserID)
-          firebase.auth().signInWithEmailAndPassword(this.state.Username, this.state.password).catch(function(error) {
+          actions.password = value;
+          firebase.auth().signInWithEmailAndPassword(actions.Username, actions.password).catch(function(error) {
             // Handle Errors here.
             var errorCode = error.code;
             var errorMessage = error.message;
             this.logOut()
-          });
+          }).then(this.setUserInfo());
         });
         } else {
          this.logOut()
         }
-      });
+      })
      } catch (error) {
        // Error retrieving data
        this.logOut()
      }
-  this.setState({Username: actions.Username});
-  this.setState({UserID: actions.UserID});
-  this.setState({password: actions.password});
-  this.setState({modalVisible: actions.visible})
+
   }
+
+  setUserInfo() {
+    this.setState({Username: actions.Username});
+    this.setState({UserID: actions.UserID});
+    this.setState({password: actions.password});
+    this.setState({name: actions.name});
+    this.setState({profDesc: actions.profDesc})
+    this.setState({modalVisible: actions.visible})
+    this.setState({key: true})
+    this.getPosts()
+  }
+
   createUser () {
     let {
         Username, password, name
@@ -320,27 +329,32 @@ class ExtendedProject extends Component {
 
   nextPost () {
     var postIndex = this.postIndex
-    this.postIndex = this.postIndex - 1
-    actions.postList.map(function(item, i) {
-      if (i == postIndex) {
-        actions.UserID = item.USERID
-        actions.postTitle = item.TITLE
-        actions.postDate = item.DATE
-        actions.postDesc = item.DESC
-        actions.postLikes = item.LIKES
-      }
-    })
+    if (this.postIndex > 0) {
+      this.postIndex = this.postIndex - 1
+      actions.postList.map(function(item, i) {
+        if (i == postIndex) {
+          actions.UserID = item.USERID
+          actions.postTitle = item.TITLE
+          actions.postDate = item.DATE
+          actions.postDesc = item.DESC
+          actions.postLikes = item.LIKES
+        }
+      })
+    } else {
+      alert("FirstPost")
+    }
+
     this.setState({postTitle: actions.postTitle})
     this.setState({postDate: moment(actions.date, "MMDDYYYYhmmss").format('MMMM Do, h:mm')})
     this.setState({postDesc: actions.postDesc})
     this.setState({postLikes: actions.postLikes})
   }
 
-  getPosts () {
+  getPosts = () => {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
        this.setState({UserID: value});
-       if (this.state.UserID !== "") {
+       if (this.state.UserID !== null) {
          var query = firebase.database().ref("UserID/" + this.state.UserID + "/following").orderByKey();
          query.once("value")
            .then(function(snapshot) {
@@ -349,34 +363,34 @@ class ExtendedProject extends Component {
                var key = childSnapshot.key;
                // childData will be the actual contents of the child
                var followedUserID = childSnapshot.val();
-               var newRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts")
+               var newRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts")
                newRef.once("value")
                  .then(function(newSnapshot) {
                    newSnapshot.forEach(function(newChildSnapshot) {
-                     actions.date = newChildSnapshot.key;
-                     var postTitleRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts/" + newChildSnapshot.key + "/title")
+                     actions.postDate = newChildSnapshot.key;
+                     var postTitleRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/title")
                      postTitleRef.once('value', (titleSnapshot) => {
                        actions.postTitle = titleSnapshot.val()
                      })
-                     var postDescRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts/" + newChildSnapshot.key + "/desc")
+                     var postDescRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/desc")
                      postDescRef.once('value', (descSnapshot) => {
                        actions.postDesc = descSnapshot.val()
                      })
-                     var postLikesRef = firebase.database().ref("UserID/" + childSnapshot.val() + "/posts/" + newChildSnapshot.key + "/likes")
+                     var postLikesRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/likes")
                      postLikesRef.once('value', (likesSnapshot) => {
                        actions.postLikes = likesSnapshot.val()
-                       actions.loadPost(actions.postTitle,actions.postDesc,actions.date,actions.postLikes,childSnapshot.key)
+                       actions.loadPost(actions.postTitle,actions.postDesc,actions.postDate,actions.postLikes,childSnapshot.key)
                      })
                    })
                  })
                })
-             });
+             }).then(this.previousPost())
            } else {
              alert("There was a problem getting posts")
              this.logOut()
              this.setState(modalVisible: actions.visible)
            }
-         });;
+         })
     } catch (error) {
       // Error retrieving data
       alert("There was a problem getting posts")
@@ -541,7 +555,7 @@ followUser(otherUserID) {
   })
     return (
 
-<View>
+<View accessible={this.state.key}>
   <Modal
       animationType={"slide"} transparent={false} visible={this.state.modalVisible}>
       <View>
@@ -793,7 +807,7 @@ followUser(otherUserID) {
     this.tryLogin()
   }
   componentDidMount () {
-    this.getPosts()
+
   }
 
 rotateCross () {
