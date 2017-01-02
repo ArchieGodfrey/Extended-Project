@@ -322,7 +322,7 @@ class ExtendedProject extends Component {
     })
     this.setState({postTitle: actions.postTitle})
     this.setState({otherUserID: actions.UserID})
-    this.setState({postDate: moment(actions.date, "MMDDYYYYhmmss").format('MMMM Do, h:mm')})
+    this.setState({postDate: moment(actions.postDate, "MMDDYYYYhmmss").format('MMMM Do, h:mm:ss')})
     this.setState({postDesc: actions.postDesc})
     this.setState({postLikes: actions.postLikes})
     }
@@ -331,21 +331,22 @@ class ExtendedProject extends Component {
     var postIndex = this.postIndex
     if (this.postIndex > 0) {
       this.postIndex = this.postIndex - 1
-      actions.postList.map(function(item, i) {
-        if (i == postIndex) {
-          actions.UserID = item.USERID
-          actions.postTitle = item.TITLE
-          actions.postDate = item.DATE
-          actions.postDesc = item.DESC
-          actions.postLikes = item.LIKES
-        }
-      })
     } else {
       alert("FirstPost")
     }
 
+    actions.postList.map(function(item, i) {
+      if (i == postIndex) {
+        actions.UserID = item.USERID
+        actions.postTitle = item.TITLE
+        actions.postDate = item.DATE
+        actions.postDesc = item.DESC
+        actions.postLikes = item.LIKES
+      }
+    })
+
     this.setState({postTitle: actions.postTitle})
-    this.setState({postDate: moment(actions.date, "MMDDYYYYhmmss").format('MMMM Do, h:mm')})
+    this.setState({postDate: moment(actions.postDate, "MMDDYYYYhmmss").format('MMMM Do, h:mm:ss')})
     this.setState({postDesc: actions.postDesc})
     this.setState({postLikes: actions.postLikes})
   }
@@ -379,12 +380,12 @@ class ExtendedProject extends Component {
                      var postLikesRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/likes")
                      postLikesRef.once('value', (likesSnapshot) => {
                        actions.postLikes = likesSnapshot.val()
-                       actions.loadPost(actions.postTitle,actions.postDesc,actions.postDate,actions.postLikes,childSnapshot.key)
+                       actions.loadPost(actions.postTitle,actions.postDesc,newChildSnapshot.key,actions.postLikes,childSnapshot.key)
                      })
                    })
                  })
                })
-             }).then(this.previousPost())
+             }).then(this.finishedLoading())
            } else {
              alert("There was a problem getting posts")
              this.logOut()
@@ -397,6 +398,12 @@ class ExtendedProject extends Component {
       this.logOut()
       this.setState(modalVisible: actions.visible)
     }
+  }
+
+  finishedLoading() {
+    this.setState({postTitle: "Press previous"})
+    this.setState({postDate: "To see posts"})
+    this.setState({postDesc: ""})
   }
 
   saveProfile() {
@@ -417,14 +424,13 @@ class ExtendedProject extends Component {
     let {
       otherUserID,postDate,UserID
     } = this.state
-    var likesRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm").format('MMDDYYYYhmmss') + "/likedBy/")
+    var likesRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss') + "/likedBy/")
     likesRef.once("value")
       .then(function(snapshot) {
         if (snapshot.val() !== null) {
           snapshot.forEach(function(childSnapshot) {
             if (childSnapshot.key !== UserID) {
-              alert("liked")
-              var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm").format('MMDDYYYYhmmss'))
+              var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
               postsRef.child("likes").once('value', (likesSnapshot) => {
                 actions.postLikes = likesSnapshot.val()
                 actions.postLikes = actions.postLikes + 1
@@ -439,7 +445,7 @@ class ExtendedProject extends Component {
           })
         } else {
           actions.postLikes = 1
-          var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm").format('MMDDYYYYhmmss'))
+          var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
           postsRef.update( {
             likes: 1
           });

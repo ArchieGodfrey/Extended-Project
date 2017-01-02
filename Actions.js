@@ -4,7 +4,7 @@ class actions {
   constructor (props) {
   this.postTitle = "Original"
   this.postDesc = "Original"
-  this.postDate = ""
+  this.postDate = 0
   this.postList = []
   this.postOne = null
   this.postTwo = null
@@ -32,8 +32,7 @@ class actions {
                         DESC: desc,
                         LIKES: likes,
                         USERID: userID,
-                        DATE: date}
-                        )
+                        DATE: date})
     this.postList.sort((num1, num2) => {
       if (num1.DATE < num2.DATE) {
         return 1;
