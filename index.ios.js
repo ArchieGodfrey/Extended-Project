@@ -1,21 +1,14 @@
 import actions from "ExtendedProject/Actions"
-import PostContents from 'ExtendedProject/postContents'
+import FeedComponent from 'ExtendedProject/feedComponent'
 import dismissKeyboard from 'dismissKeyboard'
+import firebase from 'ExtendedProject/firebaseConfig'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
+  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,AsyncFunction
 } from 'react-native';
 var moment = require('moment');
-import * as firebase from 'firebase';
-// Initialize Firebase
-var config = {
-   apiKey: "AIzaSyAuC_xqXKk99bTeaCluuoJhqNfJFQNlv1E",
-   authDomain: "epproject-a2ea7.firebaseapp.com",
-   databaseURL: "https://epproject-a2ea7.firebaseio.com",
-   storageBucket: "epproject-a2ea7.appspot.com",
-   messagingSenderId: "638364827583"
-};
-firebase.initializeApp(config);
+
+var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
 const FirebaseURL = 'https://epproject-a2ea7.firebaseio.com';
 const window = Dimensions.get('window');
@@ -23,14 +16,15 @@ const window = Dimensions.get('window');
 class ExtendedProject extends Component {
   constructor (props) {
     super(props);
-    this.database = firebase.database();
-    //this.firebase = new Firebase(FirebaseURL);
+    this.database = firebaseApp.database();
+    //this.firebaseApp = new firebaseApp(firebaseAppURL);
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
     modalVisible: false,
     textEntered: false,
     otherUserID: "",
     otherName: "",
+    otherProfDesc: "",
     UserID: "",
     Username: "",
     name: "",
@@ -46,7 +40,7 @@ class ExtendedProject extends Component {
     searchQuery: "",
     resultsOpacity: 0,
     dataSource: ds.cloneWithRows([]),
-    key: false
+    loaded: false
     }
     this.clearText = this.clearText.bind(this);
     this.postIndex = 0
@@ -72,56 +66,65 @@ class ExtendedProject extends Component {
    dismissKeyboard();
  }
 
-  tryLogin() {
-    try {
-      AsyncStorage.getItem('@userID:key').then((value) => {
-        actions.UserID = value
-      });
-    } catch (error) {
-      // Error retrieving data
-      this.logOut()
-    }
-
-    try {
-      AsyncStorage.getItem('@name:key').then((value) => {
-        actions.name = value;
-      });
-    } catch (error) {
-      // Error retrieving data
-      this.logOut()
-    }
-    try {
-      AsyncStorage.getItem('@profDesc:key').then((value) => {
-        actions.profDesc= value;
-      });
-    } catch (error) {
-      // Error retrieving data
-      this.logOut()
-    }
-    try {
-      AsyncStorage.getItem('@username:key').then((value) => {
-       actions.Username = value;
-       if (actions.Username !== null){
-         // We have data!!
-         actions.goodLogin()
-         AsyncStorage.getItem('@password:key').then((value) => {
-          actions.password = value;
-          firebase.auth().signInWithEmailAndPassword(actions.Username, actions.password).catch(function(error) {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            this.logOut()
-          }).then(this.setUserInfo());
+  async tryLogin() {
+    function loggingIn() {
+      try {
+        AsyncStorage.getItem('@userID:key').then((value) => {
+          actions.UserID = value
         });
-        } else {
-         this.logOut()
-        }
-      })
-     } catch (error) {
-       // Error retrieving data
-       this.logOut()
-     }
+      } catch (error) {
+        // Error retrieving data
+        actions.badLogin()
+      }
 
+      try {
+        AsyncStorage.getItem('@name:key').then((value) => {
+          actions.name = value;
+        });
+      } catch (error) {
+        // Error retrieving data
+        actions.badLogin()
+      }
+      try {
+        AsyncStorage.getItem('@profDesc:key').then((value) => {
+          actions.profDesc = value;
+        });
+      } catch (error) {
+        // Error retrieving data
+        actions.badLogin()
+      }
+      try {
+        AsyncStorage.getItem('@username:key').then((value) => {
+        actions.Username = value
+         var Username = value;
+         if (Username !== null){
+           // We have data!
+           actions.goodLogin()
+           actions.login = true
+           AsyncStorage.getItem('@password:key').then((word) => {
+            actions.password = word
+            var password = word
+            firebaseApp.auth().signInWithEmailAndPassword(Username, password).catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              actions.badLogin()
+            })
+            })
+          } else {
+           actions.badLogin()
+          }
+        })
+       } catch (error) {
+         // Error retrieving data
+         actions.badLogin()
+       }
+    }
+
+     return new Promise(function(resolve, reject) {
+       setTimeout(function() {
+         resolve(loggingIn())}, 1000)
+       })
   }
 
   setUserInfo() {
@@ -131,25 +134,23 @@ class ExtendedProject extends Component {
     this.setState({name: actions.name});
     this.setState({profDesc: actions.profDesc})
     this.setState({modalVisible: actions.visible})
-    this.setState({key: true})
-    this.getPosts()
   }
 
   createUser () {
     let {
         Username, password, name
       } = this.state;
-      firebase.auth().createUserWithEmailAndPassword(Username, password).catch(function(error) {
+      firebaseApp.auth().createUserWithEmailAndPassword(Username, password).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
       alert(errorMessage)
       });
-      firebase.auth().onAuthStateChanged(function(user) {
+      firebaseApp.auth().onAuthStateChanged(function(user) {
         if (user) {
           // User is signed in.
-          var user = firebase.auth().currentUser;
-          var userRef = firebase.database().ref("UserID/" + user.uid)
+          var user = firebaseApp.auth().currentUser;
+          var userRef = firebaseApp.database().ref("UserID/" + user.uid)
           userRef.set( {
             User: user.uid,
             Name: name,
@@ -189,17 +190,18 @@ class ExtendedProject extends Component {
         Username, password
       } = this.state;
 
-    firebase.auth().signInWithEmailAndPassword(Username, password).catch(function(error) {
+    firebaseApp.auth().signInWithEmailAndPassword(Username, password).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
       alert(errorMessage);
     });
 
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebaseApp.auth().onAuthStateChanged(function(user) {
       if (user) {
         // User is signed in.
-        var user = firebase.auth().currentUser;
+        //alert("logged")
+        var user = firebaseApp.auth().currentUser;
         try {
          AsyncStorage.setItem('@userID:key', user.uid);
         } catch (error) {
@@ -238,13 +240,14 @@ class ExtendedProject extends Component {
     if (this.state.Username !== ""){
       // We have data!!
       actions.goodLogin()
-      firebase.auth().signInWithEmailAndPassword(this.state.Username, this.state.password).catch(function(error) {
+      firebaseApp.auth().signInWithEmailAndPassword(this.state.Username, this.state.password).catch(function(error) {
         // Handle Errors here.
         var errorCode = error.code;
         var errorMessage = error.message;
         this.logOut()
         alert('There was a problem logging in')
       });
+      this.readyToLogin()
     }
   } catch (error) {
     // Error retrieving data
@@ -255,8 +258,8 @@ class ExtendedProject extends Component {
   }
 
   logOut() {
-    var user = firebase.auth().currentUser;
-    firebase.auth().signOut().then(function() {
+    var user = firebaseApp.auth().currentUser;
+    firebaseApp.auth().signOut().then(function() {
       // Sign-out successful.
       try {
        AsyncStorage.setItem('@userID:key', "");
@@ -299,117 +302,28 @@ class ExtendedProject extends Component {
     var timeKey = moment().format('MMDDYYYYhmmss')
     var postTitle = this.state.postTitle
     var postDesc = this.state.postDesc
-    var postsRef = firebase.database().ref("UserID/"+ this.state.UserID + "/posts")
-    postsRef.child(timeKey).update( {
-      title: postTitle,
-      desc: postDesc
-    });
-    this.clearText()
-    this.rotateCross()
-  }
-
-  previousPost() {
-    var postIndex = this.postIndex
-    this.postIndex = this.postIndex + 1
-    actions.postList.map(function(item, i) {
-      if (i == postIndex) {
-        actions.UserID = item.USERID
-        actions.postTitle = item.TITLE
-        actions.postDate = item.DATE
-        actions.postDesc = item.DESC
-        actions.postLikes = item.LIKES
-      }
-    })
-    this.setState({postTitle: actions.postTitle})
-    this.setState({otherUserID: actions.UserID})
-    this.setState({postDate: moment(actions.postDate, "MMDDYYYYhmmss").format('MMMM Do, h:mm:ss')})
-    this.setState({postDesc: actions.postDesc})
-    this.setState({postLikes: actions.postLikes})
-    }
-
-  nextPost () {
-    var postIndex = this.postIndex
-    if (this.postIndex > 0) {
-      this.postIndex = this.postIndex - 1
-    } else {
-      alert("FirstPost")
-    }
-
-    actions.postList.map(function(item, i) {
-      if (i == postIndex) {
-        actions.UserID = item.USERID
-        actions.postTitle = item.TITLE
-        actions.postDate = item.DATE
-        actions.postDesc = item.DESC
-        actions.postLikes = item.LIKES
-      }
-    })
-
-    this.setState({postTitle: actions.postTitle})
-    this.setState({postDate: moment(actions.postDate, "MMDDYYYYhmmss").format('MMMM Do, h:mm:ss')})
-    this.setState({postDesc: actions.postDesc})
-    this.setState({postLikes: actions.postLikes})
-  }
-
-  getPosts = () => {
     try {
-      AsyncStorage.getItem('@userID:key').then((value) => {
-       this.setState({UserID: value});
-       if (this.state.UserID !== null) {
-         var query = firebase.database().ref("UserID/" + this.state.UserID + "/following").orderByKey();
-         query.once("value")
-           .then(function(snapshot) {
-             snapshot.forEach(function(childSnapshot) {
-               // key will be "ada" the first time and "alan" the second time
-               var key = childSnapshot.key;
-               // childData will be the actual contents of the child
-               var followedUserID = childSnapshot.val();
-               var newRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts")
-               newRef.once("value")
-                 .then(function(newSnapshot) {
-                   newSnapshot.forEach(function(newChildSnapshot) {
-                     actions.postDate = newChildSnapshot.key;
-                     var postTitleRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/title")
-                     postTitleRef.once('value', (titleSnapshot) => {
-                       actions.postTitle = titleSnapshot.val()
-                     })
-                     var postDescRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/desc")
-                     postDescRef.once('value', (descSnapshot) => {
-                       actions.postDesc = descSnapshot.val()
-                     })
-                     var postLikesRef = firebase.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/likes")
-                     postLikesRef.once('value', (likesSnapshot) => {
-                       actions.postLikes = likesSnapshot.val()
-                       actions.loadPost(actions.postTitle,actions.postDesc,newChildSnapshot.key,actions.postLikes,childSnapshot.key)
-                     })
-                   })
-                 })
-               })
-             }).then(this.finishedLoading())
-           } else {
-             alert("There was a problem getting posts")
-             this.logOut()
-             this.setState(modalVisible: actions.visible)
-           }
-         })
-    } catch (error) {
-      // Error retrieving data
-      alert("There was a problem getting posts")
-      this.logOut()
-      this.setState(modalVisible: actions.visible)
-    }
+    AsyncStorage.getItem('@userID:key').then((value) => {
+             this.setState({UserID: value});
+             var postsRef = firebaseApp.database().ref("UserID/"+ this.state.UserID + "/posts")
+             postsRef.child(timeKey).update( {
+               title: postTitle,
+               desc: postDesc
+             });
+             this.clearText()
+             this.rotateCross()
+             });;
+  } catch(error) {
+    this.signOut()
   }
 
-  finishedLoading() {
-    this.setState({postTitle: "Press previous"})
-    this.setState({postDate: "To see posts"})
-    this.setState({postDesc: ""})
+
   }
 
   saveProfile() {
     var name = this.state.name
     var profDesc = this.state.profDesc
-    var postsRef = firebase.database().ref("UserID/"+ this.state.UserID)
+    var postsRef = firebaseApp.database().ref("UserID/"+ this.state.UserID)
     postsRef.update( {
       Name: name,
       ProfDesc: profDesc
@@ -424,13 +338,13 @@ class ExtendedProject extends Component {
     let {
       otherUserID,postDate,UserID
     } = this.state
-    var likesRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss') + "/likedBy/")
+    var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss') + "/likedBy/")
     likesRef.once("value")
       .then(function(snapshot) {
         if (snapshot.val() !== null) {
           snapshot.forEach(function(childSnapshot) {
             if (childSnapshot.key !== UserID) {
-              var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
+              var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
               postsRef.child("likes").once('value', (likesSnapshot) => {
                 actions.postLikes = likesSnapshot.val()
                 actions.postLikes = actions.postLikes + 1
@@ -445,7 +359,7 @@ class ExtendedProject extends Component {
           })
         } else {
           actions.postLikes = 1
-          var postsRef = firebase.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
+          var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
           postsRef.update( {
             likes: 1
           });
@@ -462,7 +376,7 @@ class ExtendedProject extends Component {
       searchQuery
     } = this.state
     actions.foundUsers = []
-    var query = firebase.database().ref("UserID").orderByKey();
+    var query = firebaseApp.database().ref("UserID").orderByKey();
     query.once("value")
       .then(function(snapshot) {
         snapshot.forEach(function(childSnapshot) {
@@ -470,7 +384,7 @@ class ExtendedProject extends Component {
           var key = childSnapshot.key;
           // childData will be the actual contents of the child
           //alert(childSnapshot.key)
-          var newRef = firebase.database().ref("UserID/" + childSnapshot.key + "/Name")
+          var newRef = firebaseApp.database().ref("UserID/" + childSnapshot.key + "/Name")
           //alert(newRef)
           newRef.once("value")
             .then(function(newSnapshot) {
@@ -484,22 +398,23 @@ class ExtendedProject extends Component {
   dismissKeyboard()
 }
 getResults() {
-  var results = []
-  actions.foundUsers.map(function(item) {
-      actions.otherUserID = item.USERID
-      actions.otherName = item.NAME
-      results.push(item.NAME)
-    }
-  )
   this.setState({dataSource: this.state.dataSource.cloneWithRows(actions.foundUsers)})
 }
 
 showAccountInfo(otherUserID) {
-  var userRef = firebase.database().ref("UserID/" + otherUserID + "/Name")
+  let {
+    UserID
+  } = this.state
+  actions.following = false
+  var userRef = firebaseApp.database().ref("UserID/" + otherUserID + "/Name")
   userRef.once('value', (Snapshot) => {
     this.setState({otherName: Snapshot.val()})
   })
-  var followRef = firebase.database().ref("UserID/"+ otherUserID + "/followers")
+  var userProfRef = firebaseApp.database().ref("UserID/" + otherUserID + "/ProfDesc")
+  userProfRef.once('value', (Snapshot) => {
+    this.setState({otherProfDesc: Snapshot.val()})
+  })
+  var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
   followRef.once("value")
     .then(function(snapshot) {
       if (snapshot.val() !== null) {
@@ -514,7 +429,11 @@ showAccountInfo(otherUserID) {
         actions.following = false
       }
   })
-  this.setState({following: actions.following})
+  if (actions.following == true) {
+    this.setState({following: "Following"})
+  } else {
+    this.setState({following: "Follow?"})
+  }
   this.showOtherAccount()
 }
 
@@ -522,7 +441,7 @@ followUser(otherUserID) {
   let {
     UserID
   } = this.state
-  var followRef = firebase.database().ref("UserID/"+ otherUserID + "/followers")
+  var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
   followRef.once("value")
     .then(function(snapshot) {
       if (snapshot.val() !== null) {
@@ -531,7 +450,7 @@ followUser(otherUserID) {
             followRef.child(UserID).update( {
               User: UserID
             });
-            var userRef = firebase.database().ref("UserID/"+ UserID + "/following")
+            var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
             userRef.child(otherUserID).update( {
               User: otherUserID
             });
@@ -541,7 +460,7 @@ followUser(otherUserID) {
         followRef.child(UserID).update( {
           User: UserID
         });
-        var userRef = firebase.database().ref("UserID/"+ UserID + "/following")
+        var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
         userRef.child(otherUserID).update( {
           User: otherUserID
         });
@@ -559,9 +478,69 @@ followUser(otherUserID) {
       inputRange: [0, 1],
       outputRange: ['0deg','45deg']
   })
+
+  if (this.state.loaded == false) {
+    return (
+    <View style={{flex:1}}>
+      <Text style={{fontSize:20, flex:1, flexDirection:'column', alignItems:'center'}}>Loading...</Text>
+        <Modal
+            animationType={"slide"} transparent={false} visible={this.state.modalVisible}>
+            <View>
+              <Text style={{position: 'absolute', top: 25, left: 130, fontSize: 50}}>Login</Text>
+              <TextInput
+              style={{position: 'absolute', top: 150, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+              placeholder={' Enter email address'}
+              onChange={(event) => this.setState({Username: event.nativeEvent.text})}
+              autoCapitalize={'none'}
+              />
+              <TextInput
+                style={{position: 'absolute', top: 200, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+                placeholder={' Enter password'}
+                secureTextEntry={true}
+                onChange={(event) => this.setState({password: event.nativeEvent.text})}
+                />
+              <TouchableHighlight onPress={this.login.bind(this)} style={{position: 'absolute', top: 260, left: 100}} underlayColor="#f1f1f1">
+                <Text style={{fontSize: 20}}>Login</Text>
+              </TouchableHighlight>
+              <TouchableHighlight onPress={this.moveLeft.bind(this)} style={{position: 'absolute', top: 300, left: 100}} underlayColor="#f1f1f1">
+                <Text style={{fontSize: 20}}>Create Account</Text>
+              </TouchableHighlight>
+            </View>
+
+
+            <Animated.View style={{flex:1,backgroundColor:"white", opacity:1, transform: [{translateX: this.previousValue}]}}>
+              <Text style={{position: 'absolute', top: 25, left: 50, fontSize: 50}}>Create Account</Text>
+                <TextInput
+                style={{position: 'absolute', top: 150, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+                placeholder={' Enter your name'}
+                onChange={(event) => this.setState({name: event.nativeEvent.text})}
+                />
+              <TextInput
+              style={{position: 'absolute', top: 200, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+              placeholder={' Enter email address'}
+              onChange={(event) => this.setState({Username: event.nativeEvent.text})}
+              autoCapitalize={'none'}
+              />
+              <TextInput
+                style={{position: 'absolute', top: 250, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
+                placeholder={' Enter password'}
+                secureTextEntry={true}
+                onChange={(event) => this.setState({password: event.nativeEvent.text})}
+                />
+              <TouchableHighlight onPress={this.createUser.bind(this)} style={{position: 'absolute', top: 310, left: 100}} underlayColor="#f1f1f1">
+                <Text style={{fontSize: 20}}>Create Account</Text>
+              </TouchableHighlight>
+              <TouchableHighlight onPress={this.moveRight.bind(this)} style={{position: 'absolute', top: 350, left: 100}} underlayColor="#f1f1f1">
+                <Text style={{fontSize: 20}}>Back</Text>
+              </TouchableHighlight>
+            </Animated.View>
+          </Modal>
+    </View>
+  )
+  } else {
     return (
 
-<View accessible={this.state.key}>
+<View>
   <Modal
       animationType={"slide"} transparent={false} visible={this.state.modalVisible}>
       <View>
@@ -678,40 +657,7 @@ followUser(otherUserID) {
 
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, position: 'absolute', top: 280, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
-        <View style={styles.Imagecontainer}>
-          <Image
-            style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/luggageCase.jpg')}/>
-        </View>
-        <View style={styles.userContainer}>
-          <Image
-            style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar2.png')}/>
-          <Text style={styles.userName}>{this.state.postTitle}</Text>
-            <Image
-              style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/ClockIcon.png')}/>
-            <Text style={styles.dateStyle}>{this.state.postDate}</Text>
-            <Image
-              style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeIcon.png')}/>
-            <Text style={styles.likeNumber}>{this.state.postLikes}</Text>
-          <Text style={styles.postDesc}>{this.state.postDesc}</Text>
-        </View>
-        <View style={styles.buttons}>
-          <TouchableHighlight onPress={this.likePost.bind(this)} underlayColor="#f1f1f1">
-            <Image
-              style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeButton.png')}/>
-          </TouchableHighlight>
-          <Image
-            style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/CommentIcon.png')}/>
-          <Image
-            style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/OptionsIcon.png')}/>
-        </View>
-        <TouchableHighlight onPress={this.previousPost.bind(this)} style={{position: 'absolute', top: 535, right: 50,padding:25}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Previous</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.nextPost.bind(this)} style={{position: 'absolute', top: 535, left: 50,padding:25}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Next</Text>
-        </TouchableHighlight>
-        <Image
-          style={styles.PageTurn} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/PageTurn.png')}/>
+        <FeedComponent />
       </Animated.View>
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.previousValue}]}}>
@@ -737,7 +683,7 @@ followUser(otherUserID) {
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.accountValue}] }}>
           <Image
-            style={{position: 'absolute', top: 25, left: 25, height: 56, width: 51}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar2.png')}/>
+            style={{position: 'absolute', top: 25, left: 25, height: 56, width: 51}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar.png')}/>
           <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.name}</Text>
           <Text style={{position: 'absolute', top: 60, left: 100, fontSize: 20}}>EMAIL: {this.state.Username}</Text>
           <Text style={{position: 'absolute', top: 100, left: 25, fontSize: 20}}>{this.state.profDesc}</Text>
@@ -800,17 +746,34 @@ followUser(otherUserID) {
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 275,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.otherAccountValue}] }}>
           <Image
-            style={{position: 'absolute', top: 25, left: 25, height: 56, width: 51}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar2.png')}/>
+            style={{position: 'absolute', top: 25, left: 25, height: 50, width: 50}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar.png')}/>
           <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.otherName}</Text>
+          <Text style={{position: 'absolute', top: 80, left: 30, fontSize: 20}}>{this.state.otherProfDesc}</Text>
           <TouchableHighlight onPress={() => this.followUser(actions.otherUserID)} style={{position: 'absolute', top: 200, left: 130}} underlayColor="#f1f1f1">
             <Text style={{fontSize: 20}}>Following: {this.state.following}</Text>
           </TouchableHighlight>
       </Animated.View>
     </View>
-  )};
+  )}
+};
+
+readyToLogin() {
+  this.tryLogin().then(() => {
+    //alert(value)
+    if (actions.login = true) {
+      this.setState({loaded: true})
+      this.setState({modalVisible: false})
+      this.setUserInfo()
+    } else {
+      this.logOut()
+    }
+  })
+}
 
   componentWillMount () {
-    this.tryLogin()
+    actions.width = window.width;
+    actions.height = window.height
+    this.readyToLogin()
   }
   componentDidMount () {
 

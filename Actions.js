@@ -1,8 +1,17 @@
 import PostContents from 'ExtendedProject/postContents'
+import FeedComponent from 'ExtendedProject/feedComponent'
 import index from 'ExtendedProject/index.ios'
 class actions {
   constructor (props) {
   this.postTitle = "Original"
+  this.nextPostTitle = "Next"
+  this.prevPostTitle = "Previous"
+  this.nextPostDesc = "Next"
+  this.prevPostDesc = "Previous"
+  this.nextPostDate = "Next"
+  this.prevPostDate = "Previous"
+  this.nextPostLikes = "Next"
+  this.prevPostLikes = "Previous"
   this.postDesc = "Original"
   this.postDate = 0
   this.postList = []
@@ -13,7 +22,8 @@ class actions {
   this.postLikes = 0
   this.liked = false
   this.visible = false
-  this.UserID = ""
+  this.nextPostUserID = ""
+  this.prevPostUserID = ""
   this.Username = ""
   this.password = ""
   this.name = ""
@@ -25,6 +35,11 @@ class actions {
   this.pressed = false
   this.following = false
   this.foundUsers = []
+  this.followedUsers = []
+  this.isLoading = true
+  this.login = false
+  this.width = 0
+  this.height = 0
 }
 
   loadPost(title,desc,date,likes,userID) {
@@ -43,12 +58,47 @@ class actions {
       // a must be equal to b
       return 0;
     });
-    //this.readArray(this.postList)
+    return new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        resolve()}, 1000)
+      })
+  }
+
+  getPostList() {
+    var list = this.postList
+    function save() {
+      return list
+    }
+    return new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        resolve(save())}, 1000)
+      })
   }
 
   searchFunction(ID, name) {
     this.foundUsers.push({USERID: ID,
                         NAME: name})
+  }
+
+  orderUsers(name,date) {
+    this.followedUsers.push({NAME: name,
+                        DATE: date})
+    for (var i=0; i < this.followedUsers.length; i++) {
+      this.followedUsers.sort((num1, num2) => {
+        if (num1.DATE < num2.DATE) {
+          return 1;
+        }
+        if (num1.DATE > num2.DATE) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
+    }
+    return new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        resolve()}, 1000)
+      })
   }
 
   tryLike(thisUser) {
@@ -66,9 +116,11 @@ class actions {
   }
   badLogin() {
     this.visible = true
+    this.login = false
   }
   goodLogin() {
     this.visible = false
+    this.login = true
   }
 
   alternateSpin (num) {
