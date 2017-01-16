@@ -26,7 +26,7 @@ export default class PostContents extends Component {
     postDate: "",
     Following: [],
     loaded: true,
-    dataSource: ds.cloneWithRows(['hello']),
+    dataSource: ds.cloneWithRows([]),
   }
     this.postTitle = "Original"
     this.postDesc = "Original"
@@ -49,7 +49,6 @@ export default class PostContents extends Component {
 }
 
 getFollowing() {
-  var results = []
   function following() {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
@@ -88,8 +87,8 @@ updateListView() {
   this.setState({dataSource: this.state.dataSource.cloneWithRows(actions.postList)})
 }
 
-async newGetPosts(post) {
-  function getPosts()  {
+async newGetPosts() {
+  return new Promise(function(resolve, reject) {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
        var UserID = value
@@ -124,179 +123,89 @@ async newGetPosts(post) {
                  })
                })
              })
-           } else {
-             alert("There was a problem getting posts")
-             this.logOut()
-             this.setState(modalVisible: actions.visible)
            }
          })
     } catch (error) {
       // Error retrieving data
       alert("There was a problem getting posts")
-      this.logOut()
-      this.setState(modalVisible: actions.visible)
     }
-  }
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() {
-      resolve(getPosts())}, 1000)
-    })
-  }
-
-likePost() {
-  let {
-    otherUserID,postDate,UserID
-  } = this.state
-  var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss') + "/likedBy/")
-  likesRef.once("value")
-    .then(function(snapshot) {
-      if (snapshot.val() !== null) {
-        snapshot.forEach(function(childSnapshot) {
-          if (childSnapshot.key !== UserID) {
-            var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
-            postsRef.child("likes").once('value', (likesSnapshot) => {
-              actions.postLikes = likesSnapshot.val()
-              actions.postLikes = actions.postLikes + 1
-            })
-            postsRef.update( {
-              likes: actions.postLikes,
-            });
-            postsRef.child('likedBy/' + UserID).update({
-              User: UserID
-            })
-          }
-        })
-      } else {
-        actions.postLikes = 1
-        var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
-        postsRef.update( {
-          likes: 1
-        });
-        postsRef.child('likedBy/' + UserID).update({
-          User: UserID
-        })
-      }
-  })
-  this.setState({postLikes: actions.postLikes})
-}
-
-previousPost() {
-  this.postIndex = this.postIndex + 1
-  this.showPost(this.postIndex).then(() => {
-    this.setState({postTitle: actions.prevPostTitle})
-    this.setState({otherUserID: actions.prevPostUserID})
-    this.setState({postDate: moment(actions.prevPostDate, "MMDDYYYYhmmss").format('MMMM Do, h:mm:ss')})
-    this.setState({postDesc: actions.prevPostDesc})
-    this.setState({postLikes: actions.prevPostLikes})
-    this.prepNextPost(this.postIndex)
-    this.prepPrevPost(this.postIndex)
-  })
-  }
-
-nextPost() {
-  if (this.postIndex > 0) {
-    this.postIndex = this.postIndex - 1
-  }
-  this.showPost(this.postIndex).then(() => {
-    this.setState({postTitle: actions.nextPostTitle})
-    this.setState({otherUserID: actions.nextPosttUserID})
-    this.setState({postDate: moment(actions.nextPostDate, "MMDDYYYYhmmss").format('MMMM Do, h:mm:ss')})
-    this.setState({postDesc: actions.nextPostDesc})
-    this.setState({postLikes: actions.nextPostLikes})
-    this.prepNextPost(this.postIndex)
-    this.prepPrevPost(this.postIndex)
-  })
-  }
-
-prepPrevPost(postIndex) {
-  actions.postList.map(function(item, i) {
-    if (i == postIndex + 1) {
-      actions.prevPostUserID = item.USERID
-      actions.prevPostTitle = item.TITLE
-      actions.prevPostDate = item.DATE
-      actions.prevPostDesc = item.DESC
-      actions.prevPostLikes = item.LIKES
-    }
-  })
-}
-
-prepNextPost(postIndex) {
-  actions.postList.map(function(item, i) {
-    if (i == postIndex - 1) {
-      actions.nextPostUserID = item.USERID
-      actions.nextPostTitle = item.TITLE
-      actions.nextPostDate = item.DATE
-      actions.nextPostDesc = item.DESC
-      actions.nextPostLikes = item.LIKES
-    }
-  })
-}
-
-
-showPost(index, dir) {
-  function loadPost() { () => {
-    if (this.loadIndex == 1) {
-      this.prepPrevPost()
-    } else {
-      this.prepNextPost()
-    }
-  }
-
-  }
-
-  return new Promise(function(resolve, reject) {
     setTimeout(function() {
       resolve()}, 1000)
     })
 }
 
-showFeed(UserID) {
-  var newRef = firebaseApp.database().ref("UserID/" + UserID + "/posts")
-  newRef.once("value")
-    .then(function(newSnapshot) {
-      newSnapshot.forEach(function(newChildSnapshot) {
-        actions.postDate = newChildSnapshot.key;
-        var postTitleRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + newChildSnapshot.key + "/title")
-        postTitleRef.once('value', (titleSnapshot) => {
-          actions.postTitle = titleSnapshot.val()
-        })
-        var postDescRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + newChildSnapshot.key + "/desc")
-        postDescRef.once('value', (descSnapshot) => {
-          actions.postDesc = descSnapshot.val()
-        })
-        var postLikesRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + newChildSnapshot.key + "/likes")
-        postLikesRef.once('value', (likesSnapshot) => {
-          actions.postLikes = likesSnapshot.val()
-          actions.loadPost(actions.postTitle,actions.postDesc,newChildSnapshot.key,actions.postLikes,UserID)
-        })
-      })
+likePost(otherUserID, postDate) {
+  return new Promise(function(resolve, reject) {
+    var likes = 0
+    var UserID = actions.UserID
+    var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
+    likesRef.once("value")
+      .then(function(snapshot) {
+        if (snapshot.val() !== null) {
+          snapshot.forEach(function(childSnapshot) {
+            if (childSnapshot.key !== UserID) {
+              var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
+              postsRef.child("likes").once('value', (likesSnapshot) => {
+                likes = likesSnapshot.val() + 1
+                postsRef.update( {
+                  likes: likes
+                });
+                postsRef.child('likedBy/' + UserID).update({
+                  User: UserID
+                })
+              })
+            }
+          })
+        } else {
+          likes = 1
+          var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
+          postsRef.update( {
+            likes: 1
+          });
+          postsRef.child('likedBy/' + UserID).update({
+            User: UserID
+          })
+        }
     })
-  this.animateShow()
+    setTimeout(function() {
+      resolve()}, 1000)
+    })
 }
 
-/*<ListView
-  enableEmptySections={true}
-  style={{position: 'absolute', top: 0, left: 0}}
-  dataSource={this.state.dataSource}
-  renderRow={(rowData) =>
-  <TouchableHighlight style={{height:60, width:window.width, borderColor: "black", borderWidth:1, justifyContent: "center"}} onPress={() => this.showFeed(rowData.USERID)}>
-    <Text  style={{fontSize: 25}}>NAME: {rowData.NAME}</Text>
-  </TouchableHighlight>}
-/>*/
+getLikes(otherUserID, postDate) {
+  return new Promise(function(resolve, reject) {
+    var likes = 0
+    var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
+    likesRef.once("value")
+      .then(function(snapshot) {
+        if (snapshot.val() !== null) {
+          snapshot.forEach(function(childSnapshot) {
+            var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
+            postsRef.child("likes").once('value', (likesSnapshot) => {
+              likes = likesSnapshot.val() + 1
+            })
+          })
+        } else {
+          likes = 0
+        }
+    })
+    setTimeout(function() {
+      resolve(alert(likes))}, 1000)
+    })
+}
 
 render() {
   if (this.state.loaded == true) {
     return (
-    <View style={{backgroundColor:"white", opacity:1, height: actions.height, width:actions.width}}>
-      <Text>Loading...</Text>
-    </View>
+      <View style={{backgroundColor:"white", opacity:1, height: actions.height, width:actions.width}}>
+        <Text>Loading...</Text>
+      </View>
   )
   } else {
     return(
     <Animated.View style={{transform: [{translateX: this.feedValue}]}}>
-      <Text>RESULTS:</Text>
       <ListView
-        enableEmptySections={false}
+        enableEmptySections={true}
         style={{position: 'absolute', top: 0, left: 0, height: actions.height, width:actions.width}}
         contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
         horizontal={true}
@@ -320,7 +229,7 @@ render() {
             <Text style={styles.postDesc}>{rowData.DESC}</Text>
           </View>
           <View style={styles.buttons}>
-            <TouchableHighlight onPress={this.likePost.bind(this)} underlayColor="#f1f1f1">
+            <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then(() => {this.newGetPosts().then(() => {actions.getPostList().then(() => {this.updateListView()})})})} underlayColor="#f1f1f1">
               <Image
                 style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeButton.png')}/>
             </TouchableHighlight>
@@ -338,7 +247,6 @@ render() {
 
 componentWillMount () {
   this.newGetPosts().then(() => {
-
     this.getFollowing().then(() => {
       actions.getPostList().then(() => {
         this.setState({loaded: false})
@@ -347,20 +255,6 @@ componentWillMount () {
     })
   })
 }
-
-animateShow () {
-  Animated.parallel([
-    Animated.timing(
-      this.feedValue,
-      {
-        toValue: 0,
-        duration: 500,
-        easing: Easing.linear
-      }
-    )
-  ]).start()
-};
-
 }
 
 

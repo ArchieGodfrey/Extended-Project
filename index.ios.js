@@ -1,5 +1,6 @@
 import actions from "ExtendedProject/Actions"
 import FeedComponent from 'ExtendedProject/feedComponent'
+import AccountComponent from 'ExtendedProject/accountComponent'
 import dismissKeyboard from 'dismissKeyboard'
 import firebase from 'ExtendedProject/firebaseConfig'
 import React, { Component } from 'react';
@@ -43,7 +44,7 @@ class ExtendedProject extends Component {
     loaded: false
     }
     this.clearText = this.clearText.bind(this);
-    this.postIndex = 0
+    this.tapYValue = new Animated.Value(800)
     this.newPostValue = new Animated.Value(500)
     this.previousValue = new Animated.Value(500)
     this.profileValue = new Animated.Value(500)
@@ -332,43 +333,6 @@ class ExtendedProject extends Component {
     AsyncStorage.setItem('@profDesc:key', profDesc);
     this.clearText()
     this.accountLeft()
-  }
-
-  likePost() {
-    let {
-      otherUserID,postDate,UserID
-    } = this.state
-    var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss') + "/likedBy/")
-    likesRef.once("value")
-      .then(function(snapshot) {
-        if (snapshot.val() !== null) {
-          snapshot.forEach(function(childSnapshot) {
-            if (childSnapshot.key !== UserID) {
-              var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
-              postsRef.child("likes").once('value', (likesSnapshot) => {
-                actions.postLikes = likesSnapshot.val()
-                actions.postLikes = actions.postLikes + 1
-              })
-              postsRef.update( {
-                likes: actions.postLikes,
-              });
-              postsRef.child('likedBy/' + UserID).update({
-                User: UserID
-              })
-            }
-          })
-        } else {
-          actions.postLikes = 1
-          var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + moment(postDate, "MMMM Do, h:mm:ss").format('MMDDYYYYhmmss'))
-          postsRef.update( {
-            likes: 1
-          });
-          postsRef.child('likedBy/' + UserID).update({
-            User: UserID
-          })
-        }
-    })
-    this.setState({postLikes: actions.postLikes})
   }
 
   searchForUser () {
@@ -682,11 +646,7 @@ followUser(otherUserID) {
 
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.accountValue}] }}>
-          <Image
-            style={{position: 'absolute', top: 25, left: 25, height: 56, width: 51}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar.png')}/>
-          <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.name}</Text>
-          <Text style={{position: 'absolute', top: 60, left: 100, fontSize: 20}}>EMAIL: {this.state.Username}</Text>
-          <Text style={{position: 'absolute', top: 100, left: 25, fontSize: 20}}>{this.state.profDesc}</Text>
+        <AccountComponent />
       </Animated.View>
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.profileValue}]}}>
@@ -752,6 +712,12 @@ followUser(otherUserID) {
           <TouchableHighlight onPress={() => this.followUser(actions.otherUserID)} style={{position: 'absolute', top: 200, left: 130}} underlayColor="#f1f1f1">
             <Text style={{fontSize: 20}}>Following: {this.state.following}</Text>
           </TouchableHighlight>
+      </Animated.View>
+
+      <Animated.View style={{height: (window.height / 2), width:window.width, position: 'absolute', top: 275, flex:1, transform: [{ translateY: (this.tapYValue)}] }}>
+        <TouchableHighlight onPress={() => this.menuFunc()} style={{position: 'absolute', top: 0, left: 0, height: (window.height / 3), width:window.width, opacity: 0.5}} underlayColor="#867979">
+          <Text style={{position: 'absolute', top: 0, left: 160, fontSize: 30, color:'black'}}>^ ^ ^</Text>
+        </TouchableHighlight>
       </Animated.View>
     </View>
   )}
@@ -855,7 +821,6 @@ showOtherAccount() {
 }
 
 moveLeft () {
-  //alert("Left")
   Animated.parallel([
     Animated.timing(
       this.previousValue,
@@ -906,7 +871,7 @@ moveRight () {
 };
 
 editFunc () {
-  Animated.sequence([
+  Animated.parallel([
     Animated.timing(
       this.crossXValue,
       {
@@ -935,7 +900,7 @@ editFunc () {
 }
 
 newPostFunc () {
-  Animated.sequence([
+  Animated.parallel([
     Animated.timing(
       this.editXValue,
       {
@@ -1001,7 +966,7 @@ closeOtherAccount() {
 }
 
 settingFunc () {
-  Animated.sequence([
+  Animated.parallel([
     Animated.timing(
       this.editXValue,
       {
@@ -1030,9 +995,16 @@ settingFunc () {
 }
 
 menuFunc () {
+  if (actions.crossSpun == true) {
+    this.rotateCross()
+  }
+  if (actions.pressed == true) {
+    this.accountLeft()
+  }
+  this.showHighlight()
   if (actions.spun == false) {
     actions.alternateSpin(1)
-    Animated.sequence([
+    Animated.parallel([
       Animated.timing(
         this.spinValue,
         {
@@ -1052,7 +1024,7 @@ menuFunc () {
     ]).start()
   } else {
     actions.alternateSpin(1)
-    Animated.sequence([
+    Animated.parallel([
       Animated.timing(
         this.spinValue,
         {
@@ -1148,6 +1120,31 @@ feedFunc () {
       )
   ]).start()
   this.menuFunc()
+};
+
+showHighlight () {
+  if (actions.highlight == false) {
+    actions.alternateSpin(3)
+    Animated.timing(
+      this.tapYValue,
+      {
+        toValue: 180,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ).start()
+  } else {
+    actions.alternateSpin(3)
+    Animated.timing(
+      this.tapYValue,
+      {
+        toValue: 400,
+        duration: 500,
+        easing: Easing.linear
+      }
+    ).start()
+  }
+
 };
 
 followFunc () {

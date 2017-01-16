@@ -31,6 +31,7 @@ class actions {
   this.otherName = ""
   this.otherUserID = ""
   this.spun = false
+  this.highlight = false
   this.crossSpun = false
   this.pressed = false
   this.following = false
@@ -135,6 +136,12 @@ class actions {
         this.crossSpun = true
       } else {
         this.crossSpun = false
+      }
+    } else if (num == 3) {
+      if (this.highlight == false) {
+        this.highlight = true
+      } else {
+        this.highlight = false
       }
     } else {
       if (this.pressed == false) {

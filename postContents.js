@@ -17,8 +17,74 @@ export default class PostContents extends Component {
     postImage: "",
     postDate: "",
     Following: []
-    }
   }
+    this.postTitle = "Original"
+    this.postDesc = "Original"
+    this.postList = []
+    this.post = null
+    this.postTitleList = []
+    this.postDescList = []
+    this.visible = false
+    this.UserID = ""
+    this.Username = ""
+    this.password = ""
+    this.date = ""
+}
+
+loadPost(title,desc,date) {
+  this.postTitle = title
+  this.postDesc = desc
+  this.date = date
+  this.postList.push({TITLE: title,
+                      DESC: desc,
+                      DATE: date}
+                      )
+  //alert(this.postTitle)
+  this.postTitleList.push(title)
+  this.postDescList.push(desc)
+  this.postList.sort((num1, num2) => {
+    if (num1.DATE < num2.DATE) {
+      return 1;
+    }
+    if (num1.DATE > num2.DATE) {
+      return -1;
+    }
+    // a must be equal to b
+    return 0;
+  });
+  this.readArray(this.postList)
+
+  //var newArr = this.sortArray(this.postList)
+}
+
+readArray(array) {
+  return array.map(function(item, i) {
+    alert("The post is " + item.TITLE + item.DESC + item.DATE + i)
+  })
+}
+
+  wholePost() {
+  return actions.postList.map(function(post){
+    alert("The post date is" + post.DATE)
+    return(
+      <View style={{flex:1}} key={post.DATE}>
+        <Text>{post.TITLE}</Text>
+        <View>
+          <Text>{post.TITLE}</Text>
+        </View>
+      </View>
+    );
+  });
+}
+
+render() {
+  return(
+    <View style={{flex:1}}>
+      {this.wholePost()}
+    </View>
+  )
+}
+  /*
   render() {
   return (
     <View>
@@ -49,8 +115,14 @@ export default class PostContents extends Component {
       </View>
       </View>
   )
+}*/
+
+componentHasMounted() {
+
 }
 }
+
+
 const styles = StyleSheet.create({
   row: {
     fontSize:20,
