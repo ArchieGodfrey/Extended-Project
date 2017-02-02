@@ -1,4 +1,4 @@
-import actions from "ExtendedProject/Actions"
+import actions from "EP/Actions"
 import React, { Component } from 'react';
 import {
   StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator, TouchableHighlight, TextInput,Button
@@ -90,28 +90,28 @@ render() {
     <View>
       <View style={styles.Imagecontainer}>
         <Image
-          style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/luggageCase.jpg')}/>
+          style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
       </View>
       <View style={styles.userContainer}>
         <Image
-          style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar2.png')}/>
+          style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/Avatar2.png')}/>
         <Text style={styles.userName}>{actions.postTitle}</Text>
           <Image
-            style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/ClockIcon.png')}/>
+            style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/ClockIcon.png')}/>
           <Text style={styles.dateStyle}>4 Days Ago...</Text>
           <Image
-            style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeIcon.png')}/>
+            style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeIcon.png')}/>
           <Text style={styles.likeNumber}>100</Text>
         <Text style={styles.postDesc}>Description</Text>
       </View>
 
       <View style={styles.buttons}>
         <Image
-          style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeButton.png')}/>
+          style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeButton.png')}/>
         <Image
-          style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/CommentIcon.png')}/>
+          style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/CommentIcon.png')}/>
         <Image
-          style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/OptionsIcon.png')}/>
+          style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
       </View>
       </View>
   )

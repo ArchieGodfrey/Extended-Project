@@ -1,11 +1,12 @@
-import actions from "ExtendedProject/Actions"
-import FeedComponent from 'ExtendedProject/feedComponent'
-import AccountComponent from 'ExtendedProject/accountComponent'
+import actions from "EP/Actions"
+import FeedComponent from 'EP/feedComponent'
+import AccountComponent from 'EP/accountComponent'
+import SearchComponent from 'EP/searchComponent'
 import dismissKeyboard from 'dismissKeyboard'
-import firebase from 'ExtendedProject/firebaseConfig'
+import firebase from 'EP/firebaseConfig'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,AsyncFunction
+  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,AsyncFunction,NetInfo
 } from 'react-native';
 var moment = require('moment');
 
@@ -19,7 +20,6 @@ class ExtendedProject extends Component {
     super(props);
     this.database = firebaseApp.database();
     //this.firebaseApp = new firebaseApp(firebaseAppURL);
-    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
     modalVisible: false,
     textEntered: false,
@@ -38,9 +38,6 @@ class ExtendedProject extends Component {
     postLikes: 0,
     liked: false,
     following: "Follow",
-    searchQuery: "",
-    resultsOpacity: 0,
-    dataSource: ds.cloneWithRows([]),
     loaded: false
     }
     this.clearText = this.clearText.bind(this);
@@ -297,6 +294,7 @@ class ExtendedProject extends Component {
       alert('There was a problem signing out');
     });
     this.setState({modalVisible: true})
+    this.setState({loaded: false})
   }
 
   newPost () {
@@ -334,36 +332,6 @@ class ExtendedProject extends Component {
     this.clearText()
     this.accountLeft()
   }
-
-  searchForUser () {
-    let {
-      searchQuery
-    } = this.state
-    actions.foundUsers = []
-    var query = firebaseApp.database().ref("UserID").orderByKey();
-    query.once("value")
-      .then(function(snapshot) {
-        snapshot.forEach(function(childSnapshot) {
-          // key will be "ada" the first time and "alan" the second time
-          var key = childSnapshot.key;
-          // childData will be the actual contents of the child
-          //alert(childSnapshot.key)
-          var newRef = firebaseApp.database().ref("UserID/" + childSnapshot.key + "/Name")
-          //alert(newRef)
-          newRef.once("value")
-            .then(function(newSnapshot) {
-              if (searchQuery == newSnapshot.val()) {
-                actions.searchFunction(childSnapshot.key, newSnapshot.val())
-              }
-            })
-        })
-  })
-  this.setState({resultsOpacity:1})
-  dismissKeyboard()
-}
-getResults() {
-  this.setState({dataSource: this.state.dataSource.cloneWithRows(actions.foundUsers)})
-}
 
 showAccountInfo(otherUserID) {
   let {
@@ -565,7 +533,7 @@ followUser(otherUserID) {
           underlayColor="#f1f1f1">
           <Animated.Image
            style={{position: 'absolute',top: 8, height:25, width:25,left: 2,transform: [{rotate: spin}]}}
-        source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/MenuIcon.png')}/>
+        source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/MenuIcon.png')}/>
         </TouchableHighlight>
         <Text style={styles.titleStyle}>
             Tell-Tale
@@ -576,7 +544,7 @@ followUser(otherUserID) {
           underlayColor="#f1f1f1">
           <Animated.Image
            style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [ {translateX: this.crossXValue}, {rotate: cross}]}}
-        source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/PlusIcon.png')}/>
+        source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/PlusIcon.png')}/>
         </TouchableHighlight>
         <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.editXValue}]}}>
           <TouchableHighlight
@@ -584,7 +552,7 @@ followUser(otherUserID) {
           style={{width: 40,height: 30}}
           underlayColor="#f1f1f1">
           <Animated.Image
-            style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/EditIcon.png')}/>
+            style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/EditIcon.png')}/>
         </TouchableHighlight>
       </Animated.View>
       <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.otherAccountXValue}]}}>
@@ -593,7 +561,7 @@ followUser(otherUserID) {
         style={{width: 40,height: 30}}
         underlayColor="#f1f1f1">
         <Animated.Image
-          style={{height: 25, width: 28 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/BackIcon.png')}/>
+          style={{height: 25, width: 28 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/BackIcon.png')}/>
       </TouchableHighlight>
     </Animated.View>
       </View>
@@ -672,28 +640,7 @@ followUser(otherUserID) {
       </Animated.View>
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.searchValue}]}}>
-        <Text style={{position: 'absolute', top: 10, left: 150, fontSize: 25}}>Search</Text>
-        <TextInput
-        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 225, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Search for a name'}
-        onChange={(event) => this.setState({searchQuery: event.nativeEvent.text})}
-        ref={component => this._titleInput = component}
-        />
-      <TouchableHighlight onPress={this.searchForUser.bind(this)} style={{position: 'absolute', top: 60, left: 275}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Search</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.getResults.bind(this)} style={{opacity: this.state.resultsOpacity, position: 'absolute', top: 100, left: 25}} underlayColor="#f1f1f1">
-            <Text style={{fontSize: 20}}>Press to show results...</Text>
-          </TouchableHighlight>
-        <ListView
-          enableEmptySections={true}
-          style={{position: 'absolute', top: 150, left: 25}}
-          dataSource={this.state.dataSource}
-          renderRow={(rowData) =>
-          <TouchableHighlight style={{height:40, width:325, borderColor: "black", borderWidth:1, justifyContent: "center"}} onPress={() => this.showAccountInfo(rowData.USERID)}>
-            <Text  style={{fontSize: 25}}>{rowData.NAME}</Text>
-          </TouchableHighlight>}
-        />
+        <SearchComponent />
       </Animated.View>
 
 
@@ -701,16 +648,6 @@ followUser(otherUserID) {
           <Text style={{position: 'absolute', top: 25, left: 130, fontSize: 20}}>Settings</Text>
           <TouchableHighlight onPress={this.logOut.bind(this)} style={{position: 'absolute', top: 75, left: 130}} underlayColor="#f1f1f1">
             <Text style={{fontSize: 20}}>Log Out</Text>
-          </TouchableHighlight>
-      </Animated.View>
-
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 275,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{ translateY: this.moveYValue}, {translateX: this.otherAccountValue}] }}>
-          <Image
-            style={{position: 'absolute', top: 25, left: 25, height: 50, width: 50}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar.png')}/>
-          <Text style={{position: 'absolute', top: 25, left: 100, fontSize: 20}}>NAME: {this.state.otherName}</Text>
-          <Text style={{position: 'absolute', top: 80, left: 30, fontSize: 20}}>{this.state.otherProfDesc}</Text>
-          <TouchableHighlight onPress={() => this.followUser(actions.otherUserID)} style={{position: 'absolute', top: 200, left: 130}} underlayColor="#f1f1f1">
-            <Text style={{fontSize: 20}}>Following: {this.state.following}</Text>
           </TouchableHighlight>
       </Animated.View>
 
@@ -739,7 +676,14 @@ readyToLogin() {
   componentWillMount () {
     actions.width = window.width;
     actions.height = window.height
-    this.readyToLogin()
+    NetInfo.fetch().done((reach) => {
+      if (reach !== 'none') {
+        this.readyToLogin()
+      } else {
+        alert('Please connect to the internet')
+      }
+    });
+
   }
   componentDidMount () {
 
@@ -1318,4 +1262,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('ExtendedProject', () => ExtendedProject);
+AppRegistry.registerComponent('EP', () => ExtendedProject);

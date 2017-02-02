@@ -1,34 +1,22 @@
-import PostContents from 'ExtendedProject/postContents'
-import FeedComponent from 'ExtendedProject/feedComponent'
-import index from 'ExtendedProject/index.ios'
+import PostContents from 'EP/postContents'
+import FeedComponent from 'EP/feedComponent'
+import index from 'EP/index.ios'
 class actions {
   constructor (props) {
   this.postTitle = "Original"
-  this.nextPostTitle = "Next"
-  this.prevPostTitle = "Previous"
-  this.nextPostDesc = "Next"
-  this.prevPostDesc = "Previous"
-  this.nextPostDate = "Next"
-  this.prevPostDate = "Previous"
-  this.nextPostLikes = "Next"
-  this.prevPostLikes = "Previous"
   this.postDesc = "Original"
   this.postDate = 0
   this.postList = []
-  this.postOne = null
-  this.postTwo = null
-  this.postTitleList = []
-  this.postDescList = []
+  this.userPosts = []
   this.postLikes = 0
   this.liked = false
   this.visible = false
-  this.nextPostUserID = ""
-  this.prevPostUserID = ""
   this.Username = ""
   this.password = ""
   this.name = ""
   this.profDesc = ""
-  this.otherName = ""
+  this.otherName = "Loading"
+  this.otherprofDesc = "Loading"
   this.otherUserID = ""
   this.spun = false
   this.highlight = false
@@ -50,6 +38,24 @@ class actions {
                         USERID: userID,
                         DATE: date})
     this.postList.sort((num1, num2) => {
+      if (num1.DATE < num2.DATE) {
+        return 1;
+      }
+      if (num1.DATE > num2.DATE) {
+        return -1;
+      }
+      // a must be equal to b
+      return 0;
+    });
+    return new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        resolve()}, 1000)
+      })
+  }
+
+  loadAccountPosts(title,desc,date) {
+    this.userPosts.push({TITLE: title, DESC: desc, DATE: date})
+    this.userPosts.sort((num1, num2) => {
       if (num1.DATE < num2.DATE) {
         return 1;
       }
@@ -150,13 +156,6 @@ class actions {
         this.pressed = false
       }
     }
-  }
-
-  setUserInfo() {
-    return this.UserID
-    //this.Username,
-    //this.password
-    //alert("User Info " + this.UserID + this.Username + this.password)
   }
 }
 

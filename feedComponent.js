@@ -1,5 +1,5 @@
-import actions from "ExtendedProject/Actions"
-import firebase from 'ExtendedProject/firebaseConfig'
+import actions from "EP/Actions"
+import firebase from 'EP/firebaseConfig'
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
@@ -206,7 +206,7 @@ render() {
     <Animated.View style={{transform: [{translateX: this.feedValue}]}}>
       <ListView
         enableEmptySections={true}
-        style={{position: 'absolute', top: 0, left: 0, height: actions.height, width:actions.width}}
+        style={{position: 'absolute', top: 0, left: 0, height: window.height, width:window.width}}
         contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
         horizontal={true}
         dataSource={this.state.dataSource}
@@ -214,29 +214,29 @@ render() {
         <View style={{width:actions.width}}>
           <View style={styles.Imagecontainer}>
             <Image
-              style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/luggageCase.jpg')}/>
+              style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
           </View>
           <View style={styles.userContainer}>
             <Image
-              style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/Avatar.png')}/>
+              style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/Avatar.png')}/>
             <Text style={styles.userName}>{rowData.TITLE}</Text>
               <Image
-                style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/ClockIcon.png')}/>
+                style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/ClockIcon.png')}/>
               <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mma')}</Text>
               <Image
-                style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeIcon.png')}/>
+                style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeIcon.png')}/>
               <Text style={styles.likeNumber}>{rowData.LIKES}</Text>
             <Text style={styles.postDesc}>{rowData.DESC}</Text>
           </View>
           <View style={styles.buttons}>
             <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then(() => {this.newGetPosts().then(() => {actions.getPostList().then(() => {this.updateListView()})})})} underlayColor="#f1f1f1">
               <Image
-                style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/LikeButton.png')}/>
+                style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeButton.png')}/>
             </TouchableHighlight>
             <Image
-              style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/CommentIcon.png')}/>
+              style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/CommentIcon.png')}/>
             <Image
-              style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/ExtendedProject/OptionsIcon.png')}/>
+              style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
           </View>
         </View>}
       />
@@ -246,11 +246,16 @@ render() {
 }
 
 componentWillMount () {
+  actions.postList = []
   this.newGetPosts().then(() => {
     this.getFollowing().then(() => {
       actions.getPostList().then(() => {
-        this.setState({loaded: false})
-        this.updateListView()
+        if (actions.postList != null) {
+          this.setState({loaded: false})
+          this.updateListView()
+        } else {
+          alert('Failed to get posts!')
+        }
       })
     })
   })
@@ -285,7 +290,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   postImage: {
-    resizeMode: 'cover'
+    resizeMode: 'cover',
+    width: window.width
   },
   userContainer: {
     flex: 1,

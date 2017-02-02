@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('ExtendedProject', () => ExtendedProject);
+AppRegistry.registerComponent('EP', () => ExtendedProject);
