@@ -1,8 +1,9 @@
 import actions from "EP/Actions"
 import firebase from 'EP/firebaseConfig'
+import dismissKeyboard from 'dismissKeyboard'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
+  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
 } from 'react-native';
 
 var moment = require('moment');
@@ -28,6 +29,7 @@ export default class PostContents extends Component {
     loaded: true,
     dataSource: ds.cloneWithRows([]),
   }
+    this.clearText = this.clearText.bind(this);
     this.postTitle = "Original"
     this.postDesc = "Original"
     this.postIndex = 0
@@ -41,10 +43,11 @@ export default class PostContents extends Component {
     this.Username = ""
     this.password = ""
     this.date = ""
-
     this.prevTitle = ""
     this.nextTitle = ""
 
+    this.previousValue = new Animated.Value(500)
+    this.crossValue = new Animated.Value(0)
     this.feedValue = new Animated.Value(0)
 }
 
@@ -83,11 +86,20 @@ getFollowing() {
     })
 }
 
-updateListView() {
-  this.setState({dataSource: this.state.dataSource.cloneWithRows(actions.postList)})
+updateListView(list) {
+  this.setState({dataSource: this.state.dataSource.cloneWithRows(list)})
 }
 
 async newGetPosts() {
+  function networkError() {
+    Alert.alert(
+          'Whoops, we got lost!',
+          "We couldn't find your feed, please connect to the internet and try again",
+          [
+            {text: 'Try again'},
+          ]
+        )
+  }
   return new Promise(function(resolve, reject) {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
@@ -118,6 +130,8 @@ async newGetPosts() {
                      postLikesRef.once('value', (likesSnapshot) => {
                        actions.postLikes = likesSnapshot.val()
                        actions.loadPost(actions.postTitle,actions.postDesc,newChildSnapshot.key,actions.postLikes,childSnapshot.key)
+                       clearTimeout(timeOut)
+                       resolve(true)
                      })
                    })
                  })
@@ -127,12 +141,12 @@ async newGetPosts() {
          })
     } catch (error) {
       // Error retrieving data
-      alert("There was a problem getting posts")
+      networkError()
     }
-    setTimeout(function() {
-      resolve()}, 1000)
+    var timeOut = setTimeout(function() {
+      networkError()}, 10000)
     })
-}
+  }
 
 likePost(otherUserID, postDate) {
   return new Promise(function(resolve, reject) {
@@ -194,7 +208,38 @@ getLikes(otherUserID, postDate) {
     })
 }
 
+newPost () {
+  var timeKey = moment().format('MMDDYYYYhmmss')
+  var postTitle = this.state.postTitle
+  var postDesc = this.state.postDesc
+  try {
+  AsyncStorage.getItem('@userID:key').then((value) => {
+           this.setState({UserID: value});
+           var postsRef = firebaseApp.database().ref("UserID/"+ this.state.UserID + "/posts")
+           postsRef.child(timeKey).update( {
+             title: postTitle,
+             desc: postDesc
+           });
+           this.clearText()
+           this.rotateCross()
+           });;
+} catch(error) {
+  alert('Failed to post!')
+}
+}
+
+clearText() {
+ this._titleInput.setNativeProps({text: ''});
+ this._descInput.setNativeProps({text: ''});
+ dismissKeyboard();
+}
+
 render() {
+  const cross = this.crossValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg','45deg']
+})
+
   if (this.state.loaded == true) {
     return (
       <View style={{backgroundColor:"white", opacity:1, height: actions.height, width:actions.width}}>
@@ -204,6 +249,14 @@ render() {
   } else {
     return(
     <Animated.View style={{transform: [{translateX: this.feedValue}]}}>
+      <TouchableHighlight
+        onPress={this.rotateCross.bind(this)}
+        style={{width: 40,height: 30, position: 'absolute',top: -44, height:25, width:25, left: 325 }}
+        underlayColor="#f1f1f1">
+        <Animated.Image
+         style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
+         source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/PlusIcon.png')}/>
+      </TouchableHighlight>
       <ListView
         enableEmptySections={true}
         style={{position: 'absolute', top: 0, left: 0, height: window.height, width:window.width}}
@@ -240,27 +293,95 @@ render() {
           </View>
         </View>}
       />
+    <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: -2,  backgroundColor: "white",transform: [{translateX: this.previousValue}]}}>
+        <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Create a new post</Text>
+        <TextInput
+        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 300, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Enter Post Title'}
+        onChange={(event) => this.setState({postTitle: event.nativeEvent.text})}
+        ref={component => this._titleInput = component}
+        />
+        <TextInput
+        style={{position: 'absolute', top: 95, left: 40, height: 80, width: 300, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Enter Post description'}
+        multiline={true}
+        onChange={(event) => this.setState({postDesc: event.nativeEvent.text})}
+        ref={component => this._descInput = component}
+        />
+      <TouchableHighlight onPress={this.newPost.bind(this)} style={{position: 'absolute', top: 155, left: 130, padding:25}} underlayColor="#f1f1f1">
+          <Text style={{fontSize: 20}}>Upload</Text>
+        </TouchableHighlight>
+      </Animated.View>
     </Animated.View>
+
     );
   }
 }
 
-componentWillMount () {
+tryLoadFeed() {
   actions.postList = []
-  this.newGetPosts().then(() => {
-    this.getFollowing().then(() => {
-      actions.getPostList().then(() => {
-        if (actions.postList != null) {
+  this.newGetPosts().then((result) => {
+    if (result == true) {
+      this.getFollowing().then(() => {
+        actions.getPostList().then((list) => {
           this.setState({loaded: false})
-          this.updateListView()
-        } else {
-          alert('Failed to get posts!')
-        }
+          this.updateListView(list)
+        })
       })
-    })
+    }
   })
 }
+
+componentWillMount () {
+  this.tryLoadFeed()
+
 }
+
+rotateCross () {
+  dismissKeyboard();
+  if (actions.crossSpun == false) {
+    actions.alternateSpin(0)
+    Animated.parallel([
+      Animated.timing(
+        this.crossValue,
+        {
+          toValue: 1,
+          duration: 550,
+          easing: Easing.linear
+        }),
+      Animated.timing(
+        this.previousValue,
+        {
+          toValue: 0,
+          duration: 550,
+          easing: Easing.linear
+        })
+    ]).start()
+  } else {
+    actions.alternateSpin(0)
+    Animated.parallel([
+      Animated.timing(
+        this.crossValue,
+        {
+          toValue: 0,
+          duration: 550,
+          easing: Easing.linear
+        }),
+      Animated.timing(
+        this.previousValue,
+        {
+          toValue: 500,
+          duration: 550,
+          easing: Easing.linear
+        })
+    ]).start()
+  }
+}
+
+
+
+
+}//last
 
 
 

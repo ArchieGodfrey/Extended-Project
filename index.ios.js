@@ -19,7 +19,6 @@ class ExtendedProject extends Component {
   constructor (props) {
     super(props);
     this.database = firebaseApp.database();
-    //this.firebaseApp = new firebaseApp(firebaseAppURL);
     this.state = {
     modalVisible: false,
     textEntered: false,
@@ -27,10 +26,10 @@ class ExtendedProject extends Component {
     otherName: "",
     otherProfDesc: "",
     UserID: "",
-    Username: "",
+    Username: " ",
     name: "",
     profDesc: "",
-    password: "",
+    password: " ",
     postTitle: "Loading",
     postDesc: "Loading",
     postImage: "",
@@ -40,13 +39,11 @@ class ExtendedProject extends Component {
     following: "Follow",
     loaded: false
     }
-    this.clearText = this.clearText.bind(this);
     this.tapYValue = new Animated.Value(800)
     this.newPostValue = new Animated.Value(500)
     this.previousValue = new Animated.Value(500)
     this.profileValue = new Animated.Value(500)
     this.spinValue = new Animated.Value(0)
-    this.crossValue = new Animated.Value(0)
     this.crossXValue = new Animated.Value(0)
     this.editXValue = new Animated.Value(100)
     this.moveYValue = new Animated.Value(-210)
@@ -58,30 +55,25 @@ class ExtendedProject extends Component {
     this.searchValue = new Animated.Value(500)
   }
 
-  clearText() {
-   this._titleInput.setNativeProps({text: ''});
-   this._descInput.setNativeProps({text: ''});
-   dismissKeyboard();
- }
+
 
   async tryLogin() {
-    function loggingIn() {
+    return new Promise(function(resolve, reject) {
       try {
         AsyncStorage.getItem('@userID:key').then((value) => {
           actions.UserID = value
         });
       } catch (error) {
         // Error retrieving data
-        actions.badLogin()
+        resolve(false)
       }
-
       try {
         AsyncStorage.getItem('@name:key').then((value) => {
           actions.name = value;
         });
       } catch (error) {
         // Error retrieving data
-        actions.badLogin()
+        resolve(false)
       }
       try {
         AsyncStorage.getItem('@profDesc:key').then((value) => {
@@ -89,16 +81,15 @@ class ExtendedProject extends Component {
         });
       } catch (error) {
         // Error retrieving data
-        actions.badLogin()
+        resolve(false)
       }
       try {
         AsyncStorage.getItem('@username:key').then((value) => {
         actions.Username = value
+        //alert(value)
          var Username = value;
          if (Username !== null){
            // We have data!
-           actions.goodLogin()
-           actions.login = true
            AsyncStorage.getItem('@password:key').then((word) => {
             actions.password = word
             var password = word
@@ -106,23 +97,26 @@ class ExtendedProject extends Component {
               // Handle Errors here.
               var errorCode = error.code;
               var errorMessage = error.message;
-              actions.badLogin()
+              resolve(false)
+            })
+            .then(() => {
+              resolve(true)
             })
             })
           } else {
-           actions.badLogin()
+           resolve(false)
           }
         })
        } catch (error) {
          // Error retrieving data
-         actions.badLogin()
+         resolve(false)
        }
-    }
 
-     return new Promise(function(resolve, reject) {
        setTimeout(function() {
-         resolve(loggingIn())}, 1000)
+         resolve(false)}, 10000)
        })
+
+       alert('loggin in')
   }
 
   setUserInfo() {
@@ -131,7 +125,6 @@ class ExtendedProject extends Component {
     this.setState({password: actions.password});
     this.setState({name: actions.name});
     this.setState({profDesc: actions.profDesc})
-    this.setState({modalVisible: actions.visible})
   }
 
   createUser () {
@@ -183,22 +176,20 @@ class ExtendedProject extends Component {
 
       this.moveRight()
   }
+
   login () {
     let {
         Username, password
       } = this.state;
-
+    var loggedIn = true
     firebaseApp.auth().signInWithEmailAndPassword(Username, password).catch(function(error) {
       // Handle Errors here.
+      loggedIn = false
       var errorCode = error.code;
       var errorMessage = error.message;
       alert(errorMessage);
-    });
-
-    firebaseApp.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        // User is signed in.
-        //alert("logged")
+    }).then(() => {
+      if (loggedIn == true) {
         var user = firebaseApp.auth().currentUser;
         try {
          AsyncStorage.setItem('@userID:key', user.uid);
@@ -213,7 +204,41 @@ class ExtendedProject extends Component {
           alert('error saving username')
         }
         try {
-         AsyncStorage.setItem('@password:key', password);
+         AsyncStorage.setItem('@password:key', password)
+        } catch (error) {
+          // Error saving data
+          alert('error saving password')
+        }
+        try {
+          AsyncStorage.getItem('@username:key').then((value) => {
+           this.readyToLogin()
+           this.setState({modalVisible:false})
+         })
+        } catch (error) {
+          // Error saving data
+          alert('error saving username')
+        }
+      }
+    })
+
+    firebaseApp.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+        var user = firebaseApp.auth().currentUser;
+        try {
+         AsyncStorage.setItem('@userID:key', user.uid);
+        } catch (error) {
+          // Error saving data
+          alert('error saving username')
+        }
+        try {
+         AsyncStorage.setItem('@username:key', Username);
+        } catch (error) {
+          // Error saving data
+          alert('error saving username')
+        }
+        try {
+         AsyncStorage.setItem('@password:key', password)
         } catch (error) {
           // Error saving data
           alert('error saving password')
@@ -221,38 +246,7 @@ class ExtendedProject extends Component {
       } else {
         // No user is signed in.
       }
-    });
-    try {
-    AsyncStorage.getItem('@userID:key').then((value) => {
-             this.setState({UserID: value});
-             });;
-    AsyncStorage.getItem('@profDesc:key').then((value) => {
-              this.setState({profDesc: value});
-              });;
-    AsyncStorage.getItem('@userID:key').then((value) => {
-             this.setState({Username: value});
-              });;
-    AsyncStorage.getItem('@password:key').then((value) => {
-             this.setState({password: value});
-             });;
-    if (this.state.Username !== ""){
-      // We have data!!
-      actions.goodLogin()
-      firebaseApp.auth().signInWithEmailAndPassword(this.state.Username, this.state.password).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        this.logOut()
-        alert('There was a problem logging in')
-      });
-      this.readyToLogin()
-    }
-  } catch (error) {
-    // Error retrieving data
-    alert("error")
-    this.logOut()
-  }
-    this.setState({modalVisible: actions.visible})
+    })
   }
 
   logOut() {
@@ -293,30 +287,8 @@ class ExtendedProject extends Component {
       // An error happened.
       alert('There was a problem signing out');
     });
-    this.setState({modalVisible: true})
     this.setState({loaded: false})
-  }
-
-  newPost () {
-    var timeKey = moment().format('MMDDYYYYhmmss')
-    var postTitle = this.state.postTitle
-    var postDesc = this.state.postDesc
-    try {
-    AsyncStorage.getItem('@userID:key').then((value) => {
-             this.setState({UserID: value});
-             var postsRef = firebaseApp.database().ref("UserID/"+ this.state.UserID + "/posts")
-             postsRef.child(timeKey).update( {
-               title: postTitle,
-               desc: postDesc
-             });
-             this.clearText()
-             this.rotateCross()
-             });;
-  } catch(error) {
-    this.signOut()
-  }
-
-
+    this.setState({modalVisible: true})
   }
 
   saveProfile() {
@@ -406,15 +378,12 @@ followUser(otherUserID) {
       inputRange: [0, 1],
       outputRange: ['0deg','90deg']
   })
-    const cross = this.crossValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg','45deg']
-  })
+
 
   if (this.state.loaded == false) {
     return (
     <View style={{flex:1}}>
-      <Text style={{fontSize:20, flex:1, flexDirection:'column', alignItems:'center'}}>Loading...</Text>
+      <Text style={{fontSize:20, flex:1, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>Loading...</Text>
         <Modal
             animationType={"slide"} transparent={false} visible={this.state.modalVisible}>
             <View>
@@ -472,60 +441,7 @@ followUser(otherUserID) {
   } else {
     return (
 
-<View>
-  <Modal
-      animationType={"slide"} transparent={false} visible={this.state.modalVisible}>
       <View>
-        <Text style={{position: 'absolute', top: 25, left: 130, fontSize: 50}}>Login</Text>
-        <TextInput
-        style={{position: 'absolute', top: 150, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Enter email address'}
-        onChange={(event) => this.setState({Username: event.nativeEvent.text})}
-        autoCapitalize={'none'}
-        />
-        <TextInput
-          style={{position: 'absolute', top: 200, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-          placeholder={' Enter password'}
-          secureTextEntry={true}
-          onChange={(event) => this.setState({password: event.nativeEvent.text})}
-          />
-        <TouchableHighlight onPress={this.login.bind(this)} style={{position: 'absolute', top: 260, left: 100}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Login</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.moveLeft.bind(this)} style={{position: 'absolute', top: 300, left: 100}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Create Account</Text>
-        </TouchableHighlight>
-      </View>
-
-
-      <Animated.View style={{flex:1,backgroundColor:"white", opacity:1, transform: [{translateX: this.previousValue}]}}>
-        <Text style={{position: 'absolute', top: 25, left: 50, fontSize: 50}}>Create Account</Text>
-          <TextInput
-          style={{position: 'absolute', top: 150, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-          placeholder={' Enter your name'}
-          onChange={(event) => this.setState({name: event.nativeEvent.text})}
-          />
-        <TextInput
-        style={{position: 'absolute', top: 200, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Enter email address'}
-        onChange={(event) => this.setState({Username: event.nativeEvent.text})}
-        autoCapitalize={'none'}
-        />
-        <TextInput
-          style={{position: 'absolute', top: 250, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-          placeholder={' Enter password'}
-          secureTextEntry={true}
-          onChange={(event) => this.setState({password: event.nativeEvent.text})}
-          />
-        <TouchableHighlight onPress={this.createUser.bind(this)} style={{position: 'absolute', top: 310, left: 100}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Create Account</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.moveRight.bind(this)} style={{position: 'absolute', top: 350, left: 100}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Back</Text>
-        </TouchableHighlight>
-      </Animated.View>
-    </Modal>
-
       <View style={styles.navBar}>
         <TouchableHighlight
           onPress={this.menuFunc.bind(this)}
@@ -538,14 +454,7 @@ followUser(otherUserID) {
         <Text style={styles.titleStyle}>
             Tell-Tale
         </Text>
-        <TouchableHighlight
-          onPress={this.rotateCross.bind(this)}
-          style={{width: 40,height: 30, position: 'absolute',top: 28, height:25, width:25, left: 325 }}
-          underlayColor="#f1f1f1">
-          <Animated.Image
-           style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [ {translateX: this.crossXValue}, {rotate: cross}]}}
-        source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/PlusIcon.png')}/>
-        </TouchableHighlight>
+
         <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.editXValue}]}}>
           <TouchableHighlight
           onPress={this.accountLeft.bind(this)}
@@ -555,6 +464,7 @@ followUser(otherUserID) {
             style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/EditIcon.png')}/>
         </TouchableHighlight>
       </Animated.View>
+
       <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.otherAccountXValue}]}}>
         <TouchableHighlight
         onPress={this.closeOtherAccount.bind(this)}
@@ -590,26 +500,6 @@ followUser(otherUserID) {
 
       <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, position: 'absolute', top: 280, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
         <FeedComponent />
-      </Animated.View>
-
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.previousValue}]}}>
-        <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Create a new post</Text>
-        <TextInput
-        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 300, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Enter Post Title'}
-        onChange={(event) => this.setState({postTitle: event.nativeEvent.text})}
-        ref={component => this._titleInput = component}
-        />
-        <TextInput
-        style={{position: 'absolute', top: 95, left: 40, height: 80, width: 300, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Enter Post description'}
-        multiline={true}
-        onChange={(event) => this.setState({postDesc: event.nativeEvent.text})}
-        ref={component => this._descInput = component}
-        />
-      <TouchableHighlight onPress={this.newPost.bind(this)} style={{position: 'absolute', top: 155, left: 130, padding:25}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Upload</Text>
-        </TouchableHighlight>
       </Animated.View>
 
 
@@ -661,9 +551,8 @@ followUser(otherUserID) {
 };
 
 readyToLogin() {
-  this.tryLogin().then(() => {
-    //alert(value)
-    if (actions.login = true) {
+  this.tryLogin().then((value) => {
+    if (value == true) {
       this.setState({loaded: true})
       this.setState({modalVisible: false})
       this.setUserInfo()
@@ -675,9 +564,17 @@ readyToLogin() {
 
   componentWillMount () {
     actions.width = window.width;
-    actions.height = window.height
-    NetInfo.fetch().done((reach) => {
-      if (reach !== 'none') {
+    actions.height = window.height;
+    NetInfo.addEventListener(
+        'change',
+        this._handleConnectionInfoChange
+    );
+    NetInfo.fetch().done((connectionInfo) => {
+      if (connectionInfo !== 'none') {
+        NetInfo.removeEventListener(
+            'change',
+            this._handleConnectionInfoChange
+        );
         this.readyToLogin()
       } else {
         alert('Please connect to the internet')
@@ -685,63 +582,21 @@ readyToLogin() {
     });
 
   }
-  componentDidMount () {
 
-  }
+  _handleConnectionInfoChange = (connectionInfo) => {
+    if (connectionInfo !== 'none') {
+      NetInfo.removeEventListener(
+          'change',
+          this._handleConnectionInfoChange
+      );
+      this.readyToLogin()
+    } else {
+      alert('Please connect to the internet')
+    }
+  };
 
-rotateCross () {
-  if (actions.crossSpun == false) {
-    actions.alternateSpin(0)
-    Animated.parallel([
-      Animated.timing(
-        this.crossValue,
-        {
-          toValue: 1,
-          duration: 550,
-          easing: Easing.linear
-        }),
-      Animated.timing(
-        this.previousValue,
-        {
-          toValue: 0,
-          duration: 550,
-          easing: Easing.linear
-        }),
-      Animated.timing(
-        this.feedValue,
-        {
-          toValue: -500,
-          duration: 550,
-          easing: Easing.linear
-        })
-    ]).start()
-  } else {
-    actions.alternateSpin(0)
-    Animated.parallel([
-      Animated.timing(
-        this.crossValue,
-        {
-          toValue: 0,
-          duration: 550,
-          easing: Easing.linear
-        }),
-      Animated.timing(
-        this.previousValue,
-        {
-          toValue: 500,
-          duration: 550,
-          easing: Easing.linear
-        }),
-      Animated.timing(
-        this.feedValue,
-        {
-          toValue: 0,
-          duration: 550,
-          easing: Easing.linear
-        })
-    ]).start()
-  }
-}
+
+
 
 showOtherAccount() {
   Animated.sequence([
@@ -939,9 +794,6 @@ settingFunc () {
 }
 
 menuFunc () {
-  if (actions.crossSpun == true) {
-    this.rotateCross()
-  }
   if (actions.pressed == true) {
     this.accountLeft()
   }

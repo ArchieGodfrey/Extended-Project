@@ -47,15 +47,15 @@ class actions {
       // a must be equal to b
       return 0;
     });
-    return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve()}, 1000)
-      })
   }
 
-  loadAccountPosts(title,desc,date) {
-    this.userPosts.push({TITLE: title, DESC: desc, DATE: date})
-    this.userPosts.sort((num1, num2) => {
+  loadAccountPosts(title,desc,date,likes) {
+    this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes})
+  }
+
+  getAccountPostList() {
+    var list = this.userPosts
+    list.sort((num1, num2) => {
       if (num1.DATE < num2.DATE) {
         return 1;
       }
@@ -64,21 +64,27 @@ class actions {
       }
       // a must be equal to b
       return 0;
-    });
+    })
     return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve()}, 1000)
+      if (list !== null) {
+        resolve(list)
+      } else {
+        alert('empty list before showing')
+      }
       })
   }
 
   getPostList() {
     var list = this.postList
-    function save() {
-      return list
-    }
     return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve(save())}, 1000)
+      if (list !== null) {
+        resolve(list)
+      } else {
+        alert('empty list before showing')
+      }
+      /*setTimeout(function() {
+        reject(list, alert('error'))}, 1000)
+        */
       })
   }
 
