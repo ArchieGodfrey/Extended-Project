@@ -6,7 +6,7 @@ import dismissKeyboard from 'dismissKeyboard'
 import firebase from 'EP/firebaseConfig'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,Navigator,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,AsyncFunction,NetInfo
+  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,NetInfo
 } from 'react-native';
 var moment = require('moment');
 
@@ -18,7 +18,6 @@ const window = Dimensions.get('window');
 class ExtendedProject extends Component {
   constructor (props) {
     super(props);
-    this.database = firebaseApp.database();
     this.state = {
     modalVisible: false,
     textEntered: false,
@@ -40,22 +39,17 @@ class ExtendedProject extends Component {
     loaded: false
     }
     this.tapYValue = new Animated.Value(800)
-    this.newPostValue = new Animated.Value(500)
     this.previousValue = new Animated.Value(500)
-    this.profileValue = new Animated.Value(500)
     this.spinValue = new Animated.Value(0)
     this.crossXValue = new Animated.Value(0)
     this.editXValue = new Animated.Value(100)
     this.moveYValue = new Animated.Value(-210)
     this.feedValue = new Animated.Value(0)
-    this.accountValue = new Animated.Value(-500)
-    this.otherAccountValue = new Animated.Value(-500)
+    this.accountValue = new Animated.Value(500)
     this.otherAccountXValue = new Animated.Value(100)
     this.settingsValue = new Animated.Value(-500)
-    this.searchValue = new Animated.Value(500)
+    this.searchValue = new Animated.Value(-500)
   }
-
-
 
   async tryLogin() {
     return new Promise(function(resolve, reject) {
@@ -127,57 +121,70 @@ class ExtendedProject extends Component {
     this.setState({profDesc: actions.profDesc})
   }
 
-  createUser () {
+  async createUser () {
     let {
         Username, password, name
       } = this.state;
-      firebaseApp.auth().createUserWithEmailAndPassword(Username, password).catch(function(error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      alert(errorMessage)
-      });
-      firebaseApp.auth().onAuthStateChanged(function(user) {
-        if (user) {
-          // User is signed in.
-          var user = firebaseApp.auth().currentUser;
-          var userRef = firebaseApp.database().ref("UserID/" + user.uid)
-          userRef.set( {
-            User: user.uid,
-            Name: name,
-            Email: Username
-          });
-          try {
-           AsyncStorage.setItem('@userID:key', user.uid);
-          } catch (error) {
-            // Error saving data
-            alert('error saving username')
-          }
-          try {
-           AsyncStorage.setItem('@name:key', name);
-          } catch (error) {
-            // Error saving data
-            alert('error saving username')
-          }
-          try {
-           AsyncStorage.setItem('@username:key', Username);
-          } catch (error) {
-            // Error saving data
-            alert('error saving username')
-          }
-          try {
-           AsyncStorage.setItem('@password:key', password);
-          } catch (error) {
-            // Error saving data
-            alert('error saving password')
-          }
+    return new Promise(function(resolve, reject) {
+      if (name.length >= 1) {
+        if (password.length > 5) {
+          firebaseApp.auth().createUserWithEmailAndPassword(Username, password).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          alert(errorMessage)
+          resolve(false)
+          })
+          .then(() => {
+            var user = firebaseApp.auth().currentUser;
+            var userRef = firebaseApp.database().ref("UserID/" + user.uid)
+            userRef.update( {
+              User: user.uid,
+              Name: name,
+              Email: Username
+            });
+            try {
+             AsyncStorage.setItem('@userID:key', user.uid);
+            } catch (error) {
+              // Error saving data
+              alert('error saving username')
+              resolve(false)
+            }
+            try {
+             AsyncStorage.setItem('@name:key', name);
+            } catch (error) {
+              // Error saving data
+              alert('error saving username')
+              resolve(false)
+            }
+            try {
+             AsyncStorage.setItem('@username:key', Username);
+            } catch (error) {
+              // Error saving data
+              alert('error saving username')
+              resolve(false)
+            }
+            try {
+             AsyncStorage.setItem('@password:key', password);
+            } catch (error) {
+              // Error saving data
+              alert('error saving password')
+              resolve(false)
+            }
+            resolve(true)
+          })
+        } else {
+          alert('Password must be longer than 5 characters')
+          resolve(false)
         }
-      })
-
-      this.moveRight()
+      } else {
+        alert('Please enter your name')
+        resolve(false)
+      }
+    })
   }
 
-  login () {
+  async login () {
     let {
         Username, password
       } = this.state;
@@ -211,13 +218,13 @@ class ExtendedProject extends Component {
         }
         try {
           AsyncStorage.getItem('@username:key').then((value) => {
-           this.readyToLogin()
-           this.setState({modalVisible:false})
          })
         } catch (error) {
           // Error saving data
           alert('error saving username')
         }
+        this.readyToLogin()
+        this.setState({modalVisible:false})
       }
     })
 
@@ -291,87 +298,7 @@ class ExtendedProject extends Component {
     this.setState({modalVisible: true})
   }
 
-  saveProfile() {
-    var name = this.state.name
-    var profDesc = this.state.profDesc
-    var postsRef = firebaseApp.database().ref("UserID/"+ this.state.UserID)
-    postsRef.update( {
-      Name: name,
-      ProfDesc: profDesc
-    });
-    AsyncStorage.setItem('@name:key', name);
-    AsyncStorage.setItem('@profDesc:key', profDesc);
-    this.clearText()
-    this.accountLeft()
-  }
 
-showAccountInfo(otherUserID) {
-  let {
-    UserID
-  } = this.state
-  actions.following = false
-  var userRef = firebaseApp.database().ref("UserID/" + otherUserID + "/Name")
-  userRef.once('value', (Snapshot) => {
-    this.setState({otherName: Snapshot.val()})
-  })
-  var userProfRef = firebaseApp.database().ref("UserID/" + otherUserID + "/ProfDesc")
-  userProfRef.once('value', (Snapshot) => {
-    this.setState({otherProfDesc: Snapshot.val()})
-  })
-  var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
-  followRef.once("value")
-    .then(function(snapshot) {
-      if (snapshot.val() !== null) {
-        snapshot.forEach(function(childSnapshot) {
-          if (childSnapshot.key !== UserID) {
-            actions.following = false
-          } else {
-            actions.following = true
-          }
-        })
-      } else {
-        actions.following = false
-      }
-  })
-  if (actions.following == true) {
-    this.setState({following: "Following"})
-  } else {
-    this.setState({following: "Follow?"})
-  }
-  this.showOtherAccount()
-}
-
-followUser(otherUserID) {
-  let {
-    UserID
-  } = this.state
-  var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
-  followRef.once("value")
-    .then(function(snapshot) {
-      if (snapshot.val() !== null) {
-        snapshot.forEach(function(childSnapshot) {
-          if (childSnapshot.key !== UserID) {
-            followRef.child(UserID).update( {
-              User: UserID
-            });
-            var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
-            userRef.child(otherUserID).update( {
-              User: otherUserID
-            });
-          }
-        })
-      } else {
-        followRef.child(UserID).update( {
-          User: UserID
-        });
-        var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
-        userRef.child(otherUserID).update( {
-          User: otherUserID
-        });
-      }
-  })
-  this.setState({following: "Following"})
-}
 
   render() {
     const spin = this.spinValue.interpolate({
@@ -428,7 +355,7 @@ followUser(otherUserID) {
                 secureTextEntry={true}
                 onChange={(event) => this.setState({password: event.nativeEvent.text})}
                 />
-              <TouchableHighlight onPress={this.createUser.bind(this)} style={{position: 'absolute', top: 310, left: 100}} underlayColor="#f1f1f1">
+              <TouchableHighlight onPress={() => {this.createUser().then((result) => {if (result == true) {this.moveRight()}})}} style={{position: 'absolute', top: 310, left: 100}} underlayColor="#f1f1f1">
                 <Text style={{fontSize: 20}}>Create Account</Text>
               </TouchableHighlight>
               <TouchableHighlight onPress={this.moveRight.bind(this)} style={{position: 'absolute', top: 350, left: 100}} underlayColor="#f1f1f1">
@@ -445,7 +372,7 @@ followUser(otherUserID) {
       <View style={styles.navBar}>
         <TouchableHighlight
           onPress={this.menuFunc.bind(this)}
-          style={{width: 40,height: 30 }}
+          style={{height: 50, width: 50}}
           underlayColor="#f1f1f1">
           <Animated.Image
            style={{position: 'absolute',top: 8, height:25, width:25,left: 2,transform: [{rotate: spin}]}}
@@ -454,26 +381,6 @@ followUser(otherUserID) {
         <Text style={styles.titleStyle}>
             Tell-Tale
         </Text>
-
-        <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.editXValue}]}}>
-          <TouchableHighlight
-          onPress={this.accountLeft.bind(this)}
-          style={{width: 40,height: 30}}
-          underlayColor="#f1f1f1">
-          <Animated.Image
-            style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/EditIcon.png')}/>
-        </TouchableHighlight>
-      </Animated.View>
-
-      <Animated.View style={{position: 'absolute', top: 28, left: 325, transform: [{translateX: this.otherAccountXValue}]}}>
-        <TouchableHighlight
-        onPress={this.closeOtherAccount.bind(this)}
-        style={{width: 40,height: 30}}
-        underlayColor="#f1f1f1">
-        <Animated.Image
-          style={{height: 25, width: 28 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/BackIcon.png')}/>
-      </TouchableHighlight>
-    </Animated.View>
       </View>
 
 
@@ -498,7 +405,7 @@ followUser(otherUserID) {
       </TouchableHighlight>
 
 
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, position: 'absolute', top: 280, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white", flex:1, transform: [{translateY: this.moveYValue}, {translateX: this.feedValue}] }}>
         <FeedComponent />
       </Animated.View>
 
@@ -507,29 +414,7 @@ followUser(otherUserID) {
         <AccountComponent />
       </Animated.View>
 
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.profileValue}]}}>
-        <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Edit your profile</Text>
-        <TextInput
-        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 300, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Enter your name'}
-        value={this.state.name}
-        onChange={(event) => this.setState({name: event.nativeEvent.text})}
-        ref={component => this._titleInput = component}
-        />
-        <TextInput
-        style={{position: 'absolute', top: 95, left: 40, height: 80, width: 300, borderColor: 'gray', borderWidth: 1}}
-        placeholder={' Enter a description'}
-        multiline={true}
-        value={this.state.profDesc}
-        onChange={(event) => this.setState({profDesc: event.nativeEvent.text})}
-        ref={component => this._descInput = component}
-        />
-      <TouchableHighlight onPress={this.saveProfile.bind(this)} style={{position: 'absolute', top: 155, left: 130, padding:25}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Save</Text>
-        </TouchableHighlight>
-      </Animated.View>
-
-      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white",transform: [{ translateY: this.moveYValue}, {translateX: this.searchValue}]}}>
+      <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: 280,  backgroundColor: "white", flex:1, transform: [{ translateY: this.moveYValue}, {translateX: this.searchValue}]}}>
         <SearchComponent />
       </Animated.View>
 
@@ -595,30 +480,6 @@ readyToLogin() {
     }
   };
 
-
-
-
-showOtherAccount() {
-  Animated.sequence([
-    Animated.timing(
-      this.otherAccountValue,
-      {
-        toValue: 0,
-        duration: 550,
-        easing: Easing.linear
-      }
-    ),
-    Animated.timing(
-      this.otherAccountXValue,
-      {
-        toValue: 0,
-        duration: 550,
-        easing: Easing.linear
-      }
-    )
-  ]).start()
-}
-
 moveLeft () {
   Animated.parallel([
     Animated.timing(
@@ -631,31 +492,6 @@ moveLeft () {
   ]).start()
 };
 
-accountLeft () {
-  if (actions.pressed == false) {
-    actions.alternateSpin(2)
-    Animated.parallel([
-      Animated.timing(
-        this.profileValue,
-        {
-          toValue: 0,
-          duration: 550,
-          easing: Easing.linear
-        })
-    ]).start()
-  } else {
-    actions.alternateSpin(2)
-    Animated.parallel([
-      Animated.timing(
-        this.profileValue,
-        {
-          toValue: 500,
-          duration: 550,
-          easing: Easing.linear
-        })
-      ]).start()
-  }
-}
 moveRight () {
   Animated.sequence([
     Animated.timing(
@@ -668,35 +504,6 @@ moveRight () {
     )
   ]).start()
 };
-
-editFunc () {
-  Animated.parallel([
-    Animated.timing(
-      this.crossXValue,
-      {
-        toValue: 100,
-        duration: 400,
-        easing: Easing.linear
-      }
-    ),
-    Animated.timing(
-      this.otherAccountXValue,
-      {
-        toValue: 100,
-        duration: 550,
-        easing: Easing.linear
-      }
-    ),
-    Animated.timing(
-      this.editXValue,
-      {
-        toValue: 0,
-        duration: 550,
-        easing: Easing.linear
-      }
-    )
-  ]).start()
-}
 
 newPostFunc () {
   Animated.parallel([
@@ -724,43 +531,6 @@ newPostFunc () {
         easing: Easing.linear
       }
     )
-  ]).start()
-}
-
-closeOtherAccount() {
-  Animated.parallel([
-    Animated.timing(
-      this.editXValue,
-      {
-        toValue: 100,
-        duration: 400,
-        easing: Easing.linear
-      }
-    ),
-    Animated.timing(
-      this.crossXValue,
-      {
-        toValue: 100,
-        duration: 550,
-        easing: Easing.linear
-      }
-    ),
-    Animated.timing(
-      this.otherAccountXValue,
-      {
-        toValue: 100,
-        duration: 550,
-        easing: Easing.linear
-      }
-    ),
-    Animated.timing(
-      this.otherAccountValue,
-      {
-        toValue: -500,
-        duration: 400,
-        easing: Easing.linear
-      }
-    ),
   ]).start()
 }
 
@@ -794,9 +564,6 @@ settingFunc () {
 }
 
 menuFunc () {
-  if (actions.pressed == true) {
-    this.accountLeft()
-  }
   this.showHighlight()
   if (actions.spun == false) {
     actions.alternateSpin(1)
@@ -842,7 +609,6 @@ menuFunc () {
 
 };
 accountFunc () {
-  this.editFunc()
   Animated.parallel([
     Animated.timing(
       this.feedValue,
@@ -863,7 +629,7 @@ accountFunc () {
     Animated.timing(
       this.searchValue,
       {
-        toValue: 500,
+        toValue: -500,
         duration: 500,
         easing: Easing.linear
       }
@@ -880,12 +646,13 @@ accountFunc () {
   this.menuFunc()
 };
 feedFunc () {
+  actions.isLoading = false
   this.newPostFunc()
   Animated.parallel([
     Animated.timing(
       this.accountValue,
       {
-        toValue: -500,
+        toValue: 500,
         duration: 500,
         easing: Easing.linear
       }
@@ -901,7 +668,7 @@ feedFunc () {
     Animated.timing(
       this.searchValue,
       {
-        toValue: 500,
+        toValue: -500,
         duration: 500,
         easing: Easing.linear
       }
@@ -957,7 +724,7 @@ followFunc () {
     Animated.timing(
       this.accountValue,
       {
-        toValue: -500,
+        toValue: 500,
         duration: 500,
         easing: Easing.linear
       }
@@ -996,7 +763,7 @@ settingsFunc () {
     Animated.timing(
       this.accountValue,
       {
-        toValue: -500,
+        toValue: 500,
         duration: 500,
         easing: Easing.linear
       }

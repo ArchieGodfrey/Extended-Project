@@ -1,15 +1,25 @@
 import actions from "EP/Actions"
 import firebase from 'EP/firebaseConfig'
+import LikeComponent from "EP/likeComponent"
+import dismissKeyboard from 'dismissKeyboard'
+import RNFetchBlob from 'react-native-fetch-blob'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions
+  AppRegistry,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
 
 var moment = require('moment');
+var ImagePicker = require('react-native-image-picker');
 
-var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
+var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database"); require("firebase/storage")
 
-const window = Dimensions.get('window');
+// Prepare Blob support
+const Blob = RNFetchBlob.polyfill.Blob
+const fs = RNFetchBlob.fs
+window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
+window.Blob = Blob
+
+const frame = Dimensions.get('window');
 
 export default class AccountContents extends Component {
   constructor (props) {
@@ -21,9 +31,45 @@ export default class AccountContents extends Component {
     profDesc: "Loading",
     dataSource: ds.cloneWithRows([]),
   }
-  this.listYValue = new Animated.Value(200)
-  this.postXValue = new Animated.Value(1000)
+  this.clearText = this.clearText.bind(this);
+  this.profileValue = new Animated.Value(500)
+  this.editXValue = new Animated.Value(0)
+  this.listYValue = new Animated.Value(0)
+  this.postXValue = new Animated.Value(500)
 }
+
+uploadImage = (userID, loc, uri, mime = 'application/octet-stream') => {
+ return new Promise((resolve, reject) => {
+   const uploadUri =  Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+   let uploadBlob = null
+   const imageRef = firebaseApp.storage().ref('Users/' + userID).child(loc)
+
+   fs.readFile(uploadUri, 'base64')
+     .then((data) => {
+       return Blob.build(data, { type: `${mime};BASE64` })
+     })
+     .then((blob) => {
+       uploadBlob = blob
+       return imageRef.put(blob, { contentType: mime })
+     })
+     .then(() => {
+       uploadBlob.close()
+       return imageRef.getDownloadURL()
+     })
+     .then((url) => {
+       resolve(url)
+     })
+     .catch((error) => {
+       reject(error)
+   })
+ })
+}
+
+clearText() {
+ this._titleInput.setNativeProps({text: ''});
+ this._descInput.setNativeProps({text: ''});
+ dismissKeyboard();
+ }
 
 getAccountInfo() {
   return new Promise(function(resolve, reject) {
@@ -73,10 +119,10 @@ async getUserPosts() {
                postDescRef.once('value', (descSnapshot) => {
                  desc = descSnapshot.val()
                })
-               var postLikesRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + childSnapshot.key + "/date")
+               var postLikesRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + childSnapshot.key + "/likes")
                postLikesRef.once('value', (likesSnapshot) => {
-                 actions.postLikes = likesSnapshot.val()
-                 actions.loadAccountPosts(title, desc, childSnapshot.key,likes)
+                 likes = likesSnapshot.val()
+                 actions.loadAccountPosts(title, desc, childSnapshot.key,likes,UserID)
                })
              })
            })
@@ -96,6 +142,160 @@ updateListView(list) {
   this.setState({dataSource: this.state.dataSource.cloneWithRows(list)})
 }
 
+likePost(otherUserID, postDate) {
+  return new Promise(function(resolve, reject) {
+    var likes = 0
+    var liked = false
+    try {
+      AsyncStorage.getItem('@userID:key').then((value) => {
+       var UserID = value
+       if (UserID !== null) {
+         var likesRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate + "/likedBy/")
+         likesRef.once("value")
+           .then(function(snapshot) {
+             if (snapshot.val() !== null) {
+               snapshot.forEach(function(childSnapshot) {
+                 if (childSnapshot.key == UserID) {
+                  liked = true
+                 }
+               })
+             } else {
+               likes = 1
+               var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate)
+               postsRef.update( {
+                 likes: 1
+               });
+               postsRef.child('likedBy/' + UserID).update({
+                 User: UserID
+               })
+               resolve(likes)
+             }
+         }).then(() => {
+             if (liked == true) {
+               var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate)
+               postsRef.child("likes").once('value', (likesSnapshot) => {
+                 likes = likesSnapshot.val() - 1
+                 postsRef.update( {
+                   likes: likes
+                 });
+                 postsRef.child('likedBy/' + UserID).remove()
+               })
+               resolve(likes)
+             } else {
+               var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate)
+               postsRef.child("likes").once('value', (likesSnapshot) => {
+                 likes = likesSnapshot.val() + 1
+                 postsRef.update( {
+                   likes: likes
+                 });
+                 postsRef.child('likedBy/' + UserID).update({
+                   User: UserID
+                 })
+               })
+               resolve(likes)
+             }
+         })
+       }
+     })
+   } catch (error) {
+     // Error retrieving data
+     alert("There was a problem getting posts")
+     resolve(likes)
+   }
+
+
+    setTimeout(function() {
+      resolve()}, 1000)
+    })
+}
+
+showTextBox() {
+  //this._titleInput.setNativeProps({backgroundColor: 'black'});
+}
+
+saveProfile() {
+  var name = this.state.name;
+  var profDesc = this.state.profDesc;
+  try {
+    AsyncStorage.getItem('@userID:key').then((value) => {
+     var userID = value;
+     if (userID !== null){
+       var postsRef = firebaseApp.database().ref("UserID/"+ userID)
+       postsRef.update( {
+         Name: name,
+         ProfDesc: profDesc
+       });
+     }
+   })
+ } catch (error) {
+    // Error retrieving data
+ }
+  AsyncStorage.setItem('@name:key', name);
+  AsyncStorage.setItem('@profDesc:key', profDesc);
+  this.accountLeft()
+}
+
+choosePicture(loc) {
+  var options = {
+  title: 'Select ' + loc + ' Picture',
+  allowsEditing: true,
+  storageOptions: {
+    skipBackup: true,
+    path: 'images'
+  }
+};
+ImagePicker.showImagePicker(options, (response) => {
+  console.log('Response = ', response);
+
+  if (response.didCancel) {
+    console.log('User cancelled image picker');
+  }
+  else if (response.error) {
+    console.log('ImagePicker Error: ', response.error);
+  }
+  else if (response.customButton) {
+    console.log('User tapped custom button: ', response.customButton);
+  }
+  else {
+    //let source = { uri: response.uri };
+
+    // You can also display the image using data:
+    let source = { uri: 'data:image/jpeg;base64,' + response.data };
+    try {
+      AsyncStorage.getItem('@userID:key').then((value) => {
+       var userID = value;
+       this.uploadImage(userID, loc, response.uri).then(() => {
+         this.tryLoadFeed()
+       })
+     })
+    } catch (error) {
+       // Error retrieving data
+    }
+    }
+  })
+}
+
+downloadImage() {
+  return new Promise(function(resolve, reject) {
+    var Realurl = ""
+    var Realurl2 = ""
+    try {
+      AsyncStorage.getItem('@userID:key').then((value) => {
+       var userID = value;
+       firebaseApp.storage().ref('Users/' + userID).child('Profile').getDownloadURL().then(function(url) {
+         Realurl = url
+         firebaseApp.storage().ref('Users/' + userID).child('Background').getDownloadURL().then(function(url2) {
+           Realurl2 = url2
+           resolve([Realurl, Realurl2])
+          })
+        })
+     })
+    } catch (error) {
+       // Error retrieving data
+    }
+  })
+}
+
   render() {
     if (this.state.loaded == true) {
       return (
@@ -105,36 +305,45 @@ updateListView(list) {
     )
     } else {
       return(
-        <View style={{flex:1}}>
+        <View style={{flex:1, position:'absolute'}}>
+          <Animated.View style={{position: 'absolute',top: -44, height:25, width:25, left: 325, transform: [{translateX: this.editXValue}]}}>
+            <TouchableHighlight
+            onPress={this.accountLeft.bind(this)}
+            style={{height: 50, width: 50,}}
+            underlayColor="#f1f1f1">
+            <Animated.Image
+              style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/EditIcon.png')}/>
+          </TouchableHighlight>
+        </Animated.View>
             <Image
-              style={{resizeMode: 'cover', width: window.width, height: (window.height / 3) }} blurRadius={2} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/Bitmap.png')}/>
-            <View style={{position: 'absolute', width:window.width, height: (window.height / 3), flexDirection: "column", justifyContent:"center", alignItems: 'center'}}>
+              style={{resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  blurRadius={2} source={{uri: this.state.backgroundSource}}/>
+            <View style={{position: 'absolute', width:frame.width, height: (frame.height / 3), flexDirection: "column", justifyContent:"center", alignItems: 'center'}}>
             <Image
-            style={{resizeMode: 'cover', height: 76, width: 71}}
-            source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/Avatar.png')}/>
+            style={{paddingTop:76, resizeMode: 'cover', height: 76, width: 71}}
+            source={{uri: this.state.avatarSource}}/>
             <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}}>{this.state.name}</Text>
             <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}}>{this.state.profDesc}</Text>
             </View>
             <TouchableOpacity
-              style={{position: 'absolute', top:5, width: window.width, height:60}}
+              style={{position: 'absolute', top:5, width: frame.width, height:60}}
               onPress={() => {this.closeList()}}>
             </TouchableOpacity>
-            <Animated.View style={{flexGrow:1, transform: [{translateY: this.listYValue}]}}>
+            <Animated.View style={{flex:1, transform: [{translateY: this.listYValue}]}}>
               <ListView
                 onScroll={() => {this.showList()}}
                 enableEmptySections={true}
-                style={{backgroundColor:'white', paddingLeft: 10, paddingRight: 10,  width: window.width}}
+                style={{backgroundColor:'white', paddingLeft: 10, paddingRight: 10,  width: frame.width}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
                 renderRow={(rowData, sec, i) =>
-                <View style={{alignSelf: 'flex-start', width:(window.width / 2) - 20}}>
+                <View style={{alignSelf: 'flex-start', width:(frame.width / 2) - 20}}>
                   <Text style={{fontSize: 25}}> {rowData.TITLE}</Text>
                   <TouchableHighlight
-                    onPress={() => {this.showPosts(), this.listView.scrollTo({ x:window.width * i, y:0, animated:false })}}>
+                    onPress={() => {this.showPosts(), this.listView.scrollTo({ x:frame.width * i, y:0, animated:false })}}>
                       <Image
-                        style={{resizeMode: 'cover', width: window.width / 2, height: window.height / 6}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
+                        style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
                   </TouchableHighlight>
-                  <Text style={{fontSize: 15}}> {rowData.DESC.slice(0,45)}...</Text>
+                  <Text style={{fontSize: 15}}> {rowData.DESC !== null ? rowData.DESC.slice(0,45) : "Loading" }...</Text>
                 </View>
                 }
                 renderFooter={() => <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
@@ -142,17 +351,23 @@ updateListView(list) {
                   <Text style={{height: 100}}>                           </Text>
                 </View>}
               />
-
             </Animated.View>
 
             <Animated.View style={{flexGrow:1, position:'absolute', backgroundColor:'white', transform: [{translateX: this.postXValue}]}}>
+              <TouchableHighlight
+              onPress={this.closePosts.bind(this)}
+              style={{height: 50, width: 50, position: 'absolute',top: -42, left: 325}}
+              underlayColor="#f1f1f1">
+              <Animated.Image
+                style={{resizeMode: 'cover', height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/BackIcon.png')}/>
+            </TouchableHighlight>
               <ListView ref={component => this.listView = component}
                 enableEmptySections={true}
-                style={{position: 'absolute', top: 0, left: 0, height: window.height, width:window.width}}
+                style={{position: 'absolute', top: 0, left: 0, height: frame.height, width:frame.width}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 horizontal={true}
                 dataSource={this.state.dataSource}
-                renderRow={(rowData) =>
+                renderRow={(rowData, s, i) =>
                 <View style={{width:actions.width, backgroundColor:'white'}}>
                   <View style={styles.Imagecontainer}>
                     <Image
@@ -164,14 +379,15 @@ updateListView(list) {
                     <Text style={styles.userName}>{rowData.TITLE}</Text>
                       <Image
                         style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/ClockIcon.png')}/>
-                      <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mma')}</Text>
+                      <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mm')}</Text>
                       <Image
                         style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeIcon.png')}/>
-                      <Text style={styles.likeNumber}>{rowData.LIKES}</Text>
+                      <LikeComponent USERID={rowData.USERID} DATE={rowData.DATE} />
+                      <Text style={styles.likeNumber} ref={component => this._likeNum = component}>{rowData.LIKES}</Text>
                     <Text style={styles.postDesc}>{rowData.DESC}</Text>
                   </View>
                   <View style={styles.buttons}>
-                    <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then(() => {this.newGetPosts().then(() => {actions.getPostList().then(() => {this.updateListView()})})})} underlayColor="#f1f1f1">
+                    <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then(() => {this.tryLoadFeed()})} underlayColor="#f1f1f1">
                       <Image
                         style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeButton.png')}/>
                     </TouchableHighlight>
@@ -181,31 +397,73 @@ updateListView(list) {
                       style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
                   </View>
                 </View>}
-                />
+              />
             </Animated.View>
+
+            <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, width: frame.width, height: frame.height, flex:1, position: 'absolute', top: -2,  backgroundColor: "white", transform: [{translateX: this.profileValue}]}}>
+              <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Edit your profile</Text>
+                <Image
+                  style={{resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }} blurRadius={2} source={{uri: this.state.backgroundSource}}/>
+                <View style={{position: 'absolute', width:frame.width, height: (frame.height / 3), flexDirection: "column", justifyContent:"center", alignItems: 'center'}}>
+                <Image
+                style={{paddingTop:76, resizeMode: 'cover', height: 76, width: 71}}
+                source={{uri: this.state.avatarSource}}/>
+                  <TextInput
+                  style={{justifyContent:"center", alignItems: 'center', paddingTop: 25, paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)', height:50, width: frame.width}}
+                  placeholder={' Enter your name'}
+                  value={this.state.name}
+                  onChange={(event) => this.setState({name: event.nativeEvent.text})}
+                  ref={component => this._titleInput = component}
+                  />
+                  <TextInput
+                  style={{justifyContent:"center", alignItems: 'center', paddingTop: 5, paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)', height:50, width: frame.width}}
+                  placeholder={' Enter a profile description'}
+                  value={this.state.profDesc}
+                  onChange={(event) => this.setState({profDesc: event.nativeEvent.text})}
+                  ref={component => this._descInput = component}
+                  />
+                </View>
+                <TouchableHighlight onPress={() => this.choosePicture("Profile")} style={{justifyContent:"center", alignItems: 'center', paddingTop:10}} underlayColor="#f1f1f1">
+                      <Text style={{fontSize: 20}}>Change Profile Picture</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={() => this.choosePicture("Background")} style={{justifyContent:"center", alignItems: 'center', paddingTop:15}} underlayColor="#f1f1f1">
+                      <Text style={{fontSize: 20}}>Change Background Picture</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={() => {this.saveProfile()}} style={{justifyContent:"center", alignItems: 'center',paddingTop:15}} underlayColor="#f1f1f1">
+                  <Text style={{fontSize: 20}}>Save</Text>
+                </TouchableHighlight>
+            </Animated.View>
+
           </View>
       )
     }
   }
 
-
-    componentWillMount() {
-      actions.userPosts = []
-      this.closeList()
-      this.getAccountInfo().then((result) => {
-        if (result == true) {
+  tryLoadFeed() {
+    actions.userPosts = []
+    this.getAccountInfo().then((result) => {
+      if (result == true) {
+        this.downloadImage().then((urls) => {
+          this.setState({avatarSource:urls[0]})
+          this.setState({backgroundSource:urls[1]})
           this.getUserPosts().then(() => {
             actions.getAccountPostList().then((list) => {
               this.updateListView(list)
               this.setState({name: actions.name})
               this.setState({profDesc: actions.profDesc})
-              this.setState({Username: actions.Username})
               this.setState({loaded: false})
             })
-
           })
-        }
-      })
+        })
+      } else {
+        alert('Failed to load account')
+      }
+    })
+  }
+
+
+    componentWillMount() {
+      this.tryLoadFeed()
     };
 
   showList () {
@@ -233,29 +491,71 @@ updateListView(list) {
     ]).start()
   };
     showPosts () {
-      Animated.sequence([
+      Animated.parallel([
+        Animated.timing(
+          this.editXValue,
+          {
+            toValue: 100,
+            duration: 250,
+            easing: Easing.linear
+          }
+        ),
         Animated.timing(
           this.postXValue,
           {
             toValue: 0,
-            duration: 550,
+            duration: 250,
             easing: Easing.linear
           }
         )
       ]).start()
     };
     closePosts () {
-      Animated.sequence([
+      Animated.parallel([
+        Animated.timing(
+          this.editXValue,
+          {
+            toValue: 0,
+            duration: 250,
+            easing: Easing.linear
+          }
+        ),
         Animated.timing(
           this.postXValue,
           {
-            toValue: 1000,
-            duration: 550,
+            toValue: 500,
+            duration: 250,
             easing: Easing.linear
           }
         )
       ]).start()
   };
+  accountLeft () {
+    dismissKeyboard()
+    if (actions.pressed == false) {
+      actions.alternateSpin(2)
+      Animated.parallel([
+        Animated.timing(
+          this.profileValue,
+          {
+            toValue: 0,
+            duration: 250,
+            easing: Easing.linear
+          })
+      ]).start()
+    } else {
+      actions.alternateSpin(2)
+      Animated.parallel([
+        Animated.timing(
+          this.profileValue,
+          {
+            toValue: 500,
+            duration: 250,
+            easing: Easing.linear
+          })
+        ]).start()
+    }
+  }
 }
 
 const styles = StyleSheet.create({
@@ -285,7 +585,7 @@ const styles = StyleSheet.create({
   },
   postImage: {
     resizeMode: 'cover',
-    width: window.width
+    width: frame.width
   },
   userContainer: {
     flex: 1,

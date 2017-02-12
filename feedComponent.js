@@ -1,6 +1,7 @@
 import actions from "EP/Actions"
 import firebase from 'EP/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
+import LikeComponent from "EP/likeComponent"
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
@@ -27,6 +28,7 @@ export default class PostContents extends Component {
     postDate: "",
     Following: [],
     loaded: true,
+    update:false,
     dataSource: ds.cloneWithRows([]),
   }
     this.clearText = this.clearText.bind(this);
@@ -151,36 +153,65 @@ async newGetPosts() {
 likePost(otherUserID, postDate) {
   return new Promise(function(resolve, reject) {
     var likes = 0
-    var UserID = actions.UserID
-    var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
-    likesRef.once("value")
-      .then(function(snapshot) {
-        if (snapshot.val() !== null) {
-          snapshot.forEach(function(childSnapshot) {
-            if (childSnapshot.key !== UserID) {
-              var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
-              postsRef.child("likes").once('value', (likesSnapshot) => {
-                likes = likesSnapshot.val() + 1
-                postsRef.update( {
-                  likes: likes
-                });
-                postsRef.child('likedBy/' + UserID).update({
-                  User: UserID
-                })
-              })
-            }
-          })
-        } else {
-          likes = 1
-          var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
-          postsRef.update( {
-            likes: 1
-          });
-          postsRef.child('likedBy/' + UserID).update({
-            User: UserID
-          })
-        }
-    })
+    var liked = false
+    try {
+      AsyncStorage.getItem('@userID:key').then((value) => {
+       var UserID = value
+       if (UserID !== null) {
+         var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
+         likesRef.once("value")
+           .then(function(snapshot) {
+             if (snapshot.val() !== null) {
+               snapshot.forEach(function(childSnapshot) {
+                 if (childSnapshot.key == UserID) {
+                  liked = true
+                 }
+               })
+             } else {
+               likes = 1
+               var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
+               postsRef.update( {
+                 likes: 1
+               });
+               postsRef.child('likedBy/' + UserID).update({
+                 User: UserID
+               })
+               resolve(likes)
+             }
+         }).then(() => {
+             if (liked == true) {
+               var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
+               postsRef.child("likes").once('value', (likesSnapshot) => {
+                 likes = likesSnapshot.val() - 1
+                 postsRef.update( {
+                   likes: likes
+                 });
+                 postsRef.child('likedBy/' + UserID).remove()
+               })
+               resolve(likes)
+             } else {
+               var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
+               postsRef.child("likes").once('value', (likesSnapshot) => {
+                 likes = likesSnapshot.val() + 1
+                 postsRef.update( {
+                   likes: likes
+                 });
+                 postsRef.child('likedBy/' + UserID).update({
+                   User: UserID
+                 })
+               })
+               resolve(likes)
+             }
+         })
+       }
+     })
+   } catch (error) {
+     // Error retrieving data
+     alert("There was a problem getting posts")
+     resolve(likes)
+   }
+
+
     setTimeout(function() {
       resolve()}, 1000)
     })
@@ -189,24 +220,38 @@ likePost(otherUserID, postDate) {
 getLikes(otherUserID, postDate) {
   return new Promise(function(resolve, reject) {
     var likes = 0
-    var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
-    likesRef.once("value")
-      .then(function(snapshot) {
-        if (snapshot.val() !== null) {
-          snapshot.forEach(function(childSnapshot) {
-            var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
-            postsRef.child("likes").once('value', (likesSnapshot) => {
-              likes = likesSnapshot.val() + 1
-            })
-          })
-        } else {
-          likes = 0
-        }
-    })
-    setTimeout(function() {
-      resolve(alert(likes))}, 1000)
-    })
-}
+    try {
+      AsyncStorage.getItem('@userID:key').then((value) => {
+       var UserID = value
+       if (UserID !== null) {
+         var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
+         likesRef.once("value")
+           .then(function(snapshot) {
+             if (snapshot.val() !== null) {
+               var liked = true
+               snapshot.forEach(function(childSnapshot) {
+                 if (childSnapshot.key !== UserID) {
+                   resolve(0)
+                 } else {
+                   resolve(1)
+                 }
+               })
+             } else {
+               resolve(1)
+             }
+           })
+         }
+       })
+     } catch (error) {
+       // Error retrieving data
+       resolve(false)
+     }
+
+      setTimeout(function() {
+        resolve(false)}, 1000)
+      })
+    }
+
 
 newPost () {
   var timeKey = moment().format('MMDDYYYYhmmss')
@@ -234,6 +279,7 @@ clearText() {
  dismissKeyboard();
 }
 
+
 render() {
   const cross = this.crossValue.interpolate({
     inputRange: [0, 1],
@@ -251,7 +297,7 @@ render() {
     <Animated.View style={{transform: [{translateX: this.feedValue}]}}>
       <TouchableHighlight
         onPress={this.rotateCross.bind(this)}
-        style={{width: 40,height: 30, position: 'absolute',top: -44, height:25, width:25, left: 325 }}
+        style={{width: 40,height: 30, position: 'absolute',top: -44, height: 50, width: 50, left: 325 }}
         underlayColor="#f1f1f1">
         <Animated.Image
          style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
@@ -263,7 +309,7 @@ render() {
         contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
         horizontal={true}
         dataSource={this.state.dataSource}
-        renderRow={(rowData) =>
+        renderRow={(rowData, s, i) =>
         <View style={{width:actions.width}}>
           <View style={styles.Imagecontainer}>
             <Image
@@ -275,14 +321,15 @@ render() {
             <Text style={styles.userName}>{rowData.TITLE}</Text>
               <Image
                 style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/ClockIcon.png')}/>
-              <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mma')}</Text>
+              <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mm')}</Text>
               <Image
                 style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeIcon.png')}/>
-              <Text style={styles.likeNumber}>{rowData.LIKES}</Text>
+              <LikeComponent USERID={rowData.USERID} DATE={rowData.DATE} />
+              <Text style={styles.likeNumber} ref={component => this._likeNum = component}>{rowData.LIKES}</Text>
             <Text style={styles.postDesc}>{rowData.DESC}</Text>
           </View>
           <View style={styles.buttons}>
-            <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then(() => {this.newGetPosts().then(() => {actions.getPostList().then(() => {this.updateListView()})})})} underlayColor="#f1f1f1">
+            <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then((value) => {this.tryLoadFeed()})} underlayColor="#f1f1f1">
               <Image
                 style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeButton.png')}/>
             </TouchableHighlight>
@@ -337,6 +384,10 @@ componentWillMount () {
 
 }
 
+update() {
+  return true
+}
+
 rotateCross () {
   dismissKeyboard();
   if (actions.crossSpun == false) {
@@ -378,10 +429,33 @@ rotateCross () {
   }
 }
 
+    likedAnimation () {
+      if (actions.liked == false) {
+        actions.alternateSpin(4)
+          Animated.timing(
+            this.likeValue,
+            {
+              toValue: 0,
+              duration: 550,
+              easing: Easing.linear
+            }).start()
+      } else {
+        actions.alternateSpin(4)
+          Animated.timing(
+            this.likeValue,
+            {
+              toValue: 1,
+              duration: 550,
+              easing: Easing.linear
+            }).start()
+  }
+}
+
 
 
 
 }//last
+
 
 
 

@@ -8,6 +8,7 @@ class actions {
   this.postDate = 0
   this.postList = []
   this.userPosts = []
+  this.otherUserPosts = []
   this.postLikes = 0
   this.liked = false
   this.visible = false
@@ -49,12 +50,37 @@ class actions {
     });
   }
 
-  loadAccountPosts(title,desc,date,likes) {
-    this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes})
+  loadAccountPosts(title,desc,date,likes,userID) {
+    this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID})
+  }
+
+  loadOtherAccountPosts(title,desc,date,likes,userID) {
+    this.otherUserPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID})
   }
 
   getAccountPostList() {
     var list = this.userPosts
+    list.sort((num1, num2) => {
+      if (num1.DATE < num2.DATE) {
+        return 1;
+      }
+      if (num1.DATE > num2.DATE) {
+        return -1;
+      }
+      // a must be equal to b
+      return 0;
+    })
+    return new Promise(function(resolve, reject) {
+      if (list !== null) {
+        resolve(list)
+      } else {
+        alert('empty list before showing')
+      }
+      })
+  }
+
+  getOtherAccountPostList() {
+    var list = this.otherUserPosts
     list.sort((num1, num2) => {
       if (num1.DATE < num2.DATE) {
         return 1;
@@ -154,6 +180,12 @@ class actions {
         this.highlight = true
       } else {
         this.highlight = false
+      }
+    } else if (num == 4) {
+      if (this.liked == false) {
+        this.liked = true
+      } else {
+        this.liked = false
       }
     } else {
       if (this.pressed == false) {
