@@ -295,7 +295,8 @@ downloadImage() {
          resolve([Realurl, url2])
        }).catch((error) =>  {
          firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-           resolve([Realurl, url2])
+           Realurl2 = url2
+           resolve([Realurl, Realurl2])
          })
        })
      })
@@ -381,7 +382,7 @@ optionsPressed(UserID, date) {
             </TouchableOpacity>
             <Animated.View style={{flex:1, transform: [{translateY: this.listYValue}]}}>
               <ListView
-                onScroll={() => {this.showList()}}
+                onScroll={() => {this.showList(this.state.dataSource)}}
                 enableEmptySections={true}
                 style={{backgroundColor:'white', paddingLeft: 10, paddingRight: 10,  width: frame.width}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
@@ -519,7 +520,8 @@ optionsPressed(UserID, date) {
       this.tryLoadFeed()
     };
 
-  showList () {
+  showList (data) {
+    alert(data)
     Animated.sequence([
       Animated.timing(
         this.listYValue,

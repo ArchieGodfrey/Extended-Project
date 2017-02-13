@@ -138,7 +138,8 @@ downloadImage(otherUserID) {
       resolve([Realurl, url2])
     }).catch((error) =>  {
       firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-        resolve([Realurl, url2])
+        Realurl2 = url2
+        resolve([Realurl, Realurl2])
       })
     })
   })
