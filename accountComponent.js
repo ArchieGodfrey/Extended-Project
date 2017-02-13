@@ -5,7 +5,7 @@ import dismissKeyboard from 'dismissKeyboard'
 import RNFetchBlob from 'react-native-fetch-blob'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
+  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
 
 var moment = require('moment');
@@ -282,16 +282,67 @@ downloadImage() {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
        var userID = value;
+       var Realurl = ""
+       var Realurl2 = ""
        firebaseApp.storage().ref('Users/' + userID).child('Profile').getDownloadURL().then(function(url) {
          Realurl = url
-         firebaseApp.storage().ref('Users/' + userID).child('Background').getDownloadURL().then(function(url2) {
-           Realurl2 = url2
-           resolve([Realurl, Realurl2])
-          })
-        })
+       }).catch((error) => {
+         firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
+           Realurl = url
+         })
+       })
+       firebaseApp.storage().ref('Users/' + userID).child('Background').getDownloadURL().then(function(url2) {
+         resolve([Realurl, url2])
+       }).catch((error) =>  {
+         firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+           resolve([Realurl, url2])
+         })
+       })
      })
     } catch (error) {
        // Error retrieving data
+    }
+  })
+}
+
+deletePost(otherUserID, postDate) {
+  return new Promise(function(resolve, reject) {
+    Alert.alert(
+      'Post Options',
+      "Are you sure you would like to delete this post?",
+      [
+        {text: 'Delete', onPress: () => {
+          var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts")
+          postsRef.child(postDate).remove()
+          resolve()
+        }},
+        {text: 'Cancel', onPress: () => resolve(), style: 'cancel'},
+      ],
+      { cancelable: true }
+    )
+  })
+}
+
+showOptionsAlert() {
+  return new Promise(function(resolve, reject) {
+    Alert.alert(
+      'Post Options',
+      "What would you like to do with this post?",
+      [
+        {text: 'Delete', onPress: () => resolve('delete')},
+        {text: 'Cancel', onPress: () => resolve('cancel'), style: 'cancel'},
+      ],
+      { cancelable: true }
+    )
+  })
+}
+
+optionsPressed(UserID, date) {
+  this.showOptionsAlert().then((result) => {
+    if (result == "delete") {
+      this.deletePost(UserID, date).then(()=> {
+        this.tryLoadFeed()
+      })
     }
   })
 }
@@ -393,9 +444,11 @@ downloadImage() {
                     </TouchableHighlight>
                     <Image
                       style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/CommentIcon.png')}/>
-                    <Image
-                      style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
-                  </View>
+                    <TouchableHighlight onPress={() => this.optionsPressed(rowData.USERID,rowData.DATE)} underlayColor="#f1f1f1">
+                      <Image
+                        style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
+                    </TouchableHighlight>
+                    </View>
                 </View>}
               />
             </Animated.View>

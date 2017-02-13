@@ -51,7 +51,7 @@ export default class likeButton extends Component {
 
 getLikes(otherUserID, postDate) {
   return new Promise(function(resolve, reject) {
-    var likes = 0
+    var liked = false
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
        var UserID = value
@@ -61,27 +61,31 @@ getLikes(otherUserID, postDate) {
            .then(function(snapshot) {
              if (snapshot.val() !== null) {
                snapshot.forEach(function(childSnapshot) {
-                 if (childSnapshot.key !== UserID) {
-                   resolve(false)
-                 } else {
-                   resolve(true)
+                 if (childSnapshot.key == UserID) {
+                  liked = true
                  }
                })
-             } else  {
+             } else {
                resolve(false)
              }
-           })
-         }
-       })
-     } catch (error) {
-       // Error retrieving data
-       resolve(false)
-     }
+         }).then(() => {
+             if (liked == true) {
+               resolve(true)
+             } else {
+               resolve(false)
+             }
+         })
+       }
+     })
+   } catch (error) {
+     // Error retrieving data
+     alert("There was a problem getting posts")
+     resolve(false)
+   }
 
-      setTimeout(function() {
-        resolve(false)}, 1000)
-      })
-    }
 
-
+    setTimeout(function() {
+      resolve(false)}, 1000)
+    })
+  }
 }

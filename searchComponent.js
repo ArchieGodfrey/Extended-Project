@@ -21,6 +21,7 @@ export default class SearchContents extends Component {
     searchQuery: "",
     resultsOpacity: 0,
     dataSource: ds.cloneWithRows([]),
+    searchResults: ds.cloneWithRows([]),
     otherUserID: "",
     otherName: "Loading",
     otherProfDesc: "Loading",
@@ -76,7 +77,7 @@ searchUsers(searchQuery) {
 }
 
 getResults() {
-  this.setState({dataSource: this.state.dataSource.cloneWithRows(actions.foundUsers)})
+  this.setState({searchResults: this.state.searchResults.cloneWithRows(actions.foundUsers)})
   this.setState({resultsOpacity:0})
 }
 
@@ -126,15 +127,22 @@ downloadImage(otherUserID) {
   return new Promise(function(resolve, reject) {
     var Realurl = ""
     var Realurl2 = ""
-     firebaseApp.storage().ref('Users/' + otherUserID).child('Profile').getDownloadURL().then(function(url) {
-       Realurl = url
-       firebaseApp.storage().ref('Users/' + otherUserID).child('Background').getDownloadURL().then(function(url2) {
-         Realurl2 = url2
-         resolve([Realurl, Realurl2])
-        })
+    firebaseApp.storage().ref('Users/' + otherUserID).child('Profile').getDownloadURL().then(function(url) {
+      Realurl = url
+    }).catch((error) => {
+      firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
+        Realurl = url
       })
     })
-  }
+    firebaseApp.storage().ref('Users/' + otherUserID).child('Background').getDownloadURL().then(function(url2) {
+      resolve([Realurl, url2])
+    }).catch((error) =>  {
+      firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+        resolve([Realurl, url2])
+      })
+    })
+  })
+}
 
 showAccountInfo(otherUserID) {
   actions.otherUserPosts = []
@@ -307,9 +315,6 @@ async getUserPosts(otherUserID) {
       })
   }
 
-
-
-
   render() {
     if (this.state.loaded == true) {
       return (
@@ -334,7 +339,7 @@ async getUserPosts(otherUserID) {
           <ListView
             enableEmptySections={true}
             style={{position: 'absolute', top: 150, left: 25}}
-            dataSource={this.state.dataSource}
+            dataSource={this.state.searchResults}
             renderRow={(rowData) =>
             <TouchableHighlight style={{height:40, width:325, borderColor: "black", borderWidth:1, justifyContent: "center"}} onPress={() => this.showAccountInfo(rowData.USERID)}>
               <Text  style={{fontSize: 25}}> {rowData.NAME}</Text>
@@ -350,13 +355,13 @@ async getUserPosts(otherUserID) {
               style={{height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/BackIcon.png')}/>
           </TouchableHighlight>
           <Image
-            style={{resizeMode: 'cover', width: window.width, height: (window.height / 3) }}  blurRadius={2} source={{uri: this.state.backgroundSource}}/>
+            style={{resizeMode: 'cover', width: window.width, height: (window.height / 3) }}  blurRadius={2} source={{uri:this.state.backgroundSource}}/>
           <View style={{position: 'absolute', width:window.width, height: (window.height / 3), flexDirection: "column", justifyContent:"center", alignItems: 'center'}}>
           <Image
           style={{paddingTop:76, resizeMode: 'cover', height: 76, width: 71}}
           source={{uri: this.state.avatarSource}}/>
           <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}} >{this.state.otherName}</Text>
-          <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}} >{this.state.otherProfDesc}</Text>
+          <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}} >{this.state.otherProfDesc !== null ? this.state.otherProfDesc : "" }</Text>
             <TouchableHighlight onPress={() => this.followUser(this.state.otherUserID).then(() => {this.showAccountInfo(this.state.otherUserID)})} underlayColor="#f1f1f1">
               <Text style={{fontSize: 20, color: "white"}}>Following: {this.state.following}</Text>
             </TouchableHighlight>
