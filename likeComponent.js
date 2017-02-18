@@ -25,7 +25,7 @@ export default class likeButton extends Component {
     );
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { USERID,DATE  } = this.props;
     this.getLikes(this.props.USERID,this.props.DATE ).then((value) => {
       if (value == true) {

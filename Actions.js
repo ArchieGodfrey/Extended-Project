@@ -32,12 +32,13 @@ class actions {
   this.height = 0
 }
 
-  loadPost(title,desc,date,likes,userID) {
+  loadPost(title,desc,date,likes,userID,uri) {
     this.postList.push({TITLE: title,
                         DESC: desc,
                         LIKES: likes,
                         USERID: userID,
-                        DATE: date})
+                        DATE: date,
+                        URI: uri})
     this.postList.sort((num1, num2) => {
       if (num1.DATE < num2.DATE) {
         return 1;
@@ -50,12 +51,12 @@ class actions {
     });
   }
 
-  loadAccountPosts(title,desc,date,likes,userID) {
-    this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID})
+  loadAccountPosts(title,desc,date,likes,userID,uri) {
+    this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID,URI: uri})
   }
 
-  loadOtherAccountPosts(title,desc,date,likes,userID) {
-    this.otherUserPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID})
+  loadOtherAccountPosts(title,desc,date,likes,userID,uri) {
+    this.otherUserPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID,URI: uri})
   }
 
   getAccountPostList() {

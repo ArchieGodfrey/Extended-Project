@@ -1,17 +1,25 @@
 import actions from "EP/Actions"
 import firebase from 'EP/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
-import LikeComponent from "EP/likeComponent"
+import PostComponent from "EP/postComponent"
+import RNFetchBlob from 'react-native-fetch-blob'
 import React, { Component } from 'react';
 import {
-  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
+  AppRegistry,Alert,RefreshControl,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
 
 var moment = require('moment');
+var ImagePicker = require('react-native-image-picker');
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
-const window = Dimensions.get('window');
+// Prepare Blob support
+const Blob = RNFetchBlob.polyfill.Blob
+const fs = RNFetchBlob.fs
+window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
+window.Blob = Blob
+
+const frame = Dimensions.get('window');
 
 export default class PostContents extends Component {
   constructor (props) {
@@ -27,6 +35,7 @@ export default class PostContents extends Component {
     postImage: "",
     postDate: "",
     Following: [],
+    liking:false,
     loaded: true,
     update:false,
     dataSource: ds.cloneWithRows([]),
@@ -51,6 +60,7 @@ export default class PostContents extends Component {
     this.previousValue = new Animated.Value(500)
     this.crossValue = new Animated.Value(0)
     this.feedValue = new Animated.Value(0)
+    this.inputValue = new Animated.Value(0)
 }
 
 getFollowing() {
@@ -102,6 +112,20 @@ async newGetPosts() {
           ]
         )
   }
+  function downloadImage(otherUserID,date) {
+    return new Promise(function(resolve, reject) {
+      var Realurl = ""
+      firebaseApp.storage().ref('Users/' + otherUserID).child(date).getDownloadURL().then(function(url) {
+        Realurl = url
+        resolve(Realurl)
+      }).catch((error) => {
+        firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+          Realurl = url2
+          resolve(Realurl)
+        })
+      })
+    })
+  }
   return new Promise(function(resolve, reject) {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
@@ -119,19 +143,21 @@ async newGetPosts() {
                newRef.once("value")
                  .then(function(newSnapshot) {
                    newSnapshot.forEach(function(newChildSnapshot) {
-                     actions.postDate = newChildSnapshot.key;
+                     var postTitle, postDesc, postLikes = ""
                      var postTitleRef = firebaseApp.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/title")
                      postTitleRef.once('value', (titleSnapshot) => {
-                       actions.postTitle = titleSnapshot.val()
+                       postTitle = titleSnapshot.val()
                      })
                      var postDescRef = firebaseApp.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/desc")
                      postDescRef.once('value', (descSnapshot) => {
-                       actions.postDesc = descSnapshot.val()
+                       postDesc = descSnapshot.val()
                      })
                      var postLikesRef = firebaseApp.database().ref("UserID/" + childSnapshot.key + "/posts/" + newChildSnapshot.key + "/likes")
                      postLikesRef.once('value', (likesSnapshot) => {
-                       actions.postLikes = likesSnapshot.val()
-                       actions.loadPost(actions.postTitle,actions.postDesc,newChildSnapshot.key,actions.postLikes,childSnapshot.key)
+                       postLikes = likesSnapshot.val()
+                     })
+                     downloadImage(childSnapshot.key, newChildSnapshot.key).then((url) => {
+                       actions.loadPost(postTitle,postDesc,newChildSnapshot.key,postLikes,childSnapshot.key,url)
                        clearTimeout(timeOut)
                        resolve(true)
                      })
@@ -150,127 +176,100 @@ async newGetPosts() {
     })
   }
 
-likePost(otherUserID, postDate) {
-  return new Promise(function(resolve, reject) {
-    var likes = 0
-    var liked = false
-    try {
-      AsyncStorage.getItem('@userID:key').then((value) => {
-       var UserID = value
-       if (UserID !== null) {
-         var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
-         likesRef.once("value")
-           .then(function(snapshot) {
-             if (snapshot.val() !== null) {
-               snapshot.forEach(function(childSnapshot) {
-                 if (childSnapshot.key == UserID) {
-                  liked = true
-                 }
-               })
-             } else {
-               likes = 1
-               var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
-               postsRef.update( {
-                 likes: 1
-               });
-               postsRef.child('likedBy/' + UserID).update({
-                 User: UserID
-               })
-               resolve(likes)
-             }
-         }).then(() => {
-             if (liked == true) {
-               var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
-               postsRef.child("likes").once('value', (likesSnapshot) => {
-                 likes = likesSnapshot.val() - 1
-                 postsRef.update( {
-                   likes: likes
-                 });
-                 postsRef.child('likedBy/' + UserID).remove()
-               })
-               resolve(likes)
-             } else {
-               var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate)
-               postsRef.child("likes").once('value', (likesSnapshot) => {
-                 likes = likesSnapshot.val() + 1
-                 postsRef.update( {
-                   likes: likes
-                 });
-                 postsRef.child('likedBy/' + UserID).update({
-                   User: UserID
-                 })
-               })
-               resolve(likes)
-             }
-         })
-       }
-     })
-   } catch (error) {
-     // Error retrieving data
-     alert("There was a problem getting posts")
-     resolve(likes)
-   }
+  uploadImage = (userID, loc, uri, mime = 'application/octet-stream') => {
+   return new Promise((resolve, reject) => {
+     const uploadUri =  Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+     let uploadBlob = null
+     const imageRef = firebaseApp.storage().ref('Users/' + userID).child(loc)
 
-
-    setTimeout(function() {
-      resolve()}, 1000)
-    })
-}
-
-getLikes(otherUserID, postDate) {
-  return new Promise(function(resolve, reject) {
-    var likes = 0
-    try {
-      AsyncStorage.getItem('@userID:key').then((value) => {
-       var UserID = value
-       if (UserID !== null) {
-         var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
-         likesRef.once("value")
-           .then(function(snapshot) {
-             if (snapshot.val() !== null) {
-               var liked = true
-               snapshot.forEach(function(childSnapshot) {
-                 if (childSnapshot.key !== UserID) {
-                   resolve(0)
-                 } else {
-                   resolve(1)
-                 }
-               })
-             } else {
-               resolve(1)
-             }
-           })
-         }
+     fs.readFile(uploadUri, 'base64')
+       .then((data) => {
+         return Blob.build(data, { type: `${mime};BASE64` })
        })
-     } catch (error) {
-       // Error retrieving data
-       resolve(false)
-     }
+       .then((blob) => {
+         uploadBlob = blob
+         return imageRef.put(blob, { contentType: mime })
+       })
+       .then(() => {
+         uploadBlob.close()
+         return imageRef.getDownloadURL()
+       })
+       .then((url) => {
+         resolve(url)
+       })
+       .catch((error) => {
+         reject(error)
+     })
+   })
+  }
 
-      setTimeout(function() {
-        resolve(false)}, 1000)
-      })
+  pictureChosen() {
+    this.choosePicture().then((result) => {
+      this.setState({image:result})
+    })
+  }
+
+  choosePicture() {
+    return new Promise((resolve, reject) => {
+    var options = {
+    title: 'Select A Picture',
+    allowsEditing: true,
+    storageOptions: {
+      skipBackup: true,
+      path: 'images'
     }
+  };
+  ImagePicker.showImagePicker(options, (response) => {
+    console.log('Response = ', response);
 
+    if (response.didCancel) {
+      console.log('User cancelled image picker');
+    }
+    else if (response.error) {
+      console.log('ImagePicker Error: ', response.error);
+    }
+    else if (response.customButton) {
+      console.log('User tapped custom button: ', response.customButton);
+    }
+    else {
+      //let source = { uri: response.uri };
+
+      // You can also display the image using data:
+      //let source = { uri: 'data:image/jpeg;base64,' + response.data };
+      this.setState({postImage:response.uri})
+      resolve(response.uri)
+      }
+    })
+  })
+  }
 
 newPost () {
   var timeKey = moment().format('MMDDYYYYhmmss')
   var postTitle = this.state.postTitle
   var postDesc = this.state.postDesc
-  try {
-  AsyncStorage.getItem('@userID:key').then((value) => {
-           this.setState({UserID: value});
-           var postsRef = firebaseApp.database().ref("UserID/"+ this.state.UserID + "/posts")
-           postsRef.child(timeKey).update( {
-             title: postTitle,
-             desc: postDesc
-           });
-           this.clearText()
-           this.rotateCross()
-           });;
-} catch(error) {
-  alert('Failed to post!')
-}
+  var postImage = this.state.postImage
+  if (postTitle.length >= 1) {
+    try {
+    AsyncStorage.getItem('@userID:key').then((value) => {
+     this.setState({UserID: value});
+     var UserID = value
+     var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts")
+     postsRef.child(timeKey).update( {
+       title: postTitle,
+       desc: postDesc
+     });
+      this.uploadImage(UserID, timeKey, postImage).then(() => {
+       this.tryLoadFeed()
+     })
+      this.clearText()
+      this.rotateCross()
+      });;
+     } catch(error) {
+       alert('Failed to post!')
+    }
+  } else {
+    alert("Post must have a title")
+  }
 }
 
 clearText() {
@@ -297,7 +296,7 @@ render() {
     <Animated.View style={{transform: [{translateX: this.feedValue}]}}>
       <TouchableHighlight
         onPress={this.rotateCross.bind(this)}
-        style={{width: 40,height: 30, position: 'absolute',top: -44, height: 50, width: 50, left: 325 }}
+        style={{width: 40,height: 30, position: 'absolute',top: -42, left: 325}}
         underlayColor="#f1f1f1">
         <Animated.Image
          style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
@@ -305,62 +304,51 @@ render() {
       </TouchableHighlight>
       <ListView
         enableEmptySections={true}
-        style={{position: 'absolute', top: 0, left: 0, height: window.height, width:window.width}}
+        style={{position: 'absolute', top: 0, left: 0, height: frame.height, width:frame.width}}
         contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
         horizontal={true}
         dataSource={this.state.dataSource}
+        scrollRenderAheadDistance={frame.width}
         renderRow={(rowData, s, i) =>
-        <View style={{width:actions.width}}>
-          <View style={styles.Imagecontainer}>
-            <Image
-              style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
-          </View>
-          <View style={styles.userContainer}>
-            <Image
-              style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/Avatar.png')}/>
-            <Text style={styles.userName}>{rowData.TITLE}</Text>
-              <Image
-                style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/ClockIcon.png')}/>
-              <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mm')}</Text>
-              <Image
-                style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeIcon.png')}/>
-              <LikeComponent USERID={rowData.USERID} DATE={rowData.DATE} />
-              <Text style={styles.likeNumber} ref={component => this._likeNum = component}>{rowData.LIKES}</Text>
-            <Text style={styles.postDesc}>{rowData.DESC}</Text>
-          </View>
-          <View style={styles.buttons}>
-            <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then((value) => {this.tryLoadFeed()})} underlayColor="#f1f1f1">
-              <Image
-                style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeButton.png')}/>
-            </TouchableHighlight>
-            <Image
-              style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/CommentIcon.png')}/>
-            <Image
-              style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
-          </View>
+        <View style={{width:frame.width, height:frame.height}}>
+          <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI}/>
         </View>}
       />
-    <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: -2,  backgroundColor: "white",transform: [{translateX: this.previousValue}]}}>
-        <Text style={{position: 'absolute', top: 10, left: 100, fontSize: 25}}>Create a new post</Text>
+    <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: frame.height, width:frame.width, position: 'absolute', top: -2, backgroundColor: "white", flexDirection: "column", justifyContent:"flex-start", alignItems: 'center', transform: [{translateX: this.previousValue}]}}>
+          <Image
+           style={{resizeMode: 'cover', height: frame.height / 2, width:frame.width}}
+           source={{uri: this.state.postImage}}/>
+         <TouchableHighlight onPress={() => this.pictureChosen()} style={{justifyContent:"center", backgroundColor: "white", alignItems: 'center', marginTop:10}} underlayColor="#f1f1f1">
+              <Text style={{fontSize: 20}}>Upload A Picture</Text>
+        </TouchableHighlight>
+        <Animated.View style={{flexDirection: "column", justifyContent:"center", alignItems: 'center', backgroundColor: "white", transform: [{translateY: this.inputValue}]}}>
         <TextInput
-        style={{position: 'absolute', top: 50, left: 40, height: 40, width: 300, borderColor: 'gray', borderWidth: 1}}
+        onFocus={() => this.moveUp()}
+        onEndEditing={() => this.moveDown()}
+        style={{marginTop: 10, height: 40, width: frame.width, borderColor: 'gray', borderWidth: 1}}
         placeholder={' Enter Post Title'}
         onChange={(event) => this.setState({postTitle: event.nativeEvent.text})}
         ref={component => this._titleInput = component}
         />
         <TextInput
-        style={{position: 'absolute', top: 95, left: 40, height: 80, width: 300, borderColor: 'gray', borderWidth: 1}}
+          onFocus={() => this.moveUp()}
+          onEndEditing={() => this.moveDown()}
+        style={{marginTop: 1, height: 80, width: frame.width, borderColor: 'gray', borderWidth: 1}}
         placeholder={' Enter Post description'}
         multiline={true}
+        maxLength={300}
         onChange={(event) => this.setState({postDesc: event.nativeEvent.text})}
         ref={component => this._descInput = component}
         />
-      <TouchableHighlight onPress={this.newPost.bind(this)} style={{position: 'absolute', top: 155, left: 130, padding:25}} underlayColor="#f1f1f1">
-          <Text style={{fontSize: 20}}>Upload</Text>
+      <TouchableHighlight onPress={this.newPost.bind(this)} style={{paddingTop: 10}} underlayColor="#f1f1f1">
+            <Text style={{fontSize: 20}}>Upload</Text>
         </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.moveDown()} style={{marginTop: 75, justifyContent:"center", alignItems: 'center'}} underlayColor="#f1f1f1">
+             <Text style={{fontSize: 20}}>Tap To Move Text Down</Text>
+       </TouchableHighlight>
+      </Animated.View>
       </Animated.View>
     </Animated.View>
-
     );
   }
 }
@@ -381,11 +369,9 @@ tryLoadFeed() {
 
 componentWillMount () {
   this.tryLoadFeed()
-
-}
-
-update() {
-  return true
+  firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then((url) => {
+    this.setState({postImage:url})
+  })
 }
 
 rotateCross () {
@@ -451,6 +437,27 @@ rotateCross () {
   }
 }
 
+moveUp() {
+  Animated.timing(
+    this.inputValue,
+    {
+      toValue: -((frame.height / 4) * 2),
+      duration: 250,
+      easing: Easing.linear
+    }).start()
+}
+
+moveDown() {
+  dismissKeyboard()
+  Animated.timing(
+    this.inputValue,
+    {
+      toValue: 0,
+      duration: 250,
+      easing: Easing.linear
+    }).start()
+}
+
 
 
 
@@ -486,7 +493,7 @@ const styles = StyleSheet.create({
   },
   postImage: {
     resizeMode: 'cover',
-    width: window.width
+    width: frame.width
   },
   userContainer: {
     flex: 1,

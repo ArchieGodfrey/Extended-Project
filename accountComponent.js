@@ -1,6 +1,6 @@
 import actions from "EP/Actions"
 import firebase from 'EP/firebaseConfig'
-import LikeComponent from "EP/likeComponent"
+import PostComponent from "EP/postComponent"
 import dismissKeyboard from 'dismissKeyboard'
 import RNFetchBlob from 'react-native-fetch-blob'
 import React, { Component } from 'react';
@@ -29,6 +29,7 @@ export default class AccountContents extends Component {
     Username: "Loading",
     name: "Loading",
     profDesc: "Loading",
+    loaded:true,
     dataSource: ds.cloneWithRows([]),
   }
   this.clearText = this.clearText.bind(this);
@@ -101,7 +102,22 @@ getAccountInfo() {
   }
 
 async getUserPosts() {
+  function downloadImage(otherUserID,date) {
+    return new Promise(function(resolve, reject) {
+      var Realurl = ""
+      firebaseApp.storage().ref('Users/' + otherUserID).child(date).getDownloadURL().then(function(url) {
+        Realurl = url
+        resolve(Realurl)
+      }).catch((error) => {
+        firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+          Realurl = url2
+          resolve(Realurl)
+        })
+      })
+    })
+  }
   return new Promise(function(resolve, reject) {
+    actions.userPosts = []
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
        var UserID = value
@@ -110,19 +126,23 @@ async getUserPosts() {
          query.once("value")
            .then(function(snapshot) {
              snapshot.forEach(function(childSnapshot) {
-               var title,desc,likes = ""
+               var postTitle,postDesc,postLikes = ""
                var postTitleRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + childSnapshot.key + "/title")
                postTitleRef.once('value', (titleSnapshot) => {
-                 title = titleSnapshot.val()
+                 postTitle = titleSnapshot.val()
                })
                var postDescRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + childSnapshot.key + "/desc")
                postDescRef.once('value', (descSnapshot) => {
-                 desc = descSnapshot.val()
+                 postDesc = descSnapshot.val()
                })
                var postLikesRef = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + childSnapshot.key + "/likes")
                postLikesRef.once('value', (likesSnapshot) => {
-                 likes = likesSnapshot.val()
-                 actions.loadAccountPosts(title, desc, childSnapshot.key,likes,UserID)
+                 postLikes = likesSnapshot.val()
+               }) 
+               downloadImage(UserID, childSnapshot.key).then((url) => {
+                 actions.loadAccountPosts(postTitle,postDesc,childSnapshot.key,postLikes,UserID,url)
+                 clearTimeout(timeOut)
+                 resolve(true)
                })
              })
            })
@@ -209,10 +229,6 @@ likePost(otherUserID, postDate) {
     })
 }
 
-showTextBox() {
-  //this._titleInput.setNativeProps({backgroundColor: 'black'});
-}
-
 saveProfile() {
   var name = this.state.name;
   var profDesc = this.state.profDesc;
@@ -275,7 +291,7 @@ ImagePicker.showImagePicker(options, (response) => {
   })
 }
 
-downloadImage() {
+downloadProfileImage() {
   return new Promise(function(resolve, reject) {
     var Realurl = ""
     var Realurl2 = ""
@@ -286,19 +302,30 @@ downloadImage() {
        var Realurl2 = ""
        firebaseApp.storage().ref('Users/' + userID).child('Profile').getDownloadURL().then(function(url) {
          Realurl = url
+         firebaseApp.storage().ref('Users/' + userID).child('Background').getDownloadURL().then(function(url2) {
+           Realurl2 = url2
+           resolve([Realurl, url2])
+         }).catch((error) =>  {
+           firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+             Realurl2 = url2
+             resolve([Realurl, Realurl2])
+           })
+         })
        }).catch((error) => {
          firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
            Realurl = url
+           firebaseApp.storage().ref('Users/' + userID).child('Background').getDownloadURL().then(function(url2) {
+             Realurl2 = url2
+             resolve([Realurl, url2])
+           }).catch((error) =>  {
+             firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+               Realurl2 = url2
+               resolve([Realurl, Realurl2])
+             })
+           })
          })
        })
-       firebaseApp.storage().ref('Users/' + userID).child('Background').getDownloadURL().then(function(url2) {
-         resolve([Realurl, url2])
-       }).catch((error) =>  {
-         firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-           Realurl2 = url2
-           resolve([Realurl, Realurl2])
-         })
-       })
+
      })
     } catch (error) {
        // Error retrieving data
@@ -348,6 +375,10 @@ optionsPressed(UserID, date) {
   })
 }
 
+showOpacity(num) {
+  this._opacity.setOpacityTo(num,10)
+}
+
   render() {
     if (this.state.loaded == true) {
       return (
@@ -376,13 +407,14 @@ optionsPressed(UserID, date) {
             <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}}>{this.state.name}</Text>
             <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}}>{this.state.profDesc}</Text>
             </View>
-            <TouchableOpacity
-              style={{position: 'absolute', top:5, width: frame.width, height:60}}
+            <TouchableOpacity ref={component => this._opacity = component}
+              style={{position: 'absolute', top:5, width: frame.width, height:60, justifyContent:"center", alignItems: 'center', backgroundColor:"grey", opacity:0}}
               onPress={() => {this.closeList()}}>
+              <Text style={{fontSize: 20, color:"white"}}>Close</Text>
             </TouchableOpacity>
             <Animated.View style={{flex:1, transform: [{translateY: this.listYValue}]}}>
               <ListView
-                onScroll={() => {this.showList(this.state.dataSource)}}
+                onScroll={() => {this.showList()}}
                 enableEmptySections={true}
                 style={{backgroundColor:'white', paddingLeft: 10, paddingRight: 10,  width: frame.width}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
@@ -393,14 +425,14 @@ optionsPressed(UserID, date) {
                   <TouchableHighlight
                     onPress={() => {this.showPosts(), this.listView.scrollTo({ x:frame.width * i, y:0, animated:false })}}>
                       <Image
-                        style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
+                        style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} source={{uri: rowData.URI}}/>
                   </TouchableHighlight>
                   <Text style={{fontSize: 15}}> {rowData.DESC !== null ? rowData.DESC.slice(0,45) : "Loading" }...</Text>
                 </View>
                 }
                 renderFooter={() => <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
+                  <Text style={{height: frame.height}}>                           </Text>
                   <Text style={{fontSize: 20}}>Nothing more to see here...</Text>
-                  <Text style={{height: 100}}>                           </Text>
                 </View>}
               />
             </Animated.View>
@@ -421,35 +453,7 @@ optionsPressed(UserID, date) {
                 dataSource={this.state.dataSource}
                 renderRow={(rowData, s, i) =>
                 <View style={{width:actions.width, backgroundColor:'white'}}>
-                  <View style={styles.Imagecontainer}>
-                    <Image
-                      style={styles.postImage} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/luggageCase.jpg')}/>
-                  </View>
-                  <View style={styles.userContainer}>
-                    <Image
-                      style={styles.profileIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/Avatar.png')}/>
-                    <Text style={styles.userName}>{rowData.TITLE}</Text>
-                      <Image
-                        style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/ClockIcon.png')}/>
-                      <Text style={styles.dateStyle}>{moment(rowData.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mm')}</Text>
-                      <Image
-                        style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeIcon.png')}/>
-                      <LikeComponent USERID={rowData.USERID} DATE={rowData.DATE} />
-                      <Text style={styles.likeNumber} ref={component => this._likeNum = component}>{rowData.LIKES}</Text>
-                    <Text style={styles.postDesc}>{rowData.DESC}</Text>
-                  </View>
-                  <View style={styles.buttons}>
-                    <TouchableHighlight onPress={() => this.likePost(rowData.USERID,rowData.DATE).then(() => {this.tryLoadFeed()})} underlayColor="#f1f1f1">
-                      <Image
-                        style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikeButton.png')}/>
-                    </TouchableHighlight>
-                    <Image
-                      style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/CommentIcon.png')}/>
-                    <TouchableHighlight onPress={() => this.optionsPressed(rowData.USERID,rowData.DATE)} underlayColor="#f1f1f1">
-                      <Image
-                        style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/OptionsIcon.png')}/>
-                    </TouchableHighlight>
-                    </View>
+                  <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI}/>
                 </View>}
               />
             </Animated.View>
@@ -494,10 +498,9 @@ optionsPressed(UserID, date) {
   }
 
   tryLoadFeed() {
-    actions.userPosts = []
     this.getAccountInfo().then((result) => {
       if (result == true) {
-        this.downloadImage().then((urls) => {
+        this.downloadProfileImage().then((urls) => {
           this.setState({avatarSource:urls[0]})
           this.setState({backgroundSource:urls[1]})
           this.getUserPosts().then(() => {
@@ -506,6 +509,7 @@ optionsPressed(UserID, date) {
               this.setState({name: actions.name})
               this.setState({profDesc: actions.profDesc})
               this.setState({loaded: false})
+              this.showOpacity(0)
             })
           })
         })
@@ -518,10 +522,20 @@ optionsPressed(UserID, date) {
 
     componentWillMount() {
       this.tryLoadFeed()
+      try {
+        AsyncStorage.getItem('@userID:key').then((UserID) => {
+          var postTitleRef = firebaseApp.database().ref("UserID/" + UserID)
+          postTitleRef.on('child_changed', (titleSnapshot) => {
+            this.tryLoadFeed()
+          })
+        })
+      } catch (error) {
+
+      }
     };
 
-  showList (data) {
-    alert(data)
+  showList () {
+    this.showOpacity(0.5)
     Animated.sequence([
       Animated.timing(
         this.listYValue,
@@ -534,6 +548,7 @@ optionsPressed(UserID, date) {
     ]).start()
   };
   closeList () {
+    this.showOpacity(0)
     Animated.sequence([
       Animated.timing(
         this.listYValue,
