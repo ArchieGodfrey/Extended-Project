@@ -1,6 +1,4 @@
-import PostContents from 'EP/postContents'
-import FeedComponent from 'EP/feedComponent'
-import index from 'EP/index.ios'
+
 class actions {
   constructor (props) {
   this.postTitle = "Original"
@@ -51,15 +49,32 @@ class actions {
     });
   }
 
-  loadAccountPosts(title,desc,date,likes,userID,uri) {
-    this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID,URI: uri})
+  async loadAccountPosts(title,desc,date,likes,userID,uri) {
+    var copy = false;
+    this.userPosts.map(function(item, i) {
+      if (item.DATE === date) {
+        copy = true;
+      }
+    })
+    if (copy == false) {
+      this.userPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID,URI: uri})
+    }
+
   }
 
   loadOtherAccountPosts(title,desc,date,likes,userID,uri) {
-    this.otherUserPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID,URI: uri})
+    var copy = false;
+    this.otherUserPosts.map(function(item, i) {
+      if (item.DATE === date) {
+        copy = true;
+      }
+    })
+    if (copy == false) {
+      this.otherUserPosts.push({TITLE: title, DESC: desc, DATE: date, LIKES: likes, USERID: userID,URI: uri})
+    }
   }
 
-  getAccountPostList() {
+  async getAccountPostList() {
     var list = this.userPosts
     list.sort((num1, num2) => {
       if (num1.DATE < num2.DATE) {
@@ -74,8 +89,6 @@ class actions {
     return new Promise(function(resolve, reject) {
       if (list !== null) {
         resolve(list)
-      } else {
-        alert('empty list before showing')
       }
       })
   }
@@ -95,8 +108,6 @@ class actions {
     return new Promise(function(resolve, reject) {
       if (list !== null) {
         resolve(list)
-      } else {
-        alert('empty list before showing')
       }
       })
   }

@@ -1,6 +1,7 @@
-import actions from "EP/Actions"
-import firebase from 'EP/firebaseConfig'
-import PostComponent from "EP/postComponent"
+import actions from "EPRouter/Actions"
+import firebase from 'EPRouter/firebaseConfig'
+import PostComponent from "EPRouter/Components/postComponent"
+import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
@@ -103,7 +104,6 @@ export default class OtherAccountContents extends Component {
   }
 
   showAccountInfo(otherUserID) {
-    actions.otherUserPosts = []
     this.setState({following: "Loading"})
     this.setState({otherName: "Loading"})
     this.setState({otherProfDesc: "Loading"})
@@ -111,13 +111,16 @@ export default class OtherAccountContents extends Component {
       this.setState({avatarSource:urls[0]})
       this.setState({backgroundSource:urls[1]})
     })
+    this.accountReady(otherUserID)
+  }
+
+  accountReady(otherUserID) {
     this.prepAccountInfo(otherUserID).then((result) => {
       this.setState({otherName: result[0]})
       this.setState({otherProfDesc: result[1]})
       this.setState({following: result[2]})
       this.setState({loaded: true})
       this.getUserPosts(otherUserID).then(() => {
-        this.showOpacity(0)
         actions.getOtherAccountPostList().then((list) => {
           this.updateListView(list)
       })
@@ -129,7 +132,30 @@ export default class OtherAccountContents extends Component {
     this.setState({dataSource: this.state.dataSource.cloneWithRows(list)})
   }
 
-  followUser(otherUserID) {
+
+  async followUser(otherUserID) {
+    this.setState({following: "-----"})
+    this.followController(otherUserID).then((result) => {
+      if (result[0] == false) {
+        var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
+        followRef.child(result[1]).update( {
+          User: result[1]
+        });
+        var userRef = firebaseApp.database().ref("UserID/"+ result[1] + "/following")
+        userRef.child(otherUserID).update( {
+          User: otherUserID
+        }).then(() => {this.accountReady(otherUserID)})
+      } else {
+        var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
+        followRef.child(result[1]).remove()
+        var userRef = firebaseApp.database().ref("UserID/"+ result[1] + "/following")
+        userRef.child(otherUserID).remove().then(() => {this.accountReady(otherUserID)})
+      }
+    })
+  }
+
+
+  async followController(otherUserID) {
     return new Promise(function(resolve, reject) {
     try {
       AsyncStorage.getItem('@userID:key').then((value) => {
@@ -138,47 +164,23 @@ export default class OtherAccountContents extends Component {
         followRef.once("value")
           .then(function(snapshot) {
             if (snapshot.val() !== null) {
-              var following = true
               snapshot.forEach(function(childSnapshot) {
-                if (childSnapshot.key !== UserID) {
-                  following = false
-                  followRef.child(UserID).update( {
-                    User: UserID
-                  });
-                  var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
-                  userRef.child(otherUserID).update( {
-                    User: otherUserID
-                  });
-                  resolve()
+                if (childSnapshot.key == UserID) {
+                  resolve([true,UserID])
                 }
               })
-              if (following == true) {
-                var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
-                followRef.child(UserID).remove()
-                var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
-                userRef.child(otherUserID).remove()
+              resolve([false,UserID])
+            } else {
+              resolve([false,UserID])
             }
-          } else {
-              var followRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/followers")
-              followRef.child(UserID).update( {
-                User: UserID
-              });
-              var userRef = firebaseApp.database().ref("UserID/"+ UserID + "/following")
-              userRef.child(otherUserID).update( {
-                User: otherUserID
-              });
-            }
+          })
         })
-      })
-    } catch (error) {
-       // Error retrieving data
-       resolve(alert("Failed to follow user"))
-    }
-
-      setTimeout(function() {
-        resolve()}, 1000)
-      })
-  }
+      } catch (error) {
+         // Error retrieving data
+         alert("Failed to follow user")
+      }
+  })
+}
 
   async getUserPosts(otherUserID) {
     function downloadImage(otherUserID,date) {
@@ -292,10 +294,6 @@ export default class OtherAccountContents extends Component {
         })
     }
 
-    showOpacity(num) {
-      this._opacity.setOpacityTo(num,10)
-    }
-
 
   render() {
     if (this.state.loaded == false) {
@@ -305,6 +303,7 @@ export default class OtherAccountContents extends Component {
       </View>
     )
     } else {
+      const {navigate} = this.props.navigation;
       return(
         <View style={{flex:1, position:'absolute'}}>
         <Image
@@ -315,24 +314,20 @@ export default class OtherAccountContents extends Component {
         source={{uri: this.state.avatarSource}}/>
         <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}} >{this.state.otherName}</Text>
         <Text style={{paddingLeft: 50, paddingRight: 50, fontSize: 20, color: "white", backgroundColor: 'rgba(0,0,0,0)'}} >{this.state.otherProfDesc !== null ? this.state.otherProfDesc : "" }</Text>
-          <TouchableHighlight onPress={() => this.followUser(this.state.otherUserID).then(() => {this.showAccountInfo(this.state.otherUserID)})} underlayColor="#f1f1f1">
-            <Text style={{fontSize: 20, color: "white"}}>Following: {this.state.following}</Text>
+          <TouchableHighlight onPress={() => this.followUser(this.state.otherUserID)} underlayColor="#f1f1f1">
+            <Text style={{fontSize: 20, color: "white"}}>{this.state.following}</Text>
           </TouchableHighlight>
         </View>
-        <TouchableOpacity ref={component => this._opacity = component}
-          style={{opacity:0, position: 'absolute', top:5, width: window.width, height:60, justifyContent:"center", alignItems: 'center', backgroundColor:"grey"}}
-          onPress={() => {this.closeList()}}>
-          <Text style={{fontSize: 20, color:"white"}}>Close</Text>
-        </TouchableOpacity>
-        <Animated.View style={{flex:1, transform: [{translateY: this.listYValue}]}}>
+        <Interactable.View style={{flex:1}}>
           <ListView
-            onScroll={() => {this.showList()}}
             enableEmptySections={true}
+            onScroll={() => {this.showList()}}
             style={{backgroundColor:'white', paddingLeft: 10, paddingRight: 10,  width: window.width}}
             contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
             dataSource={this.state.dataSource}
             renderRow={(rowData, sec, i) =>
-            <View style={{alignSelf: 'flex-start', width:(window.width / 2) - 20}}>
+            <Interactable.View style={{alignSelf: 'flex-start', width:(window.width / 2) - 20}}
+              snapPoints={[{x: (i % 2) === 0 ? 0 : window.width / 2 }, {x: (i % 2) === 0 ?  window.width / 2 : window.width }]}>
               <Text style={{fontSize: 25}}> {rowData.TITLE}</Text>
               <TouchableHighlight
                 onPress={() => {this.showPosts(), this.listView.scrollTo({ x:window.width * i, y:0, animated:false })}}>
@@ -340,14 +335,14 @@ export default class OtherAccountContents extends Component {
                     style={{resizeMode: 'cover', width: window.width / 2, height: window.height / 6}} source={{uri: rowData.URI}}/>
               </TouchableHighlight>
               <Text style={{fontSize: 15}}> {rowData.DESC !== null ? rowData.DESC.slice(0,45) : "Loading" }...</Text>
-            </View>
+            </Interactable.View>
             }
             renderFooter={() => <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
             <Text style={{height: window.height}}>                           </Text>
             <Text style={{fontSize: 20}}>Nothing more to see here...</Text>
             </View>}
           />
-        </Animated.View>
+      </Interactable.View>
 
         <Animated.View style={{flexGrow:1, position:'absolute', backgroundColor:'white', transform: [{translateX: this.postXValue}]}}>
           <TouchableHighlight
@@ -355,7 +350,7 @@ export default class OtherAccountContents extends Component {
           style={{height: 40, width: 50, position: 'absolute',top: -42, left: 325, backgroundColor:"white"}}
           underlayColor="#f1f1f1">
           <Animated.Image
-            style={{resizeMode: 'cover', height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/BackIcon.png')}/>
+            style={{resizeMode: 'cover', height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/BackIcon.png')}/>
         </TouchableHighlight>
           <ListView ref={component => this.listView = component}
             enableEmptySections={true}
@@ -365,19 +360,22 @@ export default class OtherAccountContents extends Component {
             dataSource={this.state.dataSource}
             renderRow={(rowData, s, i) =>
             <View style={{width:window.width, backgroundColor:'white'}}>
-              <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI}/>
+              <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI} navigate={navigate}/>
             </View>}
           />
         </Animated.View>
+        <Interactable.View style={{width:40,height:40,backgroundColor:'#21c064',justifyContent:'center'}} initialPosition={{x: window.width - (window.width / 5), y: window.height - (window.height / 3)}} boundaries={{top:0, bottom:window.height - 50,left: 0, right: window.width - 80}} frictionAreas={[{damping: 0.4}]}>
+          <TouchableHighlight style={{justifyContent:'center'}} onPress={() => this.followUser(this.state.otherUserID)} underlayColor="#f1f1f1">
+                <Image style={{height: 40, width: 40}}source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/EditIcon.png')}/>
+            </TouchableHighlight>
+          </Interactable.View>
       </View>
     )
   }
 }
   componentWillMount() {
-    const { value,visibility  } = this.props;
-    if (visibility == 1) {
-      this.showAccountInfo(value)
-    }
+    const { USERID } = this.props.navigation.state.params;
+    this.showAccountInfo(USERID)
   }
 
   closePosts () {
@@ -422,7 +420,11 @@ showPosts () {
   ]).start()
 };
 showList () {
-  this.showOpacity(0.5)
+  this.getUserPosts(this.props.navigation.state.params.USERID).then(() => {
+    actions.getOtherAccountPostList().then((list) => {
+      this.updateListView(list)
+  })
+})
   Animated.sequence([
     Animated.timing(
       this.listYValue,
@@ -435,7 +437,6 @@ showList () {
   ]).start()
 };
 closeList () {
-  this.showOpacity(0)
   Animated.sequence([
     Animated.timing(
       this.listYValue,

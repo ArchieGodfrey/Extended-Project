@@ -1,8 +1,9 @@
-import actions from "EP/Actions"
-import firebase from 'EP/firebaseConfig'
-import LikeComponent from "EP/likeComponent"
+import actions from "EPRouter/Actions"
+import firebase from 'EPRouter/firebaseConfig'
+import LikeComponent from "EPRouter/Components/likeComponent"
 import dismissKeyboard from 'dismissKeyboard'
-import OtherAccountComponent from "EP/otherUserAccount"
+import OtherAccountComponent from "EPRouter/Components/otherUserAccount"
+import { StackNavigator  } from 'react-navigation';
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableOpacity, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
@@ -116,8 +117,8 @@ downloadImage(otherUserID) {
 showAccountInfo(otherUserID) {
   this.setState({otherUser: otherUserID})
   this.setState({showAccount:1})
-  this.showOtherAccount()
-  this.setState({ key: Math.random() })
+  //this.navigator && this.navigator.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'UserDetail' });
+  this.props.navigation.navigate('UserDetail', { USERID:  otherUserID })
 }
 
   render() {
@@ -150,24 +151,13 @@ showAccountInfo(otherUserID) {
               <Text  style={{fontSize: 25}}> {rowData.NAME}</Text>
             </TouchableHighlight>}
           />
-
-        <Animated.View key={this.state.key} style={{borderTopColor: "black", borderTopWidth: 2, height: window.height, width:window.width, position: 'absolute', top: -2,  backgroundColor: "white", flex:1, backgroundColor: '#FFFFFF', transform: [{translateX: this.otherAccountValue}] }}>
-          <TouchableHighlight
-            onPress={this.closeOtherAccount.bind(this)}
-            style={{position: 'absolute',top: -42, height: 50, width: 50, left: 325}}
-            underlayColor="#f1f1f1">
-          <Animated.Image
-            style={{height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/BackIcon.png')}/>
-        </TouchableHighlight>
-            <OtherAccountComponent value={this.state.otherUser} visibility={this.state.showAccount}/>
-          </Animated.View>
-
         </View>
       )}
     }
-    componentWillMount() {
-      this.setState({loaded:false})
-    }
+  componentWillMount() {
+    this.setState({loaded:false})
+    const {navigate} = this.props;
+  }
 
   showOtherAccount() {
     Animated.sequence([

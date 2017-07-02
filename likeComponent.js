@@ -1,5 +1,5 @@
-import actions from "EP/Actions"
-import firebase from 'EP/firebaseConfig'
+import actions from "EPRouter/Actions"
+import firebase from 'EPRouter/firebaseConfig'
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions
@@ -14,6 +14,7 @@ const window = Dimensions.get('window');
 export default class likeButton extends Component {
   constructor(props) {
     super(props);
+    this.update = true
     this.liked = false
     this.likeValue = new Animated.Value(0)
   }
@@ -21,35 +22,44 @@ export default class likeButton extends Component {
   render() {
     return (
         <Animated.Image style={{position: 'absolute', top: 25, left: 280, opacity: this.likeValue}}
-             source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EP/LikedIcon.png')}/>
+             source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/LikedIcon.png')}/>
     );
   }
 
+  readyToGetLikes() {
+    if (this.update == true) {
+      const { USERID,DATE  } = this.props;
+      this.getLikes(this.props.USERID,this.props.DATE ).then((value) => {
+        if (value == true) {
+          Animated.timing(
+            this.likeValue,
+            {
+              toValue: 1,
+              duration: 250,
+              easing: Easing.linear
+            }).start()
+        } else {
+          Animated.timing(
+            this.likeValue,
+            {
+              toValue: 0,
+              duration: 350,
+              easing: Easing.linear
+            }).start()
+        }
+        this.readyToGetLikes()
+      })
+    }
+  }
+
   componentWillMount() {
-    const { USERID,DATE  } = this.props;
-    this.getLikes(this.props.USERID,this.props.DATE ).then((value) => {
-      if (value == true) {
-        Animated.timing(
-          this.likeValue,
-          {
-            toValue: 1,
-            duration: 550,
-            easing: Easing.linear
-          }).start()
-      } else {
-        Animated.timing(
-          this.likeValue,
-          {
-            toValue: 0,
-            duration: 550,
-            easing: Easing.linear
-          }).start()
-      }
-    })
-
+    this.readyToGetLikes()
 }
+  componentWillUnmount() {
+    this.update = false
+  }
 
-getLikes(otherUserID, postDate) {
+async getLikes(otherUserID, postDate) {
   return new Promise(function(resolve, reject) {
     var liked = false
     try {
@@ -62,20 +72,15 @@ getLikes(otherUserID, postDate) {
              if (snapshot.val() !== null) {
                snapshot.forEach(function(childSnapshot) {
                  if (childSnapshot.key == UserID) {
-                  liked = true
+                  resolve(true)
                  }
                })
+               resolve(false)
              } else {
                resolve(false)
              }
-         }).then(() => {
-             if (liked == true) {
-               resolve(true)
-             } else {
-               resolve(false)
-             }
-         })
-       }
+       })
+     }
      })
    } catch (error) {
      // Error retrieving data

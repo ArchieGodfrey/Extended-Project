@@ -375,7 +375,7 @@ optionsPressed(UserID, date) {
 }
 
 showOpacity(num) {
-  //this._opacity.setOpacityTo(num,10)
+  this._opacity.setOpacityTo(num,10)
 }
 
   render() {
@@ -535,7 +535,7 @@ showOpacity(num) {
               } catch (error) {
                 // Error saving data
               }
-              //this.tryLoadFeed()
+              this.tryLoadFeed()
             })
           })
         })
@@ -545,11 +545,11 @@ showOpacity(num) {
     })
   }
 
-loadCachedData() {
+async loadCachedData() {
   this.setState({loaded: false})
   try {
     AsyncStorage.getItem('@profileCache:key').then((url) => {
-      if (url !== null) {
+      if (url != null) {
         this.setState({avatarSource:url})
       }
     })
@@ -558,7 +558,7 @@ loadCachedData() {
   }
   try {
     AsyncStorage.getItem('@backgroundCache:key').then((url) => {
-      if (url !== null) {
+      if (url != null) {
         this.setState({backgroundSource:url})
       }
     })
@@ -567,7 +567,7 @@ loadCachedData() {
   }
   try {
     AsyncStorage.getItem('@postsCache:key').then((list) => {
-      if (list !== null) {
+      if (list != null) {
         this.updateListView(JSON.parse(list))
         actions.userPosts = JSON.parse(list)
       }
@@ -577,7 +577,7 @@ loadCachedData() {
   }
   try {
     AsyncStorage.getItem('@nameCache:key').then((name) => {
-      if (name !== null) {
+      if (name != null) {
         this.setState({name: name})
       }
     })
@@ -586,7 +586,7 @@ loadCachedData() {
   }
   try {
     AsyncStorage.getItem('@descCache:key').then((profDesc) => {
-      if (profDesc !== null) {
+      if (profDesc != null) {
         this.setState({profDesc: profDesc})
       }
     })
@@ -603,7 +603,7 @@ loadCachedData() {
         AsyncStorage.getItem('@userID:key').then((UserID) => {
           var postTitleRef = firebaseApp.database().ref("UserID/" + UserID)
           postTitleRef.on('child_changed', (titleSnapshot) => {
-            //this.tryLoadFeed()
+            this.tryLoadFeed()
           })
         })
 

@@ -1,8 +1,6 @@
 import actions from "EPRouter/Actions"
 import firebase from 'EPRouter/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
-import PostComponent from "EPRouter/Components/postComponent"
-import RNFetchBlob from 'react-native-fetch-blob'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
 import {
@@ -103,7 +101,7 @@ updateListView(list) {
   this.setState({dataSource: this.state.dataSource.cloneWithRows(list)})
 }
 
-async GetPosts() {
+async newGetPosts() {
   function networkError() {
     Alert.alert(
           'Whoops, we got lost!',
@@ -279,14 +277,6 @@ clearText() {
  dismissKeyboard();
 }
 
-transitionToNewPost() {
-  this.props.navigation.navigate('NewPost')
-}
-
-loadCacheFeed() {
-
-}
-
 
 render() {
   const cross = this.crossValue.interpolate({
@@ -310,7 +300,7 @@ render() {
         underlayColor="#f1f1f1">
         <Animated.Image
          style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
-         source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/PlusIcon.png')}/>
+         source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/PlusIcon.png')}/>
       </TouchableHighlight>
       <ListView
         enableEmptySections={true}
@@ -319,19 +309,46 @@ render() {
         horizontal={true}
         dataSource={this.state.dataSource}
         renderRow={(rowData, s, i) =>
-        <View style={{width:frame.width, height:frame.height}} >
+        <View style={{width:frame.width, height:frame.height}}>
 
           <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI} navigate={navigate}/>
         </View>
         }
       />
-
-    <Interactable.View style={{width:40,height:40,backgroundColor:'#21c064',justifyContent:'center'}} initialPosition={{x: frame.width - (frame.width / 5), y: frame.height - (frame.height / 3)}}
-      boundaries={{top:0, bottom:frame.height - 80,left: 0, right: frame.width - 40}} frictionAreas={[{damping: 0.4}]}>
-      <TouchableHighlight style={{justifyContent:'center'}} onPress={() => this.transitionToNewPost()} underlayColor="#f1f1f1">
-            <Image style={{height: 40, width: 40}}source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/EditIcon.png')}/>
+    <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: frame.height, width:frame.width, position: 'absolute', top: -2, backgroundColor: "white", flexDirection: "column", justifyContent:"flex-start", alignItems: 'center', transform: [{translateX: this.previousValue}]}}>
+          <Image
+           style={{resizeMode: 'cover', height: frame.height / 2, width:frame.width}}
+           source={{uri: this.state.postImage}}/>
+         <TouchableHighlight onPress={() => this.pictureChosen()} style={{justifyContent:"center", backgroundColor: "white", alignItems: 'center', marginTop:10}} underlayColor="#f1f1f1">
+              <Text style={{fontSize: 20}}>Upload A Picture</Text>
         </TouchableHighlight>
-      </Interactable.View>
+        <Animated.View style={{flexDirection: "column", justifyContent:"center", alignItems: 'center', backgroundColor: "white", transform: [{translateY: this.inputValue}]}}>
+        <TextInput
+        onFocus={() => this.moveUp()}
+        onEndEditing={() => this.moveDown()}
+        style={{marginTop: 10, height: 40, width: frame.width, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Enter Post Title'}
+        onChange={(event) => this.setState({postTitle: event.nativeEvent.text})}
+        ref={component => this._titleInput = component}
+        />
+        <TextInput
+          onFocus={() => this.moveUp()}
+          onEndEditing={() => this.moveDown()}
+        style={{marginTop: 1, height: 80, width: frame.width, borderColor: 'gray', borderWidth: 1}}
+        placeholder={' Enter Post description'}
+        multiline={true}
+        maxLength={300}
+        onChange={(event) => this.setState({postDesc: event.nativeEvent.text})}
+        ref={component => this._descInput = component}
+        />
+      <TouchableHighlight onPress={this.newPost.bind(this)} style={{paddingTop: 10}} underlayColor="#f1f1f1">
+            <Text style={{fontSize: 20}}>Upload</Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.moveDown()} style={{marginTop: 75, justifyContent:"center", alignItems: 'center'}} underlayColor="#f1f1f1">
+             <Text style={{fontSize: 20}}>Tap To Move Text Down</Text>
+       </TouchableHighlight>
+      </Animated.View>
+      </Animated.View>
     </Animated.View>
     );
   }
@@ -339,26 +356,12 @@ render() {
 
 tryLoadFeed() {
   actions.postList = []
-  try {
-    AsyncStorage.getItem('@feedCache:key').then((list) => {
-      if (list != null) {
-        this.updateListView(JSON.parse(list))
-      }
-    })
-  } catch (error) {
-    // Error saving data
-  }
-  this.GetPosts().then((result) => {
+  this.newGetPosts().then((result) => {
     if (result == true) {
       this.getFollowing().then(() => {
         actions.getPostList().then((list) => {
           this.setState({loaded: false})
           this.updateListView(list)
-          try {
-           AsyncStorage.setItem('@feedCache:key', JSON.stringify(list));
-          } catch (error) {
-            // Error saving data
-          }
         })
       })
     }
@@ -370,17 +373,6 @@ componentWillMount () {
   firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then((url) => {
     this.setState({postImage:url})
   })
-  try {
-    AsyncStorage.getItem('@userID:key').then((UserID) => {
-      var postTitleRef = firebaseApp.database().ref("UserID/" + UserID)
-      postTitleRef.on('child_changed', (titleSnapshot) => {
-        this.tryLoadFeed()
-      })
-    })
-
-  } catch (error) {
-
-  }
 }
 
 rotateCross () {

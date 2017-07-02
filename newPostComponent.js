@@ -6,7 +6,7 @@ import RNFetchBlob from 'react-native-fetch-blob'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
 import {
-  AppRegistry,Alert,RefreshControl,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,Platform
+  AppRegistry,Alert,RefreshControl,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,Platform,KeyboardAvoidingView
 } from 'react-native';
 
 var moment = require('moment');
@@ -22,7 +22,7 @@ window.Blob = Blob
 
 const frame = Dimensions.get('window');
 
-export default class PostContents extends Component {
+export default class NewPostContents extends Component {
   constructor (props) {
     super(props);
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -103,7 +103,7 @@ updateListView(list) {
   this.setState({dataSource: this.state.dataSource.cloneWithRows(list)})
 }
 
-async GetPosts() {
+async newGetPosts() {
   function networkError() {
     Alert.alert(
           'Whoops, we got lost!',
@@ -279,14 +279,6 @@ clearText() {
  dismissKeyboard();
 }
 
-transitionToNewPost() {
-  this.props.navigation.navigate('NewPost')
-}
-
-loadCacheFeed() {
-
-}
-
 
 render() {
   const cross = this.crossValue.interpolate({
@@ -303,35 +295,38 @@ render() {
   } else {
     const {navigate} = this.props.navigation;
     return(
-    <Animated.View style={{transform: [{translateX: this.feedValue}]}}>
-      <TouchableHighlight
-        onPress={this.rotateCross.bind(this)}
-        style={{width: 40,height: 30, position: 'absolute',top: -42, left: 325}}
-        underlayColor="#f1f1f1">
-        <Animated.Image
-         style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
-         source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/PlusIcon.png')}/>
-      </TouchableHighlight>
-      <ListView
-        enableEmptySections={true}
-        style={{position: 'absolute', top: 0, left: 0, height: frame.height, width:frame.width}}
-        contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
-        horizontal={true}
-        dataSource={this.state.dataSource}
-        renderRow={(rowData, s, i) =>
-        <View style={{width:frame.width, height:frame.height}} >
+    <Animated.View>
 
-          <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI} navigate={navigate}/>
-        </View>
-        }
-      />
-
-    <Interactable.View style={{width:40,height:40,backgroundColor:'#21c064',justifyContent:'center'}} initialPosition={{x: frame.width - (frame.width / 5), y: frame.height - (frame.height / 3)}}
-      boundaries={{top:0, bottom:frame.height - 80,left: 0, right: frame.width - 40}} frictionAreas={[{damping: 0.4}]}>
-      <TouchableHighlight style={{justifyContent:'center'}} onPress={() => this.transitionToNewPost()} underlayColor="#f1f1f1">
-            <Image style={{height: 40, width: 40}}source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/EditIcon.png')}/>
+    <Animated.View style={{borderTopColor: "black", borderTopWidth: 2, height: frame.height, width:frame.width, position: 'absolute', top: -2, backgroundColor: "white", flexDirection: "column", justifyContent:"flex-start", alignItems: 'center'}}>
+          <Image
+           style={{resizeMode: 'cover', height: frame.height / 2, width:frame.width}}
+           source={{uri: this.state.postImage}}/>
+         <TouchableHighlight onPress={() => this.pictureChosen()} style={{justifyContent:"center", backgroundColor: "white", alignItems: 'center', marginTop:10}} underlayColor="#f1f1f1">
+              <Text style={{fontSize: 20}}>Upload A Picture</Text>
         </TouchableHighlight>
-      </Interactable.View>
+        <KeyboardAvoidingView style={{flexDirection: "column", justifyContent:"center", alignItems: 'center', backgroundColor: "white"}} behavior='position'>
+        <TextInput
+        style={{marginTop: 10, height: 40, width: frame.width - 10, borderColor: 'gray', borderWidth: 1,backgroundColor:'white'}}
+        placeholder={' Enter Post Title'}
+        onChange={(event) => this.setState({postTitle: event.nativeEvent.text})}
+        ref={component => this._titleInput = component}
+        />
+        <TextInput
+        style={{marginTop: 1, height: 80, width: frame.width - 10, borderColor: 'gray', borderWidth: 1,backgroundColor:'white'}}
+        placeholder={' Enter Post description'}
+
+        maxLength={300}
+        onChange={(event) => this.setState({postDesc: event.nativeEvent.text})}
+        ref={component => this._descInput = component}
+        />
+
+      <View style={{width:frame.width, height:60, flexDirection: "column", justifyContent:"center", alignItems: 'center', backgroundColor: "white"}}>
+        <TouchableHighlight onPress={this.newPost.bind(this)} style={{paddingTop: 10}} underlayColor="#f1f1f1">
+              <Text style={{fontSize: 20}}>Upload</Text>
+          </TouchableHighlight>
+      </View>
+      </KeyboardAvoidingView>
+      </Animated.View>
     </Animated.View>
     );
   }
@@ -339,26 +334,12 @@ render() {
 
 tryLoadFeed() {
   actions.postList = []
-  try {
-    AsyncStorage.getItem('@feedCache:key').then((list) => {
-      if (list != null) {
-        this.updateListView(JSON.parse(list))
-      }
-    })
-  } catch (error) {
-    // Error saving data
-  }
-  this.GetPosts().then((result) => {
+  this.newGetPosts().then((result) => {
     if (result == true) {
       this.getFollowing().then(() => {
         actions.getPostList().then((list) => {
           this.setState({loaded: false})
           this.updateListView(list)
-          try {
-           AsyncStorage.setItem('@feedCache:key', JSON.stringify(list));
-          } catch (error) {
-            // Error saving data
-          }
         })
       })
     }
@@ -366,7 +347,7 @@ tryLoadFeed() {
 }
 
 componentWillMount () {
-  this.tryLoadFeed()
+  this.setState({loaded: false})
   firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then((url) => {
     this.setState({postImage:url})
   })
@@ -445,30 +426,6 @@ rotateCross () {
             }).start()
   }
 }
-
-moveUp() {
-  Animated.timing(
-    this.inputValue,
-    {
-      toValue: -((frame.height / 4) * 2),
-      duration: 250,
-      easing: Easing.linear
-    }).start()
-}
-
-moveDown() {
-  dismissKeyboard()
-  Animated.timing(
-    this.inputValue,
-    {
-      toValue: 0,
-      duration: 250,
-      easing: Easing.linear
-    }).start()
-}
-
-
-
 
 }//last
 
