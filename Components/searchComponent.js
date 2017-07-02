@@ -1,8 +1,8 @@
-import actions from "Extended-Project/Actions"
-import firebase from 'Extended-Project/firebaseConfig'
-import LikeComponent from "Extended-Project/Components/likeComponent"
+import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
+import LikeComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/likeComponent"
 import dismissKeyboard from 'dismissKeyboard'
-import OtherAccountComponent from "Extended-Project/Components/otherUserAccount"
+import OtherAccountComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/otherUserAccount"
 import { StackNavigator  } from 'react-navigation';
 import React, { Component } from 'react';
 import {

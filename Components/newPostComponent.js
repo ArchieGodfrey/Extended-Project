@@ -1,7 +1,7 @@
-import actions from "Extended-Project/Actions"
-import firebase from 'Extended-Project/firebaseConfig'
+import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
-import PostComponent from "Extended-Project/Components/postComponent"
+import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
 import RNFetchBlob from 'react-native-fetch-blob'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';

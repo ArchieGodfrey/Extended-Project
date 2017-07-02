@@ -1,7 +1,7 @@
-import actions from "Extended-Project/Actions"
-import firebase from 'Extended-Project/firebaseConfig'
+import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
-import PostComponent from "Extended-Project/Components/postComponent"
+import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
 import RNFetchBlob from 'react-native-fetch-blob'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
@@ -310,13 +310,13 @@ render() {
         underlayColor="#f1f1f1">
         <Animated.Image
          style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
-         source={require('Extended-Project/Images/PlusIcon.png')}/>
+         source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/PlusIcon.png')}/>
       </TouchableHighlight>
       <ListView
         enableEmptySections={true}
         style={{position: 'absolute', top: 0, left: 0, height: frame.height, width:frame.width}}
         contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
-        horizontal={true}
+        horizontal={false}
         dataSource={this.state.dataSource}
         renderRow={(rowData, s, i) =>
         <View style={{width:frame.width, height:frame.height}} >
@@ -329,7 +329,7 @@ render() {
     <Interactable.View style={{width:40,height:40,backgroundColor:'#21c064',justifyContent:'center'}} initialPosition={{x: frame.width - (frame.width / 5), y: frame.height - (frame.height / 3)}}
       boundaries={{top:0, bottom:frame.height - 80,left: 0, right: frame.width - 40}} frictionAreas={[{damping: 0.4}]}>
       <TouchableHighlight style={{justifyContent:'center'}} onPress={() => this.transitionToNewPost()} underlayColor="#f1f1f1">
-            <Image style={{height: 40, width: 40}}source={require('Extended-Project/Images/EditIcon.png')}/>
+            <Image style={{height: 40, width: 40}}source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/EditIcon.png')}/>
         </TouchableHighlight>
       </Interactable.View>
     </Animated.View>

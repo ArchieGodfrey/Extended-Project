@@ -1,6 +1,6 @@
-import actions from "Extended-Project/Actions"
-import firebase from 'Extended-Project/firebaseConfig'
-import PostComponent from "Extended-Project/Components/postComponent"
+import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
+import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
 import dismissKeyboard from 'dismissKeyboard'
 import RNFetchBlob from 'react-native-fetch-blob'
 import React, { Component } from 'react';
@@ -395,7 +395,7 @@ showOpacity(num) {
             style={{height: 50, width: 50,}}
             underlayColor="#f1f1f1">
             <Animated.Image
-              style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('Extended-Project/Images/EditIcon.png')}/>
+              style={{height: 25, width: 25 ,position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/EditIcon.png')}/>
           </TouchableHighlight>
         </Animated.View>
             <Image
@@ -443,7 +443,7 @@ showOpacity(num) {
               style={{height: 50, width: 50, position: 'absolute',top: -42, left: 325}}
               underlayColor="#f1f1f1">
               <Animated.Image
-                style={{resizeMode: 'cover', height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('Extended-Project/Images/BackIcon.png')}/>
+                style={{resizeMode: 'cover', height: 25, width: 15, position: 'absolute', top: 0, left: 0}}  source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/BackIcon.png')}/>
             </TouchableHighlight>
               <ListView ref={component => this.listView = component}
                 enableEmptySections={true}

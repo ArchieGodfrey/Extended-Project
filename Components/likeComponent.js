@@ -1,5 +1,5 @@
-import actions from "Extended-Project/Actions"
-import firebase from 'Extended-Project/firebaseConfig'
+import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions
@@ -22,7 +22,7 @@ export default class likeButton extends Component {
   render() {
     return (
         <Animated.Image style={{position: 'absolute', top: 25, left: 280, opacity: this.likeValue}}
-             source={require('Extended-Project/Images/LikedIcon.png')}/>
+             source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
     );
   }
 
