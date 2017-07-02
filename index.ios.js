@@ -12,13 +12,13 @@ export default class EPRouter extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      loggedIn: false,
+      loggedIn: "true",
     }
   }
 
   updateLoggedInState() {
-    if (this.state.loggedIn === true) {
-      this.setState({loggedIn: false})
+    if (this.state.loggedIn === "true") {
+      this.setState({loggedIn: "false"})
       AsyncStorage.setItem('@loggedIn:key', "false");
     } else {
       this.setState({loggedIn: true})
@@ -30,6 +30,10 @@ export default class EPRouter extends Component {
     try {
         AsyncStorage.getItem('@loggedIn:key').then((value) => {
           this.setState({loggedIn: value})
+          if (value === "false") {
+            firebaseApp.auth().signOut()
+            AsyncStorage.clear()
+          }
         });
       } catch (error) {
         // Error retrieving data
@@ -38,12 +42,11 @@ export default class EPRouter extends Component {
   }
 
   render() {
-    if (this.state.loggedIn === true) {
+    if (this.state.loggedIn === "true") {
       return (
           <Router ref={nav => { this.navigator = nav; }}/>   
       );
     } else {
-      firebaseApp.auth().signOut()
       return (
           <SignIn updateLoggedInState={this.updateLoggedInState.bind(this)} />   
       );

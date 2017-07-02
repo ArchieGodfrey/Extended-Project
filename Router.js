@@ -32,8 +32,6 @@ const FeedStack = StackNavigator({
       header: ({state}) => ({backTitle: null, tintColor:'black'})
     },
   },
-  },{
-    headerMode: 'none'
   }
 );
 
@@ -53,8 +51,6 @@ const AccountStack = StackNavigator({
 
     },
   },
-  },{
-    headerMode: 'none'
   }
 );
 
@@ -74,8 +70,6 @@ const SearchStack = StackNavigator({
 
     },
   },
-  },{
-    headerMode: 'none'
   }
 );
 
@@ -90,7 +84,8 @@ export default MainNavigation = TabNavigator({
     screen: SearchStack,
   },
 },{
-    tabBarPosition: 'top',
+    initialRouteName: "Account",
+    tabBarPosition: 'bottom',
     swipeEnabled: true,
     animationEnabled: false,
     headerMode: 'none',
