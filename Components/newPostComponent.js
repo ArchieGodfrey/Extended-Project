@@ -1,7 +1,7 @@
-import actions from "EPRouter/Actions"
-import firebase from 'EPRouter/firebaseConfig'
+import actions from "Extended-Project/Actions"
+import firebase from 'Extended-Project/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
-import PostComponent from "EPRouter/Components/postComponent"
+import PostComponent from "Extended-Project/Components/postComponent"
 import RNFetchBlob from 'react-native-fetch-blob'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';

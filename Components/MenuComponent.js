@@ -1,5 +1,5 @@
-import actions from "EPRouter/Actions"
-import firebase from 'EPRouter/firebaseConfig'
+import actions from "Extended-Project/Actions"
+import firebase from 'Extended-Project/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
@@ -300,7 +300,7 @@ render() {
         underlayColor="#f1f1f1">
         <Animated.Image
          style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
-         source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/PlusIcon.png')}/>
+         source={require('Extended-Project/Images/PlusIcon.png')}/>
       </TouchableHighlight>
       <ListView
         enableEmptySections={true}

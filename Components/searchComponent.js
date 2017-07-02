@@ -1,8 +1,8 @@
-import actions from "EPRouter/Actions"
-import firebase from 'EPRouter/firebaseConfig'
-import LikeComponent from "EPRouter/Components/likeComponent"
+import actions from "Extended-Project/Actions"
+import firebase from 'Extended-Project/firebaseConfig'
+import LikeComponent from "Extended-Project/Components/likeComponent"
 import dismissKeyboard from 'dismissKeyboard'
-import OtherAccountComponent from "EPRouter/Components/otherUserAccount"
+import OtherAccountComponent from "Extended-Project/Components/otherUserAccount"
 import { StackNavigator  } from 'react-navigation';
 import React, { Component } from 'react';
 import {

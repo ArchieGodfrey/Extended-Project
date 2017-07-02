@@ -1,7 +1,7 @@
-import actions from "EPRouter/Actions"
-import firebase from 'EPRouter/firebaseConfig'
-import LikeComponent from "EPRouter/Components/likeComponent"
-import OtherAccountComponent from "EPRouter/Components/otherUserAccount"
+import actions from "Extended-Project/Actions"
+import firebase from 'Extended-Project/firebaseConfig'
+import LikeComponent from "Extended-Project/Components/likeComponent"
+import OtherAccountComponent from "Extended-Project/Components/otherUserAccount"
 import React, { Component } from 'react';
 import { StackNavigator  } from 'react-navigation';
 import {
@@ -185,10 +185,10 @@ onPhotoPress() {
             </TouchableHighlight>
             <Text style={styles.userName}>{this.props.TITLE}</Text>
               <Image
-                style={styles.ClockIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/ClockIcon.png')}/>
+                style={styles.ClockIcon} source={require('Extended-Project/Images/ClockIcon.png')}/>
               <Text style={styles.dateStyle}>{moment(this.props.DATE, "MMDDYYYYhmmss").format('MMMM Do, h:mm')}</Text>
               <Image
-                style={styles.LikeIcon} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/LikeIcon.png')}/>
+                style={styles.LikeIcon} source={require('Extended-Project/Images/LikeIcon.png')}/>
               <LikeComponent USERID={this.props.USERID} DATE={this.props.DATE} />
               <Text style={styles.likeNumber}>{this.state.likes}</Text>
             <Text style={styles.postDesc}>{this.props.DESC}</Text>
@@ -196,12 +196,12 @@ onPhotoPress() {
           <View style={styles.buttons}>
             <TouchableHighlight onPress={() => this.likeController(this.props.USERID,this.props.DATE)} underlayColor="#f1f1f1">
               <Image
-                style={styles.LikeButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/LikeButton.png')}/>
+                style={styles.LikeButton} source={require('Extended-Project/Images/LikeButton.png')}/>
             </TouchableHighlight>
             <Image
-              style={styles.CommentButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/CommentIcon.png')}/>
+              style={styles.CommentButton} source={require('Extended-Project/Images/CommentIcon.png')}/>
             <Image
-              style={styles.OptionsButton} source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/OptionsIcon.png')}/>
+              style={styles.OptionsButton} source={require('Extended-Project/Images/OptionsIcon.png')}/>
         </View>
       </View>
 )}

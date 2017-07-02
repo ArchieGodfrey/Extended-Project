@@ -453,7 +453,7 @@ export default class EPRouter extends Component {
           }]} >
             <FeedStack ref={nav => { this.navigator = nav; }}/>
               <TouchableHighlight style={{height: 40, width: 40, position:'absolute', left:Screen.width - (Screen.width / 7), top: 20, justifyContent:'center'}} onPress={() => this.toggleMenu()} underlayColor="#f1f1f1">
-                  <Image style={{height: 20, width: 20}}source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/MenuIcon.png')}/>
+                  <Image style={{height: 20, width: 20}}source={require('Extended-Project/Images/MenuIcon.png')}/>
               </TouchableHighlight>
           </Animated.View>
 

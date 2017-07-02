@@ -1,5 +1,5 @@
-import actions from "EPRouter/Actions"
-import firebase from 'EPRouter/firebaseConfig'
+import actions from "Extended-Project/Actions"
+import firebase from 'Extended-Project/firebaseConfig'
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions
@@ -22,7 +22,7 @@ export default class likeButton extends Component {
   render() {
     return (
         <Animated.Image style={{position: 'absolute', top: 25, left: 280, opacity: this.likeValue}}
-             source={require('/Users/archiegodfrey/Desktop/ReactNativeApp/EPRouter/Images/LikedIcon.png')}/>
+             source={require('Extended-Project/Images/LikedIcon.png')}/>
     );
   }
 

@@ -1,6 +1,6 @@
-import actions from "EPRouter/Actions"
-import firebase from 'EPRouter/firebaseConfig'
-import LikeComponent from "EPRouter/Components/likeComponent"
+import actions from "Extended-Project/Actions"
+import firebase from 'Extended-Project/firebaseConfig'
+import LikeComponent from "Extended-Project/Components/likeComponent"
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
