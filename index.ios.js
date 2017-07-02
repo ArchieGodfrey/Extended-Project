@@ -1,4 +1,4 @@
-import actions from "EPRouter/Actions"
+import actions from "Extended-Project/Actions"
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
 import {
@@ -8,11 +8,11 @@ import {
 
 import { StackNavigator, NavigationActions  } from 'react-navigation';
 
-import Feed from 'EPRouter/Components/feedComponent'
-import UserDetail from 'EPRouter/Components/otherUserAccount'
-import Account from 'EPRouter/Components/accountComponent'
-import Search from 'EPRouter/Components/searchComponent'
-import NewPost from 'EPRouter/Components/newPostComponent'
+import Feed from 'Extended-Project/Components/feedComponent'
+import UserDetail from 'Extended-Project/Components/otherUserAccount'
+import Account from 'Extended-Project/Components/accountComponent'
+import Search from 'Extended-Project/Components/searchComponent'
+import NewPost from 'Extended-Project/Components/newPostComponent'
 
 const FeedStack = StackNavigator({
   Feed: {
