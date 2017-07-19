@@ -32,6 +32,8 @@ const FeedStack = StackNavigator({
       header: ({state}) => ({backTitle: null, tintColor:'black'})
     },
   },
+  }, {
+    headerMode: 'none',
   }
 );
 
@@ -51,6 +53,8 @@ const AccountStack = StackNavigator({
 
     },
   },
+  }, {
+    headerMode: 'none',
   }
 );
 
@@ -59,17 +63,18 @@ const SearchStack = StackNavigator({
     screen: Search,
     navigationOptions: {
       title: 'Search',
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
+      header: ({state}) => ({backTitle: null, tintColor:'black'}),
     },
   },
   UserDetail: {
     screen: UserDetail,
     navigationOptions: {
       /*title: ({state}) => `${state.params.USERID}`,*/
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
-
+      header: ({state}) => ({backTitle: null, tintColor:'black'}),
     },
   },
+  }, {
+    headerMode: 'none',
   }
 );
 
@@ -85,13 +90,13 @@ export default MainNavigation = TabNavigator({
   },
 },{
     initialRouteName: "Account",
-    tabBarPosition: 'bottom',
+    tabBarPosition: 'none',
     swipeEnabled: true,
-    animationEnabled: false,
+    animationEnabled: true,
     headerMode: 'none',
     tabBarOptions: {
     labelStyle: {
-      fontSize: 16,
+      fontSize: 18,
     },
   }
 })
