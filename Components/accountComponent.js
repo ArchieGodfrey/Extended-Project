@@ -53,14 +53,18 @@ class ImageContainer extends Component {
 
     render() {
         return(
-            <View style={{flex:1,alignItems:'center'}}>
+            <View style={{flex:0.5,alignItems:'center',justifyContent:'center'}}>
                 <Image
-                style={{resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  
+                style={{position: 'absolute', top:0, left:0, right:0,resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  
                 blurRadius={2} 
                 source={{uri: this.state.backgroundSource}}/>
-            <Image
-                style={{position:'absolute', left: (frame.width / 2.5), top: (frame.height / 8.5), resizeMode: 'cover', height: (frame.width / 5), width: (frame.width / 5)}}
+                <View style={{alignItems:'center'}}>
+                    <Image 
+                style={{resizeMode: 'cover', height: (frame.width / 4), width: (frame.width / 4)}}
                 source={{uri: this.state.avatarSource}}/>
+                    <AccountDetails/>
+                </View>
+                
             </View>
         )
     }
@@ -87,7 +91,7 @@ class AccountPosts extends Component {
         return(
             <ListView
                 enableEmptySections={true}
-                style={{flex:1,backgroundColor:'white',width: frame.width}}
+                style={{backgroundColor:'white'}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
                 renderRow={(rowData, sec, i) =>
@@ -110,10 +114,42 @@ class AccountPosts extends Component {
     }
 }
 
+class AccountDetails extends Component {
+    constructor (props) {
+        super(props);
+        this.state = {
+            name:"",
+            desc:"",
+        }
+    }
+
+    componentWillMount() {
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            var nameRef = firebaseApp.database().ref("UserID/"+ ID + "/Name")
+            nameRef.once('value', (nameSnapshot) => {
+                this.setState({name: nameSnapshot.val()});
+            });
+            var descRef = firebaseApp.database().ref("UserID/"+ ID + "/ProfDesc")
+            descRef.once('value', (descSnapshot) => {
+                this.setState({desc: descSnapshot.val()});
+            });
+        })
+    }
+
+    render() {
+        return(
+            <View style={{backgroundColor:'transparent',alignItems:'center'}}>
+                <Text style={{fontSize:20,color:'white'}} >{this.state.name}</Text>
+                <Text style={{fontSize:20,color:'white'}} >{this.state.desc}</Text>
+            </View>
+        )
+    }
+}
+
 export default class AccountContents extends Component {
  render() {
      return(
-         <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+         <View style={{flex:1,justifyContent:'center'}}>
              <ImageContainer />
              <AccountPosts />
          </View>
