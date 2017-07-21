@@ -13,18 +13,17 @@ const FeedStack = StackNavigator({
   Home: {
     screen: Feed,
     navigationOptions: {
-      title: 'Feed',
-      header: ({state, setParams}) => ({backTitle: null, tintColor:'black'})
-    },
-  },
+      title: 'Home',
+    },  
+  }, 
   UserDetail: {
     screen: UserDetail,
     navigationOptions: {
-      /*title: ({state}) => `${state.params.USERID}`,*/
+      title: ({state}) => `${state.params.USERID}`,
       header: ({state}) => ({backTitle: null, tintColor:'black'})
 
     },
-  },
+  }, 
   NewPost: {
     screen: NewPost,
     navigationOptions: {
@@ -34,7 +33,7 @@ const FeedStack = StackNavigator({
   },
   }, {
     headerMode: 'none',
-  }
+    },
 );
 
 const AccountStack = StackNavigator({
@@ -89,7 +88,7 @@ export default MainNavigation = TabNavigator({
     screen: SearchStack,
   },
 },{
-    initialRouteName: "Account",
+    initialRouteName: "Feed",
     tabBarPosition: 'none',
     swipeEnabled: true,
     animationEnabled: true,

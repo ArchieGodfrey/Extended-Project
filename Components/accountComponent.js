@@ -146,6 +146,10 @@ class AccountDetails extends Component {
     }
 }
 
+class postDetails extends Component {
+    //Complete Post Component First
+}
+
 export default class AccountContents extends Component {
  render() {
      return(
