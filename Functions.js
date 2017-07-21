@@ -67,6 +67,17 @@ getTimeline(UserID,limit) {
     })
 }
 
+getProfilePicture(UserID) {
+    return new Promise(function(resolve, reject) {
+        downloadProfileImages(UserID).then((URIS) => {
+            clearTimeout(timeOut)
+            resolve(URIS[0])
+        })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    })
+}
+
 }
 
 function getFollowedUsers(UserID) {

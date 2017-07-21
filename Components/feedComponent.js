@@ -21,7 +21,7 @@ export default class Timeline extends Component {
     }
   }
 
-  componentWillMount() {
+  componentDidMount() {
     functions.getFromAsyncStorage("@userID:key").then((UserID) => {
       functions.getTimeline(UserID,8).then((MostRecentPosts) => {
           this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
@@ -39,7 +39,7 @@ export default class Timeline extends Component {
         dataSource={this.state.dataSource}
         renderRow={(rowData, s, i) =>
         <View style={{width:frame.width, height:frame.height}} >
-          <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI}/>
+          <PostComponent URI={rowData.URI}USERID={rowData.USERID} TITLE={rowData.TITLE} LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} URI={rowData.URI}/>
         </View>
         }
       />
