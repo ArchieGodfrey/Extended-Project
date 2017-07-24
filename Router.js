@@ -52,7 +52,8 @@ const UserDetailStack = StackNavigator({
     screen: UserDetail,
     navigationOptions: {
       title: ({state}) => `${state.params.USERID}`,
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
+      headerLeft: ({state}) => ({backTitle: "Back", tintColor:'black'}),
+      headerBackTitle:"test"
     },
   }
   }
@@ -72,7 +73,7 @@ const BottomNavigation = TabNavigator({
   },
 },{
     initialRouteName: "Feed",
-    tabBarPosition: 'none',
+    tabBarPosition: 'top',
     swipeEnabled: true,
     animationEnabled: true,
     headerMode: 'none',
@@ -89,6 +90,10 @@ export default MainNavigation = StackNavigator({
   },
   UserDetail: {
     screen: UserDetailStack,
+    navigationOptions: {
+      title: ({state}) => `${state.params.USERID}`,
+      header: ({state}) => ({backTitle: null, tintColor:'black'})
+    },
   },
   NewPost: {
     screen: NewPost,

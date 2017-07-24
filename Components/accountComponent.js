@@ -70,21 +70,55 @@ class ImageContainer extends Component {
     }
 }
 
+class PostPreview extends Component {
+    constructor (props) {
+    super(props);
+    this.state = {
+      imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
+    }
+  }
+
+    componentWillMount() {
+        const {TITLE,DESC,USERID,DATE} = this.props;
+        functions.getPostPhoto(this.props.USERID,this.props.DATE).then((URI) => {
+            this.setState({imageSource:URI})
+        }) 
+    } 
+
+    render() {
+        return (
+            <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
+                <Text style={{fontSize: 25}}> {this.props.TITLE}</Text>
+                <TouchableHighlight onPress={() => {this.showPosts(), 
+                    this.listView.scrollTo({ x:frame.width * i, y:0, animated:false })}}>
+                    <Image
+                        style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} 
+                        source={{uri: this.state.imageSource}}/>
+                </TouchableHighlight>
+                <Text style={{fontSize: 15}}> {this.props.DESC !== null ? this.props.DESC.slice(0,45) : "Loading" }...</Text>
+            </View>
+        )
+    }
+}
+
 class AccountPosts extends Component {
     constructor (props) {
         super(props);
         const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         this.state = {
             dataSource: ds.cloneWithRows([]),
+            USERID:"",
         }
     }
 
-    componentWillMount() {
+    componentWillMount() { 
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
             functions.getAllUserPosts(ID).then((UserPosts) => { 
+                this.setState({USERID:ID})
                 this.setState({dataSource: this.state.dataSource.cloneWithRows(UserPosts)})
             })
         })
+        
     } 
 
     render() {
@@ -96,13 +130,8 @@ class AccountPosts extends Component {
                 dataSource={this.state.dataSource}
                 renderRow={(rowData, sec, i) =>
                 <View style={{alignSelf: 'flex-start', width:(frame.width / 2) - 20}}>
-                  <Text style={{fontSize: 25}}> {rowData.TITLE}</Text>
-                  <TouchableHighlight
-                    onPress={() => {this.showPosts(), this.listView.scrollTo({ x:frame.width * i, y:0, animated:false })}}>
-                      <Image
-                        style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} source={{uri: rowData.URI}}/>
-                  </TouchableHighlight>
-                  <Text style={{fontSize: 15}}> {rowData.DESC !== null ? rowData.DESC.slice(0,45) : "Loading" }...</Text>
+                    <PostPreview TITLE={rowData.TITLE} DESC={rowData.DESC} 
+                        USERID={this.state.USERID} DATE={rowData.DATE}/>
                 </View>
                 }
                 renderFooter={() => <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
@@ -151,13 +180,13 @@ class postDetails extends Component {
 }
 
 export default class AccountContents extends Component {
- render() {
-     return(
-         <View style={{flex:1,justifyContent:'center'}}>
-             <ImageContainer />
-             <AccountPosts />
-         </View>
-     )
- }
+    render() {
+        return(
+            <View style={{flex:1,justifyContent:'center'}}>
+                <ImageContainer />
+                <AccountPosts />
+            </View>
+        )
+    }
 }
 

@@ -1,7 +1,6 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import LikeComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/likeComponent"
 import React, { Component } from 'react';
-import { StackNavigator  } from 'react-navigation';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
@@ -25,7 +24,7 @@ class ImageContainer extends Component {
       functions.getPostPhoto(this.props.USERID,DATE).then((URI) => {
         this.setState({imageSource:URI})
       }) 
-  }
+  } 
 
   render() {
     return(
@@ -51,11 +50,18 @@ class PostDetails extends Component {
     })
   }
 
+  transition(location) {
+    this.props.navigate('UserDetail', { USERID:  this.props.USERID })
+}
+
   render() {
     return(
       <View style={{flexDirection:'row',marginLeft:(frame.width / 40),marginTop:(frame.width / 40)}} >
-        <Image style={{resizeMode: 'cover', height: (frame.height / 10), width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} 
-          onPress={transition("UserDetail")}/>
+        <TouchableHighlight onPress={() => {this.transition("UserDetail")}}>
+          <Image style={{resizeMode: 'cover', height: (frame.height / 10), 
+            width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
+        </TouchableHighlight>
+        
         <View style={{flexDirection:'column',marginTop:(frame.height / 80),marginLeft:(frame.height / 80),marginBottom:(frame.height / 160)}}> 
           <Text style={{fontSize:20}}>
             {this.props.TITLE}
@@ -123,24 +129,20 @@ class TimeStamp extends Component {
 
 
 export default class PostTemplate extends Component {
-
   componentWillMount() {
-    const { USERID,DATE,TITLE,DESC,LIKES } = this.props;
+    const { USERID,DATE,TITLE,DESC,LIKES,navigate} = this.props;
+    
   }
 
   render() {
     return(
       <View style={{flex:1,marginBottom:(frame.height / 40)}}>
         <ImageContainer USERID={this.props.USERID} DATE={this.props.DATE}/>
-        <PostDetails 
+        <PostDetails navigate={this.props.navigate}
           USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
         <DescriptionContainer DESC={this.props.DESC}/>    
         <TimeStamp DATE={this.props.DATE}/>  
       </View>
     )
   }
-}
-
-function transition(location) {
-  this.props.navigation.navigate(location)
 }
