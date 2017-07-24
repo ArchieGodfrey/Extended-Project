@@ -13,16 +13,25 @@ var firebaseApp = require("firebase/app"); require("firebase/auth"); require("fi
 const frame = Dimensions.get('window');
 
 class ImageContainer extends Component {
-  componentWillMount() {
-    const { USERID,DATE,URI  } = this.props;
+  constructor (props) {
+    super(props);
+    this.state = {
+      imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
+    }
+  }
 
+  componentWillMount() {
+    const { USERID,DATE } = this.props;
+      functions.getPostPhoto(this.props.USERID,DATE).then((URI) => {
+        this.setState({imageSource:URI})
+      }) 
   }
 
   render() {
     return(
       <Image 
         style={{resizeMode: 'cover', height: (frame.height / 2), width: (frame.width)}}
-        source={{uri: this.props.URI}}/>
+        source={{uri: this.state.imageSource}}/>
     )
   }
 }
@@ -45,10 +54,19 @@ class PostDetails extends Component {
   render() {
     return(
       <View style={{flexDirection:'row',marginLeft:(frame.width / 40),marginTop:(frame.width / 40)}} >
-        <Image style={{resizeMode: 'cover', height: (frame.height / 10), width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
-        <Text style={{fontSize:20,marginTop:(frame.height / 80),marginLeft:(frame.height / 80),marginBottom:(frame.height / 160)}}>
-          {this.props.TITLE}
-        </Text>
+        <Image style={{resizeMode: 'cover', height: (frame.height / 10), width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} 
+          onPress={transition("UserDetail")}/>
+        <View style={{flexDirection:'column',marginTop:(frame.height / 80),marginLeft:(frame.height / 80),marginBottom:(frame.height / 160)}}> 
+          <Text style={{fontSize:20}}>
+            {this.props.TITLE}
+          </Text>
+          <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
+            marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
+            <Text style={{fontSize:16,color:'grey'}}>
+              {moment(this.props.DATE, "MMDDYYYYhmmss").format('MMMM Do YYYY')}
+            </Text>
+          </View>
+        </View>
         <LikeComponent USERID={this.props.USERID} DATE={this.props.DATE} />
       </View>
       
@@ -67,12 +85,36 @@ class DescriptionContainer extends Component {
 
   render() {
     return(
-      <View style={{flex:1,borderColor:'grey',borderBottomWidth:1,
-      marginTop: (frame.height / 80), marginLeft:(frame.width / 10), marginRight:(frame.width / 10)}} >
+      <View style={{borderColor:'grey',borderBottomWidth:1,
+      marginTop: (frame.height / 80), marginBottom: (frame.height / 40), marginLeft:(frame.width / 10), marginRight:(frame.width / 10)}} >
         <Text style={{fontSize:16}}>
           {this.props.DESC}
         </Text>
       </View>
+      
+    )
+  }
+}
+
+class TimeStamp extends Component {
+  constructor (props) {
+    super(props);
+  }
+
+  componentWillMount() {
+    const { DATE } = this.props;
+  }
+
+  render() {
+    return(
+      <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
+      marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
+        <Image
+          style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
+        <Text style={{paddingLeft:(frame.width / 80),fontSize:16,color:'grey'}}>
+          {moment(this.props.DATE, "MMDDYYYYhmmss").format('MMMM Do YYYY, h:mm')}
+        </Text>
+        </View>
       
     )
   }
@@ -83,28 +125,22 @@ class DescriptionContainer extends Component {
 export default class PostTemplate extends Component {
 
   componentWillMount() {
-    const { URI,USERID,DATE,TITLE,DESC,LIKES } = this.props;
-    functions.getFromAsyncStorage("@userID:key").then((UserID) => {
-      //functions.getTimeline(UserID) 
-    })
+    const { USERID,DATE,TITLE,DESC,LIKES } = this.props;
   }
 
   render() {
     return(
-      <View style={{flex:1}}>
-        <ImageContainer URI={this.props.URI}/>
-        <PostDetails style={{borderColor:'grey',borderTopWidth:1,borderBottomWidth:1,}} 
+      <View style={{flex:1,marginBottom:(frame.height / 40)}}>
+        <ImageContainer USERID={this.props.USERID} DATE={this.props.DATE}/>
+        <PostDetails 
           USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
-        <DescriptionContainer DESC={this.props.DESC}/>      
+        <DescriptionContainer DESC={this.props.DESC}/>    
+        <TimeStamp DATE={this.props.DATE}/>  
       </View>
     )
   }
+}
 
-
-  /*
-  Image(Optional)
-  Profile Pic - Name - Title - Likes
-  Desc(Optional)
-  Timestamp
-  */
+function transition(location) {
+  this.props.navigation.navigate(location)
 }

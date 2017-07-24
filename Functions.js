@@ -78,6 +78,17 @@ getProfilePicture(UserID) {
     })
 }
 
+getPostPhoto(UserID,Date) {
+    return new Promise(function(resolve, reject) {
+        downloadImage(UserID,Date).then((URI) => {
+            clearTimeout(timeOut)
+            resolve(URI)
+        })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    })
+}
+
 }
 
 function getFollowedUsers(UserID) {
@@ -156,12 +167,10 @@ function getSinglePost(Date,UserID) {
                         })
                         getPostFromFireBase(UserID,postDetails.key,"/likes").then((likes) => {
                             postLikes = likes
-                        })
-                        downloadImage(UserID, postDetails.key).then((url) => {
-                            UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:postDetails.key,LIKES:postLikes,USERID:UserID,URI:url})
+                            UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:postDetails.key,LIKES:postLikes,USERID:UserID})
                             clearTimeout(timeOut)
                             resolve(UserPosts)
-                        }) 
+                        })
                     }
                 })
             })
@@ -200,14 +209,12 @@ async function getAllPostDetails(UserID) {
                 })
                 getPostFromFireBase(UserID,childSnapshot.key,"/likes").then((likes) => {
                     postLikes = likes
-                })
-                downloadImage(UserID, childSnapshot.key).then((url) => {
-                    UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:childSnapshot.key,LIKES:postLikes,USERID:UserID,URI:url})
+                    UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:childSnapshot.key,LIKES:postLikes,USERID:UserID})
                     if (UserPosts.length == snapshot.numChildren()) {
                         clearTimeout(timeOut)
                         resolve(UserPosts)
                     }
-                }) 
+                })
             })
         })
         var timeOut = setTimeout(function() {

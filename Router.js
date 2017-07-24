@@ -15,25 +15,10 @@ const FeedStack = StackNavigator({
     navigationOptions: {
       title: 'Home',
     },  
-  }, 
-  UserDetail: {
-    screen: UserDetail,
-    navigationOptions: {
-      title: ({state}) => `${state.params.USERID}`,
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
-
-    },
-  }, 
-  NewPost: {
-    screen: NewPost,
-    navigationOptions: {
-      title: 'Create a post',
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
-    },
-  },
+  }
   }, {
     headerMode: 'none',
-    },
+  }
 );
 
 const AccountStack = StackNavigator({
@@ -42,14 +27,6 @@ const AccountStack = StackNavigator({
     navigationOptions: {
       title: 'Account',
       header: ({state}) => ({backTitle: null, tintColor:'black'})
-    },
-  },
-  UserDetail: {
-    screen: UserDetail,
-    navigationOptions: {
-      /*title: ({state}) => `${state.params.USERID}`,*/
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
-
     },
   },
   }, {
@@ -64,20 +41,26 @@ const SearchStack = StackNavigator({
       title: 'Search',
       header: ({state}) => ({backTitle: null, tintColor:'black'}),
     },
-  },
-  UserDetail: {
-    screen: UserDetail,
-    navigationOptions: {
-      /*title: ({state}) => `${state.params.USERID}`,*/
-      header: ({state}) => ({backTitle: null, tintColor:'black'}),
-    },
-  },
+  }
   }, {
     headerMode: 'none',
   }
 );
 
-export default MainNavigation = TabNavigator({
+const UserDetailStack = StackNavigator({
+  UserDetail: {
+    screen: UserDetail,
+    navigationOptions: {
+      title: ({state}) => `${state.params.USERID}`,
+      header: ({state}) => ({backTitle: null, tintColor:'black'})
+    },
+  }
+  }
+);
+
+
+
+const BottomNavigation = TabNavigator({
   Account: {
     screen: AccountStack,
   },
@@ -99,3 +82,21 @@ export default MainNavigation = TabNavigator({
     },
   }
 })
+
+export default MainNavigation = StackNavigator({
+  Home: {
+    screen: BottomNavigation,
+  },
+  UserDetail: {
+    screen: UserDetailStack,
+  },
+  NewPost: {
+    screen: NewPost,
+    navigationOptions: {
+      title: 'Create a post',
+      header: ({state}) => ({backTitle: null, tintColor:'black'})
+    },
+  }
+}, {
+    headerMode: 'none',
+  })
