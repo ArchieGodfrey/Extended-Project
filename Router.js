@@ -6,31 +6,46 @@ import UserDetail from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Com
 import Account from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/accountComponent'
 import Search from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/searchComponent'
 import NewPost from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/newPostComponent'
+import Settings from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/settingsComponent'
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
 const FeedStack = StackNavigator({
-  Home: {
+  Feed: {
     screen: Feed,
     navigationOptions: {
-      title: 'Home',
+      title: 'Feed',
     },  
-  }
+  }, 
   }, {
     headerMode: 'none',
   }
 );
 
-const AccountStack = StackNavigator({
+const AccountTab = TabNavigator({
+  Settings: {
+    screen: Settings,
+    navigationOptions: {
+      title: 'Settings',
+    },
+  },
   Account: {
     screen: Account,
     navigationOptions: {
       title: 'Account',
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
     },
   },
-  }, {
+  },{
+    initialRouteName: "Account",
+    tabBarPosition: 'bottom',
+    swipeEnabled: true,
+    animationEnabled: true,
     headerMode: 'none',
+    tabBarOptions: {
+    labelStyle: {
+      fontSize: 18,
+    },
+  }
   }
 );
 
@@ -63,10 +78,10 @@ const UserDetailStack = StackNavigator({
 
 const BottomNavigation = TabNavigator({
   Account: {
-    screen: AccountStack,
+    screen:  AccountTab,
   },
   Feed: {
-    screen: FeedStack
+    screen: FeedStack, 
   },
   Search: {
     screen: SearchStack,
@@ -104,4 +119,5 @@ export default MainNavigation = StackNavigator({
   }
 }, {
     headerMode: 'none',
+    initialRouteName: "Home",
   })
