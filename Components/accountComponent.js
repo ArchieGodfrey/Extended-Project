@@ -1,9 +1,4 @@
-import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
-import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
-import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
-import dismissKeyboard from 'dismissKeyboard'
-import RNFetchBlob from 'react-native-fetch-blob'
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
@@ -13,12 +8,6 @@ var moment = require('moment');
 var ImagePicker = require('react-native-image-picker');
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database"); require("firebase/storage")
-
-// Prepare Blob support
-const Blob = RNFetchBlob.polyfill.Blob
-const fs = RNFetchBlob.fs
-window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
-window.Blob = Blob
 
 const frame = Dimensions.get('window');
 
@@ -125,6 +114,7 @@ class AccountPosts extends Component {
         return(
             <ListView
                 enableEmptySections={true}
+                showsVerticalScrollIndicator={false}
                 style={{backgroundColor:'white'}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}

@@ -1,7 +1,6 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
 import React, { Component } from 'react';
-import { StackNavigator  } from 'react-navigation';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
@@ -23,9 +22,13 @@ export default class Timeline extends Component {
 
   componentDidMount() {
     const {navigate} = this.props.navigation;
+    /*tryLoadCache().then((OldPosts) => { //Works but SLOW
+      this.setState({dataSource: this.state.dataSource.cloneWithRows(OldPosts)})
+    })*/
     functions.getFromAsyncStorage("@userID:key").then((UserID) => {
       functions.getTimeline(UserID,8).then((MostRecentPosts) => {
           this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
+          saveCache(MostRecentPosts)
       }) 
     })
   }
@@ -34,17 +37,47 @@ export default class Timeline extends Component {
     return(
         <ListView
         enableEmptySections={true}
+        showsVerticalScrollIndicator={false}
         style={{flex:1}}
-        contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
+        contentContainerStyle={{flexDirection: 'column'}}
         horizontal={false}
         dataSource={this.state.dataSource}
         renderRow={(rowData, s, i) =>
-        <View style={{width:frame.width, height:frame.height}} >
+        <View >
           <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} 
-          LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} navigate={this.props.navigation.navigate}/>
+          LIKES={rowData.LIKES} DESC={rowData.DESC} DATE={rowData.DATE} 
+          navigate={this.props.navigation.navigate}/>
         </View>
         }
       />
     )
   }
+}
+
+function saveCache(Posts) {
+  try {
+    AsyncStorage.setItem('@feedCache:key', JSON.stringify(Posts));
+  } catch (error) {
+    // Error saving feed cache
+  }
+}
+
+function tryLoadCache() {
+  return new Promise(function(resolve, reject) {
+    try {
+      AsyncStorage.getItem('@feedCache:key').then((list) => {
+        if (list != null) {
+          clearTimeout(timeOut)
+          resolve(JSON.parse(list))
+        } else {
+          clearTimeout(timeOut)
+          resolve(null)
+        }
+      })
+    } catch (error) {
+      // Error saving data
+    }
+    var timeOut = setTimeout(function() {
+    resolve(null)}, 10000)
+  })
 }

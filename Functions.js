@@ -69,9 +69,9 @@ getTimeline(UserID,limit) {
 
 getProfilePicture(UserID) {
     return new Promise(function(resolve, reject) {
-        downloadProfileImages(UserID).then((URIS) => {
+        downloadProfile(UserID).then((URI) => {
             clearTimeout(timeOut)
-            resolve(URIS[0])
+            resolve(URI)
         })
         var timeOut = setTimeout(function() {
         resolve(null)}, 10000)
@@ -231,7 +231,7 @@ function downloadImage(ID,date) {
         }).catch((error) => {
             firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
             Realurl = url2
-            resolve(Realurl)
+            resolve("null")
             })
         })
     })
@@ -251,33 +251,49 @@ function getPostFromFireBase(UserID,Date,Type) {
     })
 }
 
-    function downloadProfileImages(ID) {
+function downloadProfile(ID) {
     return new Promise(function(resolve, reject) {
         firebaseApp.storage().ref('Users/' + ID).child('Profile').getDownloadURL().then(function(url) {
-         Realurl = url
-         firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
-           Realurl2 = url2
-           resolve([Realurl, url2])
-         }).catch((error) =>  {
-           firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-             Realurl2 = url2
-             resolve([Realurl, Realurl2])
-           })
-         })
-       }).catch((error) => {
-         firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
-           Realurl = url
-           firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
-             Realurl2 = url2
-             resolve([Realurl, url2])
-           }).catch((error) =>  {
-             firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-               Realurl2 = url2
-               resolve([Realurl, Realurl2])
-             })
-           })
-         })
-       })
+            clearTimeout(timeOut)
+            resolve(url)
+        }).catch((error) => {
+            firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(defaultImage) {
+                clearTimeout(timeOut)
+                resolve(defaultImage)
+            })
+        })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    })
+}
+
+function downloadProfileImages(ID) {
+    return new Promise(function(resolve, reject) {
+        firebaseApp.storage().ref('Users/' + ID).child('Profile').getDownloadURL().then(function(url) {
+            Realurl = url
+            firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
+            Realurl2 = url2
+            resolve([Realurl, url2])
+            }).catch((error) =>  {
+            firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+                Realurl2 = url2
+                resolve([Realurl, Realurl2])
+            })
+            })
+        }).catch((error) => {
+            firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
+            Realurl = url
+            firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
+                Realurl2 = url2
+                resolve([Realurl, url2])
+            }).catch((error) =>  {
+                firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+                Realurl2 = url2
+                resolve([Realurl, Realurl2])
+                })
+            })
+            })
+        })
     })
 }
 

@@ -1,5 +1,4 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
-import LikeComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/likeComponent"
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
@@ -15,7 +14,7 @@ class ImageContainer extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
+      imageSource:"null", 
     }
   }
 
@@ -27,11 +26,18 @@ class ImageContainer extends Component {
   } 
 
   render() {
-    return(
+    if (this.state.imageSource !== "null") {
+      return(
       <Image 
         style={{resizeMode: 'cover', height: (frame.height / 2), width: (frame.width)}}
         source={{uri: this.state.imageSource}}/>
     )
+    } else {
+      return(
+      <View style={{marginTop:(frame.height / 40), marginBottom:(frame.height / 40),borderColor:'grey',borderBottomWidth:1,}}></View>
+    )
+    }
+    
   }
 }
 
@@ -39,7 +45,7 @@ class PostDetails extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
+      avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
     }
   }
 
@@ -62,8 +68,9 @@ class PostDetails extends Component {
             width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
         </TouchableHighlight>
         
-        <View style={{flexDirection:'column',marginTop:(frame.height / 80),marginLeft:(frame.height / 80),marginBottom:(frame.height / 160)}}> 
-          <Text style={{fontSize:20}}>
+        <View style={{flexDirection:'column',marginTop:(frame.height / 80),marginLeft:(frame.height / 80)
+          ,marginBottom:(frame.height / 160)}}> 
+          <Text style={{fontSize:22}}>
             {this.props.TITLE}
           </Text>
           <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
@@ -73,7 +80,7 @@ class PostDetails extends Component {
             </Text>
           </View>
         </View>
-        <LikeComponent USERID={this.props.USERID} DATE={this.props.DATE} />
+        <LikeComponent style={{marginTop:(frame.height / 20), alignSelf:'flex-end'}} USERID={this.props.USERID} DATE={this.props.DATE} />
       </View>
       
     )
@@ -92,8 +99,8 @@ class DescriptionContainer extends Component {
   render() {
     return(
       <View style={{borderColor:'grey',borderBottomWidth:1,
-      marginTop: (frame.height / 80), marginBottom: (frame.height / 40), marginLeft:(frame.width / 10), marginRight:(frame.width / 10)}} >
-        <Text style={{fontSize:16}}>
+      marginTop: (frame.height / 80), marginLeft:(frame.width / 10), marginRight:(frame.width / 10)}} >
+        <Text style={{fontSize:20,marginBottom: (frame.height / 40)}}>
           {this.props.DESC}
         </Text>
       </View>
@@ -102,7 +109,7 @@ class DescriptionContainer extends Component {
   }
 }
 
-class TimeStamp extends Component {
+class Footer extends Component {
   constructor (props) {
     super(props);
   }
@@ -113,20 +120,104 @@ class TimeStamp extends Component {
 
   render() {
     return(
-      <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
-      marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
+      <View style={{marginTop: (frame.height / 80), alignSelf:'flex-end',flexDirection:'row'}}>
+        <Text style={{alignSelf:'flex-start',paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>2 Comments</Text>
+        <View style={{flexDirection:'row',marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
         <Image
           style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
         <Text style={{paddingLeft:(frame.width / 80),fontSize:16,color:'grey'}}>
           {moment(this.props.DATE, "MMDDYYYYhmmss").format('MMMM Do YYYY, h:mm')}
         </Text>
         </View>
+      </View>
       
     )
   }
 }
 
+class LikeComponent extends Component {
+  constructor(props) {
+    super(props);
+    this.update = true
+    this.liked = false
+    this.likeValue = new Animated.Value(0)
+  }
 
+  render() {
+    return (
+        <Animated.Image style={{opacity: this.likeValue}}
+             source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
+    );
+  }
+
+  readyToGetLikes() {
+    if (this.update == true) {
+      const { USERID,DATE  } = this.props;
+      this.getLikes(this.props.USERID,this.props.DATE ).then((value) => {
+        if (value == true) {
+          Animated.timing(
+            this.likeValue,
+            {
+              toValue: 1,
+              duration: 250,
+              easing: Easing.linear
+            }).start()
+        } else {
+          Animated.timing(
+            this.likeValue,
+            {
+              toValue: 0,
+              duration: 350,
+              easing: Easing.linear
+            }).start()
+        }
+        this.readyToGetLikes()
+      })
+    }
+  }
+
+  componentWillMount() {
+    this.readyToGetLikes()
+}
+  componentWillUnmount() {
+    this.update = false
+  }
+
+async getLikes(otherUserID, postDate) {
+  return new Promise(function(resolve, reject) {
+    var liked = false
+    try {
+      AsyncStorage.getItem('@userID:key').then((value) => {
+       var UserID = value
+       if (UserID !== null) {
+         var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
+         likesRef.once("value")
+           .then(function(snapshot) {
+             if (snapshot.val() !== null) {
+               snapshot.forEach(function(childSnapshot) {
+                 if (childSnapshot.key == UserID) {
+                  resolve(true)
+                 }
+               })
+               resolve(false)
+             } else {
+               resolve(false)
+             }
+       })
+     }
+     })
+   } catch (error) {
+     // Error retrieving data
+     alert("There was a problem getting posts")
+     resolve(false)
+   }
+
+
+    setTimeout(function() {
+      resolve(false)}, 1000)
+    })
+  }
+}
 
 export default class PostTemplate extends Component {
   componentWillMount() {
@@ -141,7 +232,7 @@ export default class PostTemplate extends Component {
         <PostDetails navigate={this.props.navigate}
           USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
         <DescriptionContainer DESC={this.props.DESC}/>    
-        <TimeStamp DATE={this.props.DATE}/>  
+        <Footer DATE={this.props.DATE}/>  
       </View>
     )
   }
