@@ -1,4 +1,4 @@
-import Interactable from 'react-native-interactable';
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,NetInfo
@@ -13,6 +13,29 @@ const Screen = {
 
 let previousValue = new Animated.Value(500)
 
+import { NavigationActions } from 'react-navigation'
+
+const resetAction = NavigationActions.reset({
+  index: 0,
+  actions: [
+    NavigationActions.navigate({ routeName: 'SignIn'})
+  ]
+})
+
+const navigateAction = NavigationActions.navigate({
+
+  routeName: 'MainNavigation',
+
+  params: {},
+
+  action: NavigationActions.reset({
+  index: 0,
+  actions: [
+    NavigationActions.navigate({ routeName: 'Feed'})
+  ]
+})
+})
+
 export default class SignIn extends Component {
   constructor (props) {
     super(props);
@@ -22,12 +45,23 @@ export default class SignIn extends Component {
     }
   }
 
-tryLogin(Username,password) {
-    login(Username,password).then((result) => {
-        if (result === true) {
-            this.props.updateLoggedInState()
+    componentWillMount() {
+      this.props.navigation.dispatch(resetAction)
+      firebaseApp.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in.
+            
+            try {
+                AsyncStorage.setItem('@userID:key', user.uid);
+            } catch (error) {
+                // Error saving data
+                alert('error saving username')
+            }
+        this.props.navigation.dispatch(navigateAction)
+        } else {
+            // No user is signed in.     
         }
-    })  
+    })
   }
 
   render() {
@@ -47,7 +81,7 @@ tryLogin(Username,password) {
                     secureTextEntry={true}
                     onChange={(event) => this.setState({password: event.nativeEvent.text})}
                     />
-                <TouchableHighlight onPress={() => {this.tryLogin(this.state.Username,this.state.password)}} style={{position: 'absolute', top: 260, left: 100}} underlayColor="#f1f1f1">
+                <TouchableHighlight onPress={() => {login(this.state.Username,this.state.password)}} style={{position: 'absolute', top: 260, left: 100}} underlayColor="#f1f1f1">
                     <Text style={{fontSize: 20}}>Login</Text>
                 </TouchableHighlight>
                 <TouchableHighlight onPress={() => {slidePageLeft()}} style={{position: 'absolute', top: 300, left: 100}} underlayColor="#f1f1f1">
@@ -99,27 +133,6 @@ class SignUpPage extends React.Component {
             } catch (error) {
               // Error saving data
               alert('error saving username')
-              resolve(false)
-            }
-            try {
-             AsyncStorage.setItem('@name:key', name);
-            } catch (error) {
-              // Error saving data
-              alert('error saving username')
-              resolve(false)
-            }
-            try {
-             AsyncStorage.setItem('@username:key', Username);
-            } catch (error) {
-              // Error saving data
-              alert('error saving username')
-              resolve(false)
-            }
-            try {
-             AsyncStorage.setItem('@password:key', password);
-            } catch (error) {
-              // Error saving data
-              alert('error saving password')
               resolve(false)
             }
             resolve(true)
@@ -174,37 +187,9 @@ function login(Username,password) {
             var errorCode = error.code;
             var errorMessage = error.message;
             alert(errorMessage);
+            resolve(false)
         })
-
-        firebaseApp.auth().onAuthStateChanged(function(user) {
-            if (user) {
-            // User is signed in.
-            var user = firebaseApp.auth().currentUser;
-            try {
-                AsyncStorage.setItem('@userID:key', user.uid);
-            } catch (error) {
-                // Error saving data
-                alert('error saving username')
-            }
-            try {
-                AsyncStorage.setItem('@username:key', Username);
-            } catch (error) {
-                // Error saving data
-                alert('error saving username')
-            }
-            try {
-                AsyncStorage.setItem('@password:key', password)
-            } catch (error) {
-                // Error saving data
-                alert('error saving password')
-            }
-            resolve(true)
-            } else {
-                // No user is signed in.
-                resolve(false)
-            }
-        })
-        })
+    })
   }
 
 function slidePageLeft () {

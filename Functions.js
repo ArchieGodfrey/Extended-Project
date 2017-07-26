@@ -89,6 +89,36 @@ getPostPhoto(UserID,Date) {
     })
 }
 
+downloadProfileImages(ID) {
+    return new Promise(function(resolve, reject) {
+        firebaseApp.storage().ref('Users/' + ID).child('Profile').getDownloadURL().then(function(url) {
+            Realurl = url
+            firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
+            Realurl2 = url2
+            resolve([Realurl, url2])
+            }).catch((error) =>  {
+            firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+                Realurl2 = url2
+                resolve([Realurl, Realurl2])
+            })
+            })
+        }).catch((error) => {
+            firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
+            Realurl = url
+            firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
+                Realurl2 = url2
+                resolve([Realurl, url2])
+            }).catch((error) =>  {
+                firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
+                Realurl2 = url2
+                resolve([Realurl, Realurl2])
+                })
+            })
+            })
+        })
+    })
+}
+
 }
 
 function getFollowedUsers(UserID) {
@@ -267,35 +297,7 @@ function downloadProfile(ID) {
     })
 }
 
-function downloadProfileImages(ID) {
-    return new Promise(function(resolve, reject) {
-        firebaseApp.storage().ref('Users/' + ID).child('Profile').getDownloadURL().then(function(url) {
-            Realurl = url
-            firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
-            Realurl2 = url2
-            resolve([Realurl, url2])
-            }).catch((error) =>  {
-            firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-                Realurl2 = url2
-                resolve([Realurl, Realurl2])
-            })
-            })
-        }).catch((error) => {
-            firebaseApp.storage().ref('blackBackground.png').getDownloadURL().then(function(url) {
-            Realurl = url
-            firebaseApp.storage().ref('Users/' + ID).child('Background').getDownloadURL().then(function(url2) {
-                Realurl2 = url2
-                resolve([Realurl, url2])
-            }).catch((error) =>  {
-                firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-                Realurl2 = url2
-                resolve([Realurl, Realurl2])
-                })
-            })
-            })
-        })
-    })
-}
+
 
 
 export default new functions();

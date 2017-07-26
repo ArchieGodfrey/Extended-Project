@@ -24,10 +24,12 @@ class ImageContainer extends Component {
         functions.getFromAsyncStorage("@profileCache:key").then((value) => {
             if (value === null) {
                 functions.getFromAsyncStorage("@userID:key").then((ID) => {
-                    functions.downloadProfileImages(ID).then((urls) => {
-                    this.setState({avatarSource:urls[0]})
-                    this.setState({backgroundSource:urls[1]})
-                })
+                    if (ID !== null) {
+                        functions.downloadProfileImages(ID).then((urls) => {
+                            this.setState({avatarSource:urls[0]})
+                            this.setState({backgroundSource:urls[1]})
+                        })
+                    }
             })
             } else {
                this.setState({avatarSource:value}) 

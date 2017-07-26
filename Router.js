@@ -125,9 +125,13 @@ const BottomNavigation = TabNavigator({
   }
 })
 
-export default MainNavigation = StackNavigator({
+const MainNavigation = StackNavigator({
   Home: {
     screen: BottomNavigation,
+    navigationOptions: {
+      gesturesEnabled : false,
+      animationEnabled: false,
+    }
   },
   UserDetail: {
     screen: UserDetailStack,
@@ -139,10 +143,19 @@ export default MainNavigation = StackNavigator({
   NewPost: {
     screen: NewPostStack,
   },
-  SignIn: {
-    screen: SignIn,
-  }
 }, {
     headerMode: 'none',
     initialRouteName: "Home",
   })
+
+  export default SignInStack = StackNavigator({
+  SignIn: {
+    screen: SignIn,
+  },
+  MainNavigation: {
+    screen:MainNavigation,
+  },
+}, {
+    headerMode: 'none',
+    initialRouteName: "MainNavigation",
+})
