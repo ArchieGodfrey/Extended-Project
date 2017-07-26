@@ -40,10 +40,13 @@
 		827827BB314A4040B128A3FB /* libInteractable.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 113B4212885D46969C1CE53E /* libInteractable.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		A8675C815A5A4ED9BA4604BC /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 150E0231A63B419581460A94 /* libRNImagePicker.a */; };
+<<<<<<< HEAD
 		B41105CF1F294B38004DEA2F /* RSKImageCropper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */; };
 		B41105D01F294B38004DEA2F /* RSKImageCropper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C54C74F139D34BEDB257B78A /* libimageCropPicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BC8DB13524ED4C7BB7CF504E /* libimageCropPicker.a */; };
 		D7272A2DFA1440DA9F71A9AE /* libAutoGrowTextInput.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34962911155E43DA86070B3F /* libAutoGrowTextInput.a */; };
+=======
+>>>>>>> parent of 2d54203... added React-native image picker to newPost component
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -285,22 +288,9 @@
 			remoteGlobalIDString = 014A3B5C1C6CF33500B6D375;
 			remoteInfo = RNImagePicker;
 		};
-		B49C4C5B1F28E6D300AFC2D2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 14F396A704FE494ABC635924 /* imageCropPicker.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3400A8081CEB54A6008A0BC7;
-			remoteInfo = imageCropPicker;
-		};
-		B49C4CA11F291B2600AFC2D2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2D419C564DDD41D6BDBF184C /* AutoGrowTextInput.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D81C36501CDB667F00777FB9;
-			remoteInfo = AutoGrowTextInput;
-		};
 /* End PBXContainerItemProxy section */
 
+<<<<<<< HEAD
 /* Begin PBXCopyFilesBuildPhase section */
 		B41105CB1F2935F1004DEA2F /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -315,6 +305,8 @@
 		};
 /* End PBXCopyFilesBuildPhase section */
 
+=======
+>>>>>>> parent of 2d54203... added React-native image picker to newPost component
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTActionSheet.xcodeproj; path = "../node_modules/react-native/Libraries/ActionSheetIOS/RCTActionSheet.xcodeproj"; sourceTree = "<group>"; };
@@ -337,19 +329,19 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = EPRouter/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = EPRouter/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
-		14F396A704FE494ABC635924 /* imageCropPicker.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = imageCropPicker.xcodeproj; path = "../node_modules/react-native-image-crop-picker/ios/imageCropPicker.xcodeproj"; sourceTree = "<group>"; };
 		150E0231A63B419581460A94 /* libRNImagePicker.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNImagePicker.a; sourceTree = "<group>"; };
 		2C7B2489DDEA4BE2A415AEEB /* libRCTActionSheet.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTActionSheet.a; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* EPRouter-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EPRouter-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* EPRouter-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EPRouter-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D419C564DDD41D6BDBF184C /* AutoGrowTextInput.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = AutoGrowTextInput.xcodeproj; path = "../node_modules/react-native-autogrow-textinput/ios/AutoGrowTextInput.xcodeproj"; sourceTree = "<group>"; };
-		34962911155E43DA86070B3F /* libAutoGrowTextInput.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libAutoGrowTextInput.a; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8E12528616654E00B7B24515 /* libRNFetchBlob.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFetchBlob.a; sourceTree = "<group>"; };
+<<<<<<< HEAD
 		B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RSKImageCropper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC8DB13524ED4C7BB7CF504E /* libimageCropPicker.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libimageCropPicker.a; sourceTree = "<group>"; };
+=======
+>>>>>>> parent of 2d54203... added React-native image picker to newPost component
 		D0DA7DC2615E4181822C13D4 /* RNImagePicker.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNImagePicker.xcodeproj; path = "../node_modules/react-native-image-picker/ios/RNImagePicker.xcodeproj"; sourceTree = "<group>"; };
 		FFD7246B91F547A888861EF8 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/react-native-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -383,8 +375,11 @@
 				B41105CF1F294B38004DEA2F /* RSKImageCropper.framework in Frameworks */,
 				A8675C815A5A4ED9BA4604BC /* libRNImagePicker.a in Frameworks */,
 				5CC4D8E55FCC4F91B163C3B7 /* libRCTActionSheet.a in Frameworks */,
+<<<<<<< HEAD
 				C54C74F139D34BEDB257B78A /* libimageCropPicker.a in Frameworks */,
 				D7272A2DFA1440DA9F71A9AE /* libAutoGrowTextInput.a in Frameworks */,
+=======
+>>>>>>> parent of 2d54203... added React-native image picker to newPost component
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -558,8 +553,6 @@
 				FFD7246B91F547A888861EF8 /* RNFetchBlob.xcodeproj */,
 				057E43AABB8A40588EF2160E /* Interactable.xcodeproj */,
 				D0DA7DC2615E4181822C13D4 /* RNImagePicker.xcodeproj */,
-				14F396A704FE494ABC635924 /* imageCropPicker.xcodeproj */,
-				2D419C564DDD41D6BDBF184C /* AutoGrowTextInput.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -576,7 +569,10 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+<<<<<<< HEAD
 				B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */,
+=======
+>>>>>>> parent of 2d54203... added React-native image picker to newPost component
 				13B07FAE1A68108700A75B9A /* EPRouter */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* EPRouterTests */,
@@ -621,22 +617,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B49C4C581F28E6D300AFC2D2 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				B49C4C5C1F28E6D300AFC2D2 /* libimageCropPicker.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		B49C4C9E1F291B2600AFC2D2 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				B49C4CA21F291B2600AFC2D2 /* libAutoGrowTextInput.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -666,7 +646,10 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+<<<<<<< HEAD
 				B41105CB1F2935F1004DEA2F /* Embed Frameworks */,
+=======
+>>>>>>> parent of 2d54203... added React-native image picker to newPost component
 			);
 			buildRules = (
 			);
@@ -753,14 +736,6 @@
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
-				{
-					ProductGroup = B49C4C9E1F291B2600AFC2D2 /* Products */;
-					ProjectRef = 2D419C564DDD41D6BDBF184C /* AutoGrowTextInput.xcodeproj */;
-				},
-				{
-					ProductGroup = B49C4C581F28E6D300AFC2D2 /* Products */;
-					ProjectRef = 14F396A704FE494ABC635924 /* imageCropPicker.xcodeproj */;
-				},
 				{
 					ProductGroup = B42D2AD91E7C994600A762F9 /* Products */;
 					ProjectRef = 057E43AABB8A40588EF2160E /* Interactable.xcodeproj */;
@@ -1053,20 +1028,6 @@
 			remoteRef = B437395C1EC2212400F707B0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B49C4C5C1F28E6D300AFC2D2 /* libimageCropPicker.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libimageCropPicker.a;
-			remoteRef = B49C4C5B1F28E6D300AFC2D2 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		B49C4CA21F291B2600AFC2D2 /* libAutoGrowTextInput.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libAutoGrowTextInput.a;
-			remoteRef = B49C4CA11F291B2600AFC2D2 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -1216,8 +1177,6 @@
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -1239,8 +1198,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1316,8 +1273,6 @@
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -1347,8 +1302,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1387,8 +1340,6 @@
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.EPRouter-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1413,8 +1364,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
