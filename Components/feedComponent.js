@@ -26,12 +26,20 @@ export default class Timeline extends Component {
       this.setState({dataSource: this.state.dataSource.cloneWithRows(OldPosts)})
     })*/
     functions.getFromAsyncStorage("@userID:key").then((UserID) => {
-      functions.getTimeline(UserID,8).then((MostRecentPosts) => {
+      if (UserID !== null) {
+        functions.getTimeline(UserID,8).then((MostRecentPosts) => {
           this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
           saveCache(MostRecentPosts)
       }) 
+      } else { //Not Logged In
+        this.props.navigation.navigate('SignIn')
+      } 
     })
   }
+
+  transition(location) {
+    this.props.navigation.navigate(location)
+}
 
   render() {
     return(
@@ -49,7 +57,14 @@ export default class Timeline extends Component {
           navigate={this.props.navigation.navigate}/>
         </View>
         }
-      />
+        renderHeader={() => <View style={{backgroundColor:'white', marginTop:(frame.height / 20), 
+        marginBottom:(frame.height / 20),  alignSelf: 'center'}}>
+        <TouchableHighlight onPress={() => {this.transition("NewPost") }}>
+          <Text style={{fontSize: 20}}>New Post</Text>
+        </TouchableHighlight>
+          
+        </View>}
+      />     
     )
   }
 }

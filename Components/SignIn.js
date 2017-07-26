@@ -169,7 +169,6 @@ class SignUpPage extends React.Component {
 
 function login(Username,password) {
     return new Promise(function(resolve, reject) {
-        resolve(true)
         firebaseApp.auth().signInWithEmailAndPassword(Username, password).catch(function(error) {
             // Handle Errors here.
             var errorCode = error.code;

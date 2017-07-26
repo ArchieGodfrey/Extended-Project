@@ -1,9 +1,11 @@
 import React from 'react';
 import { StackNavigator,TabNavigator  } from 'react-navigation';
+import { Image } from 'react-native';
 
 import Feed from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/feedComponent'
 import UserDetail from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/otherUserAccount'
 import Account from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/accountComponent'
+import SignIn from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/SignIn'
 import Search from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/searchComponent'
 import NewPost from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/newPostComponent'
 import Settings from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/settingsComponent'
@@ -33,11 +35,18 @@ const AccountTab = TabNavigator({
     screen: Account,
     navigationOptions: {
       title: 'Account',
+      tabBarIcon: () => (
+      <Image
+        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/UserIcon.png')}
+        style={{resizeMode: 'cover', height:50,width:50}}
+      />
+    ),
     },
   },
   },{
     initialRouteName: "Account",
     tabBarPosition: 'bottom',
+    showIcon:true,
     swipeEnabled: true,
     animationEnabled: true,
     headerMode: 'none',
@@ -45,7 +54,15 @@ const AccountTab = TabNavigator({
     labelStyle: {
       fontSize: 18,
     },
-  }
+      tabs: {
+        Settings: {
+            activeIcon: 
+              <Image source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/SettingsIcon.png')}
+                style={{resizeMode: 'cover', height:20,width:20}}
+              />
+        },
+      }
+    }
   }
 );
 
@@ -74,7 +91,16 @@ const UserDetailStack = StackNavigator({
   }
 );
 
-
+const NewPostStack = StackNavigator({
+  NewPost: {
+    screen: NewPost,
+    navigationOptions: {
+      title: 'Edit Post',
+      header: ({state}) => ({backTitle: null, tintColor:'black'})
+    },
+  }
+  }
+);
 
 const BottomNavigation = TabNavigator({
   Account: {
@@ -111,11 +137,10 @@ export default MainNavigation = StackNavigator({
     },
   },
   NewPost: {
-    screen: NewPost,
-    navigationOptions: {
-      title: 'Create a post',
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
-    },
+    screen: NewPostStack,
+  },
+  SignIn: {
+    screen: SignIn,
   }
 }, {
     headerMode: 'none',
