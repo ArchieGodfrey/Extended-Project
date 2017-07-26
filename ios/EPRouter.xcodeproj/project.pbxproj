@@ -40,10 +40,8 @@
 		827827BB314A4040B128A3FB /* libInteractable.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 113B4212885D46969C1CE53E /* libInteractable.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		A8675C815A5A4ED9BA4604BC /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 150E0231A63B419581460A94 /* libRNImagePicker.a */; };
-		B41105C91F2935F1004DEA2F /* RSKImageCropper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49C4C791F28E88100AFC2D2 /* RSKImageCropper.framework */; };
-		B41105CA1F2935F1004DEA2F /* RSKImageCropper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B49C4C791F28E88100AFC2D2 /* RSKImageCropper.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B41105CC1F2935F4004DEA2F /* QBImagePicker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49C4C7D1F28E88600AFC2D2 /* QBImagePicker.framework */; };
-		B41105CD1F2935F4004DEA2F /* QBImagePicker.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B49C4C7D1F28E88600AFC2D2 /* QBImagePicker.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B41105CF1F294B38004DEA2F /* RSKImageCropper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */; };
+		B41105D01F294B38004DEA2F /* RSKImageCropper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C54C74F139D34BEDB257B78A /* libimageCropPicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BC8DB13524ED4C7BB7CF504E /* libimageCropPicker.a */; };
 		D7272A2DFA1440DA9F71A9AE /* libAutoGrowTextInput.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 34962911155E43DA86070B3F /* libAutoGrowTextInput.a */; };
 /* End PBXBuildFile section */
@@ -310,8 +308,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				B41105CA1F2935F1004DEA2F /* RSKImageCropper.framework in Embed Frameworks */,
-				B41105CD1F2935F4004DEA2F /* QBImagePicker.framework in Embed Frameworks */,
+				B41105D01F294B38004DEA2F /* RSKImageCropper.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -351,8 +348,7 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8E12528616654E00B7B24515 /* libRNFetchBlob.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFetchBlob.a; sourceTree = "<group>"; };
-		B49C4C791F28E88100AFC2D2 /* RSKImageCropper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RSKImageCropper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B49C4C7D1F28E88600AFC2D2 /* QBImagePicker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = QBImagePicker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RSKImageCropper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC8DB13524ED4C7BB7CF504E /* libimageCropPicker.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libimageCropPicker.a; sourceTree = "<group>"; };
 		D0DA7DC2615E4181822C13D4 /* RNImagePicker.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNImagePicker.xcodeproj; path = "../node_modules/react-native-image-picker/ios/RNImagePicker.xcodeproj"; sourceTree = "<group>"; };
 		FFD7246B91F547A888861EF8 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/react-native-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
@@ -381,11 +377,10 @@
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
-				B41105CC1F2935F4004DEA2F /* QBImagePicker.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				1A3C3DFB9B8F49DB8735D049 /* libRNFetchBlob.a in Frameworks */,
 				827827BB314A4040B128A3FB /* libInteractable.a in Frameworks */,
-				B41105C91F2935F1004DEA2F /* RSKImageCropper.framework in Frameworks */,
+				B41105CF1F294B38004DEA2F /* RSKImageCropper.framework in Frameworks */,
 				A8675C815A5A4ED9BA4604BC /* libRNImagePicker.a in Frameworks */,
 				5CC4D8E55FCC4F91B163C3B7 /* libRCTActionSheet.a in Frameworks */,
 				C54C74F139D34BEDB257B78A /* libimageCropPicker.a in Frameworks */,
@@ -581,8 +576,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				B49C4C7D1F28E88600AFC2D2 /* QBImagePicker.framework */,
-				B49C4C791F28E88100AFC2D2 /* RSKImageCropper.framework */,
+				B41105CE1F294B38004DEA2F /* RSKImageCropper.framework */,
 				13B07FAE1A68108700A75B9A /* EPRouter */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* EPRouterTests */,
@@ -1469,7 +1463,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1504,7 +1498,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
