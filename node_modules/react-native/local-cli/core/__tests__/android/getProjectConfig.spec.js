@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const getProjectConfig = require('../../config/android').projectConfig;
+const getProjectConfig = require('../../android').projectConfig;
 const mockFs = require('mock-fs');
 const mocks = require('../../__fixtures__/android');
 
@@ -14,6 +14,9 @@ describe('android::getProjectConfig', () => {
     },
     flat: {
       android: mocks.valid,
+    },
+    multiple: {
+      android: mocks.userConfigManifest,
     },
     noManifest: {
       android: {},
@@ -39,6 +42,16 @@ describe('android::getProjectConfig', () => {
     it('flat structure', () => {
       const userConfig = {};
       const folder = 'flat';
+
+      expect(getProjectConfig(folder, userConfig)).not.toBe(null);
+      expect(typeof getProjectConfig(folder, userConfig)).toBe('object');
+    });
+
+    it('multiple', () => {
+      const userConfig = {
+        manifestPath: 'src/main/AndroidManifest.xml'
+      };
+      const folder = 'multiple';
 
       expect(getProjectConfig(folder, userConfig)).not.toBe(null);
       expect(typeof getProjectConfig(folder, userConfig)).toBe('object');

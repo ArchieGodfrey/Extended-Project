@@ -6,7 +6,6 @@
 #include <fbsystrace.h>
 #endif
 
-#include <folly/String.h>
 #include <glog/logging.h>
 
 #include "JavaScriptCore.h"
@@ -30,7 +29,8 @@ JSValueRef functionCaller(
 }
 
 JSClassRef createFuncClass(JSContextRef ctx) {
-  auto definition = kJSClassDefinitionEmpty;
+  JSClassDefinition definition = kJSClassDefinitionEmpty;
+  definition.attributes |= kJSClassAttributeNoAutomaticPrototype;
   // Need to duplicate the two different finalizer blocks, since there's no way
   // for it to capture this static information.
   if (isCustomJSCPtr(ctx)) {
@@ -67,6 +67,51 @@ JSObjectRef makeFunction(
 }
 
 }
+
+void JSException::buildMessage(JSContextRef ctx, JSValueRef exn, JSStringRef sourceURL, const char* errorMsg) {
+  std::ostringstream msgBuilder;
+  if (errorMsg && strlen(errorMsg) > 0) {
+    msgBuilder << errorMsg << ": ";
+  }
+
+  Value exnValue = Value(ctx, exn);
+  msgBuilder << exnValue.toString().str();
+
+  // The null/empty-ness of source tells us if the JS came from a
+  // file/resource, or was a constructed statement.  The location
+  // info will include that source, if any.
+  std::string locationInfo = sourceURL != nullptr ? String::ref(ctx, sourceURL).str() : "";
+  Object exnObject = exnValue.asObject();
+  auto line = exnObject.getProperty("line");
+  if (line != nullptr && line.isNumber()) {
+    if (locationInfo.empty() && line.asInteger() != 1) {
+      // If there is a non-trivial line number, but there was no
+      // location info, we include a placeholder, and the line
+      // number.
+      locationInfo = folly::to<std::string>("<unknown file>:", line.asInteger());
+    } else if (!locationInfo.empty()) {
+      // If there is location info, we always include the line
+      // number, regardless of its value.
+      locationInfo += folly::to<std::string>(":", line.asInteger());
+    }
+  }
+
+  if (!locationInfo.empty()) {
+    msgBuilder << " (" << locationInfo << ")";
+  }
+
+  auto exceptionText = msgBuilder.str();
+  LOG(ERROR) << "Got JS Exception: " << exceptionText;
+  msg_ = std::move(exceptionText);
+
+  Value jsStack = exnObject.getProperty("stack");
+  if (jsStack.isString()) {
+    auto stackText = jsStack.toString().str();
+    LOG(ERROR) << "Got JS Stack: " << stackText;
+    stack_ = std::move(stackText);
+  }
+}
+
 
 JSObjectRef makeFunction(
     JSContextRef ctx,
@@ -107,7 +152,7 @@ void installGlobalProxy(
     const char* name,
     JSObjectGetPropertyCallback callback) {
   JSClassDefinition proxyClassDefintion = kJSClassDefinitionEmpty;
-  proxyClassDefintion.className = "_FBProxyClass";
+  proxyClassDefintion.attributes |= kJSClassAttributeNoAutomaticPrototype;
   proxyClassDefintion.getProperty = callback;
 
   const bool isCustomJSC = isCustomJSCPtr(ctx);
@@ -122,14 +167,11 @@ void removeGlobal(JSGlobalContextRef ctx, const char* name) {
   Object::getGlobalObject(ctx).setProperty(name, Value::makeUndefined(ctx));
 }
 
-JSValueRef evaluateScript(JSContextRef context, JSStringRef script, JSStringRef source) {
-  #ifdef WITH_FBSYSTRACE
-  fbsystrace::FbSystraceSection s(TRACE_TAG_REACT_CXX_BRIDGE, "evaluateScript");
-  #endif
+JSValueRef evaluateScript(JSContextRef context, JSStringRef script, JSStringRef sourceURL) {
   JSValueRef exn, result;
-  result = JSC_JSEvaluateScript(context, script, NULL, source, 0, &exn);
+  result = JSC_JSEvaluateScript(context, script, NULL, sourceURL, 0, &exn);
   if (result == nullptr) {
-    formatAndThrowJSException(context, exn, source);
+    throw JSException(context, exn, sourceURL);
   }
   return result;
 }
@@ -139,50 +181,11 @@ JSValueRef evaluateSourceCode(JSContextRef context, JSSourceCodeRef source, JSSt
   JSValueRef exn, result;
   result = JSEvaluateSourceCode(context, source, NULL, &exn);
   if (result == nullptr) {
-    formatAndThrowJSException(context, exn, sourceURL);
+    throw JSException(context, exn, sourceURL);
   }
   return result;
 }
 #endif
-
-void formatAndThrowJSException(JSContextRef context, JSValueRef exn, JSStringRef source) {
-  Value exception = Value(context, exn);
-  std::string exceptionText = exception.toString().str();
-
-  // The null/empty-ness of source tells us if the JS came from a
-  // file/resource, or was a constructed statement.  The location
-  // info will include that source, if any.
-  std::string locationInfo = source != nullptr ? String::ref(context, source).str() : "";
-  Object exObject = exception.asObject();
-  auto line = exObject.getProperty("line");
-  if (line != nullptr && line.isNumber()) {
-    if (locationInfo.empty() && line.asInteger() != 1) {
-      // If there is a non-trivial line number, but there was no
-      // location info, we include a placeholder, and the line
-      // number.
-      locationInfo = folly::to<std::string>("<unknown file>:", line.asInteger());
-    } else if (!locationInfo.empty()) {
-      // If there is location info, we always include the line
-      // number, regardless of its value.
-      locationInfo += folly::to<std::string>(":", line.asInteger());
-    }
-  }
-
-  if (!locationInfo.empty()) {
-    exceptionText += " (" + locationInfo + ")";
-  }
-
-  LOG(ERROR) << "Got JS Exception: " << exceptionText;
-
-  Value jsStack = exObject.getProperty("stack");
-  if (jsStack.isNull() || !jsStack.isString()) {
-    throwJSExecutionException("%s", exceptionText.c_str());
-  } else {
-    LOG(ERROR) << "Got JS Stack: " << jsStack.toString().str();
-    throwJSExecutionExceptionWithStack(
-        exceptionText.c_str(), jsStack.toString().str().c_str());
-  }
-}
 
 JSValueRef translatePendingCppExceptionToJSError(JSContextRef ctx, const char *exceptionLocation) {
   std::ostringstream msg;
