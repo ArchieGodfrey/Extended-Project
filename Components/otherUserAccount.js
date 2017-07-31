@@ -317,7 +317,7 @@ export default class OtherAccountContents extends Component {
             <Text style={{fontSize: 20, color: "white"}}>{this.state.following}</Text>
           </TouchableHighlight>
         </View>
-        <Interactable.View style={{flex:1}}>
+        <View style={{flex:1}}>
           <ListView
             enableEmptySections={true}
             onScroll={() => {this.showList()}}
@@ -325,7 +325,7 @@ export default class OtherAccountContents extends Component {
             contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
             dataSource={this.state.dataSource}
             renderRow={(rowData, sec, i) =>
-            <Interactable.View style={{alignSelf: 'flex-start', width:(window.width / 2) - 20}}
+            <View style={{alignSelf: 'flex-start', width:(window.width / 2) - 20}}
               snapPoints={[{x: (i % 2) === 0 ? 0 : window.width / 2 }, {x: (i % 2) === 0 ?  window.width / 2 : window.width }]}>
               <Text style={{fontSize: 25}}> {rowData.TITLE}</Text>
               <TouchableHighlight
@@ -334,14 +334,14 @@ export default class OtherAccountContents extends Component {
                     style={{resizeMode: 'cover', width: window.width / 2, height: window.height / 6}} source={{uri: rowData.URI}}/>
               </TouchableHighlight>
               <Text style={{fontSize: 15}}> {rowData.DESC !== null ? rowData.DESC.slice(0,45) : "Loading" }...</Text>
-            </Interactable.View>
+            </View>
             }
             renderFooter={() => <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
             <Text style={{height: window.height}}>                           </Text>
             <Text style={{fontSize: 20}}>Nothing more to see here...</Text>
             </View>}
           />
-      </Interactable.View>
+      </View>
 
         <Animated.View style={{flexGrow:1, position:'absolute', backgroundColor:'white', transform: [{translateX: this.postXValue}]}}>
           <TouchableHighlight
@@ -363,11 +363,11 @@ export default class OtherAccountContents extends Component {
             </View>}
           />
         </Animated.View>
-        <Interactable.View style={{width:40,height:40,backgroundColor:'#21c064',justifyContent:'center'}} initialPosition={{x: window.width - (window.width / 5), y: window.height - (window.height / 3)}} boundaries={{top:0, bottom:window.height - 50,left: 0, right: window.width - 80}} frictionAreas={[{damping: 0.4}]}>
+        <View style={{width:40,height:40,backgroundColor:'#21c064',justifyContent:'center'}} initialPosition={{x: window.width - (window.width / 5), y: window.height - (window.height / 3)}} boundaries={{top:0, bottom:window.height - 50,left: 0, right: window.width - 80}} frictionAreas={[{damping: 0.4}]}>
           <TouchableHighlight style={{justifyContent:'center'}} onPress={() => this.followUser(this.state.otherUserID)} underlayColor="#f1f1f1">
                 <Image style={{height: 40, width: 40}}source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/EditIcon.png')}/>
             </TouchableHighlight>
-          </Interactable.View>
+          </View>
       </View>
     )
   }

@@ -82,11 +82,9 @@ const SearchStack = StackNavigator({
 const UserDetailStack = StackNavigator({
   UserDetail: {
     screen: UserDetail,
-    navigationOptions: {
-      title: ({state}) => `${state.params.USERID}`,
-      headerLeft: ({state}) => ({backTitle: "Back", tintColor:'black'}),
-      headerBackTitle:"test"
-    },
+    navigationOptions: ({ navigation }) => ({
+      title: `${navigation.state.params.USERID}`,
+    }),
   }
   }
 );
@@ -135,10 +133,10 @@ const MainNavigation = StackNavigator({
   },
   UserDetail: {
     screen: UserDetailStack,
-    navigationOptions: {
-      title: ({state}) => `${state.params.USERID}`,
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
-    },
+    navigationOptions: ({ navigation }) => ({
+      title: `${navigation.state.params.USERID}`,
+      header: ({navigation}) => ({backTitle: null, tintColor:'black'})
+    }),
   },
   NewPost: {
     screen: NewPostStack,

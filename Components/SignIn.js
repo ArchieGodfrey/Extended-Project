@@ -46,7 +46,7 @@ export default class SignIn extends Component {
   }
 
     componentWillMount() {
-      this.props.navigation.dispatch(resetAction)
+      //this.props.navigation.dispatch(resetAction)
       firebaseApp.auth().onAuthStateChanged((user) => {
         if (user) {
             // User is signed in.
