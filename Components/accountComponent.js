@@ -83,9 +83,8 @@ class PostPreview extends Component {
         return (
             <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
                 <Text style={{fontSize: 25}}> {this.props.TITLE}</Text>
-                <TouchableHighlight onPress={() => {this.showPosts(), 
-                    this.listView.scrollTo({ x:frame.width * i, y:0, animated:false })}}>
-                    <Image
+                <TouchableHighlight onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
+                    <Image 
                         style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} 
                         source={{uri: this.state.imageSource}}/>
                 </TouchableHighlight>
@@ -106,6 +105,7 @@ class AccountPosts extends Component {
     }
 
     componentWillMount() { 
+        const {navigate} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
             functions.getAllUserPosts(ID).then((UserPosts) => { 
                 this.setState({USERID:ID})
@@ -126,7 +126,8 @@ class AccountPosts extends Component {
                 renderRow={(rowData, sec, i) =>
                 <View style={{alignSelf: 'flex-start', width:(frame.width / 2) - 20}}>
                     <PostPreview TITLE={rowData.TITLE} DESC={rowData.DESC} 
-                        USERID={this.state.USERID} DATE={rowData.DATE}/>
+                        USERID={this.state.USERID} DATE={rowData.DATE}
+                        navigate={this.props.navigate}/>
                 </View>
                 }
                 renderFooter={() => <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
@@ -170,16 +171,13 @@ class AccountDetails extends Component {
     }
 }
 
-class postDetails extends Component {
-    //Complete Post Component First
-}
-
 export default class AccountContents extends Component {
     render() {
+        const {navigate} = this.props;
         return(
             <View style={{flex:1,justifyContent:'center'}}>
                 <ImageContainer />
-                <AccountPosts />
+                <AccountPosts navigate={this.props.navigation.navigate}/>
             </View>
         )
     }
