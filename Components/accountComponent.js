@@ -68,7 +68,7 @@ class PostPreview extends Component {
     constructor (props) {
     super(props);
     this.state = {
-      imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
+      imageSource:"null", 
     }
   }
 
@@ -80,17 +80,27 @@ class PostPreview extends Component {
     } 
 
     render() {
-        return (
-            <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
-                <Text style={{fontSize: 25}}> {this.props.TITLE}</Text>
+        if (this.state.imageSource == "null") {
+            return (
                 <TouchableHighlight onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
-                    <Image 
-                        style={{resizeMode: 'cover', width: frame.width / 2, height: frame.height / 6}} 
-                        source={{uri: this.state.imageSource}}/>
+                <View style={{alignSelf: 'flex-start', width:(frame.width / 2.5),borderColor:'grey',
+                    borderBottomWidth:1}}>
+                    <Text style={{fontSize: 25}}>{this.props.TITLE}</Text>
+                    <Text style={{fontSize: 15}}>{this.props.DESC !== null ? this.props.DESC.slice(0,50) : "Loading" }...</Text>
+                </View>
                 </TouchableHighlight>
-                <Text style={{fontSize: 15}}> {this.props.DESC !== null ? this.props.DESC.slice(0,45) : "Loading" }...</Text>
-            </View>
-        )
+            )
+        } else {
+            return (
+                <TouchableHighlight onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
+                <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
+                    <Image 
+                        style={{resizeMode: 'cover', height: frame.height / 6}} 
+                        source={{uri: this.state.imageSource}}/>
+                </View>
+                </TouchableHighlight>
+            )
+        }
     }
 }
 
@@ -124,7 +134,8 @@ class AccountPosts extends Component {
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
                 renderRow={(rowData, sec, i) =>
-                <View style={{alignSelf: 'flex-start', width:(frame.width / 2) - 20}}>
+                <View style={{marginTop:(frame.width / 40), marginLeft:(frame.width / 40), 
+                    marginRight:(frame.width / 40)}}>
                     <PostPreview TITLE={rowData.TITLE} DESC={rowData.DESC} 
                         USERID={this.state.USERID} DATE={rowData.DATE}
                         navigate={this.props.navigate}/>
