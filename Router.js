@@ -35,12 +35,6 @@ const AccountTab = TabNavigator({
     screen: Account,
     navigationOptions: {
       title: 'Account',
-      tabBarIcon: () => (
-      <Image
-        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/UserIcon.png')}
-        style={{resizeMode: 'cover', height:50,width:50}}
-      />
-    ),
     },
   },
   },{
@@ -51,17 +45,10 @@ const AccountTab = TabNavigator({
     animationEnabled: true,
     headerMode: 'none',
     tabBarOptions: {
-    labelStyle: {
-      fontSize: 18,
-    },
-      tabs: {
-        Settings: {
-            activeIcon: 
-              <Image source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/SettingsIcon.png')}
-                style={{resizeMode: 'cover', height:20,width:20}}
-              />
-        },
-      }
+      activeTintColor: '#000000',
+      labelStyle: {
+        fontSize: 18,
+      },
     }
   }
 );
@@ -71,7 +58,6 @@ const SearchStack = StackNavigator({
     screen: Search,
     navigationOptions: {
       title: 'Search',
-      header: ({state}) => ({backTitle: null, tintColor:'black'}),
     },
   }
   }, {
@@ -94,13 +80,12 @@ const NewPostStack = StackNavigator({
     screen: NewPost,
     navigationOptions: {
       title: 'Edit Post',
-      header: ({state}) => ({backTitle: null, tintColor:'black'})
     },
   }
   }
 );
 
-const BottomNavigation = TabNavigator({
+const TopNavigation = TabNavigator({
   Account: {
     screen:  AccountTab,
   },
@@ -114,18 +99,20 @@ const BottomNavigation = TabNavigator({
     initialRouteName: "Feed",
     tabBarPosition: 'top',
     swipeEnabled: true,
+    showIcon:false,
     animationEnabled: true,
     headerMode: 'none',
     tabBarOptions: {
-    labelStyle: {
-      fontSize: 18,
-    },
-  }
+      activeTintColor: '#000000',
+      labelStyle: {
+        fontSize: 18,
+      },
+    }
 })
 
 const MainNavigation = StackNavigator({
   Home: {
-    screen: BottomNavigation,
+    screen: TopNavigation,
     navigationOptions: {
       gesturesEnabled : false,
       animationEnabled: false,

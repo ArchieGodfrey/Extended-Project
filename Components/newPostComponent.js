@@ -1,19 +1,40 @@
-  import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
-  import dismissKeyboard from 'dismissKeyboard'
-  import RNFetchBlob from 'react-native-fetch-blob'
-  import ImagePicker from 'react-native-image-crop-picker';
-  
-  import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
-  import React, { Component } from 'react';
-  import {
-    Alert,Text,View,Animated,Easing,Modal,Image,ListView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,KeyboardAvoidingView
-  } from 'react-native';
-  
-  var moment = require('moment');
-  var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
-  
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
+import dismissKeyboard from 'dismissKeyboard'
+import RNFetchBlob from 'react-native-fetch-blob'
+import ImagePicker from 'react-native-image-crop-picker';
+
+import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
+import React, { Component } from 'react';
+import {
+  Alert,Text,View,Animated,Easing,Modal,Image,ListView, ScrollView,TouchableHighlight,TouchableWithoutFeedback,Platform, TextInput,AsyncStorage,Dimensions,KeyboardAvoidingView
+} from 'react-native';
+
+var moment = require('moment');
+var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
+
+const frame = Dimensions.get('window');
+
+// Prepare Blob support
+const Blob = RNFetchBlob.polyfill.Blob
+const fs = RNFetchBlob.fs
+window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
+window.Blob = Blob
+
+const PostRequirements = {
+  PictureValid:false,PictureURI:"",TitleValid:false,Title:"",
+  DescValid:false,Desc:"",Day:"",Month:"",Year:"",Time:""
+}
+
   
  class ImageContainer extends Component {
+  constructor (props) {
+     super(props);
+     this.state = {
+       imageSource:"null", 
+     }
+   }
+
    chooseImage() {
      ImagePicker.openPicker({
        width:(frame.width),
@@ -21,6 +42,8 @@
        cropping: true,
        compressImageQuality:1,
      }).then(image => {
+       PostRequirements.PictureValid = true
+       PostRequirements.PictureURI = image.path
        this.setState({imageSource: image.path})
      });
    }
@@ -51,7 +74,8 @@
    constructor (props) {
      super(props);
      this.state = {
-       avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
+       avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png",
+       title:"", 
      }
    }
  
@@ -61,6 +85,17 @@
          this.setState({avatarSource:URI})
        })
      })
+   }
+
+   checkTitle(title) {
+     this.setState({title: title.replace(/\r?\n|\r/g,"")})
+     temp = this.state.title.replace(/\s/g,'')
+     if (temp.length > 0) {
+      PostRequirements.TitleValid = true
+      PostRequirements.Title = this.state.title
+     } else {
+       PostRequirements.TitleValid = false
+     }
    }
  
    render() {
@@ -72,9 +107,13 @@
             ,marginBottom:(frame.height / 160)}}> 
            <AutoGrowingTextInput style={{fontSize:22, height:(frame.height / 20)}} 
              placeholder={'Title'}
-              maxHeight={200}
-             minHeight={45}
-             />
+              maxHeight={frame.height / 10}
+              minHeight={frame.height / 20}
+              maxLength={50}
+              value={this.state.title}
+              onEndEditing={(event) => this.checkTitle(event.nativeEvent.text)}
+              onChange={(event) => this.checkTitle(event.nativeEvent.text)}
+              />
             <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
               marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
               <Text style={{fontSize:16,color:'grey'}}>
@@ -88,6 +127,22 @@
   }
   
   class DescriptionContainer extends Component {
+    constructor (props) {
+     super(props);
+     this.state = {
+       desc:""
+     }
+   }
+    checkDesc(desc) {
+      this.setState({desc: desc.replace(/\r?\n|\r/g,"")})
+      temp = this.state.desc.replace(/\s/g,'')
+      if (temp.length > 0) {
+        PostRequirements.DescValid = true
+        PostRequirements.Desc = this.state.desc
+      } else {
+        PostRequirements.DescValid = false
+      }
+   }
 
     render() {
       return(
@@ -95,9 +150,13 @@
         marginTop: (frame.height / 80), marginLeft:(frame.width / 10), marginRight:(frame.width / 10)}} >
          <AutoGrowingTextInput style={{fontSize:20, height:(frame.height / 20)}}
             placeholder={'Description'}
-            maxHeight={200}
-           minHeight={45}
-            maxLength={300}/>
+            maxHeight={frame.height / 5}
+            minHeight={frame.height / 20}
+            maxLength={300}
+            value={this.state.desc}
+            onChange={(event) => this.checkDesc(event.nativeEvent.text)}
+            onEndEditing={(event) => this.checkDesc(event.nativeEvent.text)}
+            />
         </View>
         
      )
@@ -107,65 +166,27 @@
   class Footer extends Component {
     constructor (props) {
       super(props);
-     this.state = {
-       day:"",
-       month:"",
-       year:"",
-       time:"",
-     }
+      this.state = {
+        day:"",
+        month:"",
+        year:"",
+        time:"",
+      }
     }
-  
-   checkAllDates() {
-     if (this.state.day !== "") {
-       if (this.state.month !== "") {
-         if (this.state.year !== "") {
-           if (this.state.time !== "") {
-             if (this.state.year.length === 4) {
-               if (this.state.year < moment().format('YYYY')) {
-                 this.setState({year: ""})
-                 alert('Must expire in the future!') 
-               } else if (this.state.year = moment().format('YYYY')) { //If it is this year, days matter
-                 if (this.state.month >= moment().format('MM')) {
-                   if (this.state.day >= moment().format('DD')) {
-                     if (this.state.time.length == 5) {
-                       if (moment().format('HH:mm') > this.state.time) {
-                         this.setState({time: ""}) 
-                         alert('Must expire in the future!')
-                       } else {
-                         dismissKeyboard();
-                       }
-                     }
-                   } else {
-                     this.setState({day: ""})
-                     alert('Must expire in the future!')
-                   }
-                 } else {
-                   this.setState({month: ""})
-                   alert('Must expire in the future!') 
-                 }
-               }  else {
-                 if (this.state.day !== "") {
-                   if (this.state.month !== "") {
-                     if (this.state.time.length == 5) {
-                       if (moment().format('HH:mm') > this.state.time) {
-                         this.setState({time: ""}) 
-                         alert('Must expire in the future!')
-                       } else {
-                         dismissKeyboard();
-                       }
-                     }
-                   }
-                 }
-               }
-             } 
-           }
-         }
-       }
-     }
+
+    checkDay(day) {
+      this.setState({day: day})
+      PostRequirements.Day = day
+    }
+
+    checkMonth(month) {
+      this.setState({month: month})
+      PostRequirements.Month = month
     }
   
    checkYear(year) {
      this.setState({year: year})
+     PostRequirements.Year = year
      if (year.length === 4) {
        if (year < moment().format('YYYY')) {
          this.setState({year: ""})
@@ -177,46 +198,46 @@
    checkTime(time) {
      this.setState({time: time})
      temp = time.replace(':','')
+     PostRequirements.Time = temp
      if ((temp.length > 1) && (temp.length < 3)) {
        this.setState({time: temp.concat(':')})
      }   
-   } 
+  }
  
     render() {
+      const {navigate} = this.props;
       return(
        <View style={{alignSelf:'center', marginTop: (frame.height / 80),flexDirection:'column'}}>
          <Text style={{fontSize:12}}>Expiration Date</Text>
          <View style={{alignSelf:'center',flexDirection:'row'}}>
            <TextInput style={{fontSize:20, height:(frame.height / 20), width:(frame.width / 10), marginLeft:(frame.width / 40)}}
-           placeholder={moment().format('DD')}
-           keyboardType={"number-pad"}
-           value={this.state.day}
-           onEndEditing={() => {this.checkAllDates()}}
-           onChange={(event) => this.setState({day:event.nativeEvent.text})}
-            maxLength={2}/>
+              placeholder={moment().format('DD')}
+              keyboardType={"number-pad"}
+              value={this.state.day}
+              onChange={(event) => this.checkDay(event.nativeEvent.text)}
+              maxLength={2}/>
            <TextInput style={{fontSize:20, height:(frame.height / 20), width:(frame.width / 10), marginLeft:(frame.width / 40)}}
-           placeholder={moment().format('MM')}
-           keyboardType={"number-pad"}
-           value={this.state.month}
-           onEndEditing={() => {this.checkAllDates()}}
-           onChange={(event) => this.setState({month:event.nativeEvent.text})}
-            maxLength={2}/>
+              placeholder={moment().format('MM')}
+              keyboardType={"number-pad"}
+              value={this.state.month}
+              onChange={(event) => this.checkMonth(event.nativeEvent.text)}
+              maxLength={2}/>
            <TextInput style={{fontSize:20, height:(frame.height / 20), width:(frame.width / 6), marginLeft:(frame.width / 40)}}
-           placeholder={moment().format('YYYY')}
-           keyboardType={"number-pad"}
-           value={this.state.year}
-           onEndEditing={() => {this.checkAllDates()}}
-           onChange={(event) => this.checkYear(event.nativeEvent.text)}
-            maxLength={4}/>
+              placeholder={moment().format('YYYY')}
+              keyboardType={"number-pad"}
+              value={this.state.year}
+              onChange={(event) => this.checkYear(event.nativeEvent.text)}
+              maxLength={4}/>
            <TextInput style={{fontSize:20, height:(frame.height / 20), width:(frame.width / 6), marginLeft:(frame.width / 40)}}
-           placeholder={moment().format('HH:mm')}
-           keyboardType={"number-pad"}
-           value={this.state.time}
-           onEndEditing={() => {this.checkAllDates()}}
-           onChange={(event) => this.checkTime(event.nativeEvent.text)}
-           maxLength={5}/>
+              placeholder={moment().format('HH:mm')}
+              keyboardType={"number-pad"}
+              value={this.state.time}
+              onChange={(event) => this.checkTime(event.nativeEvent.text)}
+              maxLength={5}/>
          </View>
-         <TouchableHighlight style={{alignSelf:'center',paddingTop:(frame.height / 40)}}>
+         <TouchableHighlight onPress={() => {newPost().then((result) => 
+           {if (result == true) {this.props.navigate("Home")}})}} 
+           style={{alignSelf:'center',paddingTop:(frame.height / 40)}}>
            <Text style={{fontSize:20}}>Upload Post</Text>
          </TouchableHighlight>
         </View>
@@ -224,15 +245,179 @@
     }
   }
   
-  export default class NewPostTemplate extends Component {
+  class NewPostTemplate extends Component {
     render() {
+      const {navigate} = this.props;
       return(
-       <KeyboardAvoidingView style={{flex:1,backgroundColor:'white'}} behavior='position'>
+        <KeyboardAvoidingView  behavior='position'>
           <ImageContainer />
           <PostDetails />
           <DescriptionContainer />    
-          <Footer />  
-       </KeyboardAvoidingView>
+          <Footer navigate={this.props.navigate}/>  
+        </KeyboardAvoidingView>
       )
     } 
  }
+
+ export default class NewPostContainer extends Component {
+   render() {
+      return(
+        
+          <ScrollView keyboardShouldPersistTaps="never" scrollEnabled={false}>
+            <NewPostTemplate navigate={this.props.navigation.navigate}/>
+          </ScrollView>
+        
+      )
+   }
+ }
+
+function newPost () {
+  return new Promise((resolve, reject) => {
+  if (checkRequirements() == true) {
+    var timeKey = moment().format('MMDDYYYYHHmmss')
+    var expirationDate = (PostRequirements.Month +
+      PostRequirements.Day + PostRequirements.Year + PostRequirements.Time)
+    var title = PostRequirements.Title
+    var desc = PostRequirements.Desc
+    functions.getFromAsyncStorage("@userID:key").then((UserID) => {
+      var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts")
+      postsRef.child(timeKey).update({
+        title: title,
+        desc: desc,
+        expiration: expirationDate,
+      });
+      if (PostRequirements.PictureURI !== "") {
+        uploadImage(UserID, timeKey, PostRequirements.PictureURI)
+      }
+      clearTimeout(timeOut)
+      resolve(true)
+    })  
+  } 
+    var timeOut = setTimeout(function() {
+    resolve(null)}, 10000)
+  })
+}
+
+function uploadImage(userID, loc, uri, mime = 'application/octet-stream') {
+   return new Promise((resolve, reject) => {
+     const uploadUri =  Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+     let uploadBlob = null
+     const imageRef = firebaseApp.storage().ref('Users/' + userID).child(loc)
+
+     fs.readFile(uploadUri, 'base64')
+       .then((data) => {
+         return Blob.build(data, { type: `${mime};BASE64` })
+       })
+       .then((blob) => {
+         uploadBlob = blob
+         return imageRef.put(blob, { contentType: mime })
+       })
+       .then(() => {
+         uploadBlob.close()
+         return imageRef.getDownloadURL()
+       })
+       .then((url) => {
+         resolve(url)
+       })
+       .catch((error) => {
+         reject(error)
+     })
+   })
+  }
+
+function checkRequirements() {
+  if (PostRequirements.TitleValid == true) {
+    if (PostRequirements.PictureValid == true) {//Desc not needed
+      if ((PostRequirements.Day == "") && (PostRequirements.Month == "") 
+        && (PostRequirements.Year == "") && (PostRequirements.Time == "")) {//No expiration date given
+        return true
+      } else {
+        if (checkAllDates() == true) {
+          return true
+        } else {
+          alert("There's something wrong with the expiration date")
+          return false
+        }
+      }
+    } else if (PostRequirements.DescValid == true) {//Picture not needed
+      if ((PostRequirements.Day == "") && (PostRequirements.Month == "") 
+        && (PostRequirements.Year == "") && (PostRequirements.Time == "")) {//No expiration date given
+        return true
+      } else {
+        if (checkAllDates() == true) {
+          return true
+        } else {
+          alert("There's something wrong with the expiration date")
+          return false
+        }
+      }
+    } else {
+      alert('Must have a picture or a description at least')
+    }
+  } else {
+    alert('Missing a title')
+  }
+}
+
+function checkAllDates() {
+  if (PostRequirements.Year !== "") {
+    if (PostRequirements.Month !== "") {
+      if (PostRequirements.Day !== "") {
+        if (PostRequirements.Time !== "") {//if there
+          if (checkGroupDate() == "FUTURE") {//In the future
+            if (moment(PostRequirements.Time, "HHmm",true).isValid() == true) {
+              return true//Valid time
+            }
+          } else if (checkGroupDate() == "CURRENT") {//Today
+            if (PostRequirements.Time > moment().format("HHmm")) {//Check it's a future time
+              if (moment(PostRequirements.Time, "HHmm",true).isValid() == true) {
+                return true//Valid time
+              }
+            } else {
+              return false//Invalid time
+            }
+          }   
+        }
+      }
+    }
+  }
+}
+
+function checkGroupDate() {
+  if (checkDate(PostRequirements.Year,'YYYY') == "FUTURE") {//in a future year
+    if (checkDate(PostRequirements.Month,'MM') !== "INVALID") {
+      if (checkDate(PostRequirements.Day,'DD') !== "INVALID") {
+        return "FUTURE"
+      }
+    }
+  } else if (checkDate(PostRequirements.Year,'YYYY') == "CURRENT") {//if this year
+    if (checkDate(PostRequirements.Month,'MM') == "FUTURE") {//in a future month
+      if (checkDate(PostRequirements.Day,'DD') !== "INVALID") {
+        return "FUTURE"
+      }
+    } else if (checkDate(PostRequirements.Month,'MM') == "CURRENT") {//if this month
+      if (checkDate(PostRequirements.Day,'DD') == "FUTURE") {//on a future day
+        return "FUTURE" 
+      } else if (checkDate(PostRequirements.Day,'DD') == "CURRENT") {//today
+        return "CURRENT"
+      }
+    }
+  }
+} 
+
+function checkDate(data,format) {
+  if (moment(data, format,true).isValid() == true) {
+    if (data < moment().format(format)) { //If earlier 
+      return "PAST"
+    } else 
+    if (data == moment().format(format)) {//If current
+      return "CURRENT"
+    } else 
+    if (data > moment().format(format)) {//If future
+      return 'FUTURE'
+    }
+  } else {
+    return 'INVALID'
+  }
+}
+

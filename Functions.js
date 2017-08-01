@@ -26,6 +26,14 @@ getFromAsyncStorage(key) {
     })
 }
 
+setItemAsyncStorage(key, data) {
+    try {
+        AsyncStorage.setItem(key, data);
+    } catch (error) {
+        // Error saving data
+    }
+}
+
 getAllUserPosts(UserID) {
     return new Promise(function(resolve, reject) {
         getAllPostDetails(UserID).then((PostList) => {

@@ -29,6 +29,8 @@ class ImageContainer extends Component {
                         functions.downloadProfileImages(ID).then((urls) => {
                             this.setState({avatarSource:urls[0]})
                             this.setState({backgroundSource:urls[1]})
+                            functions.setItemAsyncStorage("@profileCache:key",urls[0])
+                            functions.setItemAsyncStorage("@backgroundCache:key",urls[1])
                         })
                     }
             })
