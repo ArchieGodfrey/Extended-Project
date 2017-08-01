@@ -113,10 +113,6 @@ const TopNavigation = TabNavigator({
 const MainNavigation = StackNavigator({
   Home: {
     screen: TopNavigation,
-    navigationOptions: {
-      gesturesEnabled : false,
-      animationEnabled: false,
-    }
   },
   UserDetail: {
     screen: UserDetailStack,

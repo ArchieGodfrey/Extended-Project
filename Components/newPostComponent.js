@@ -4,6 +4,7 @@ import dismissKeyboard from 'dismissKeyboard'
 import RNFetchBlob from 'react-native-fetch-blob'
 import ImagePicker from 'react-native-image-crop-picker';
 
+import { NavigationActions } from 'react-navigation'
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import React, { Component } from 'react';
 import {
@@ -14,6 +15,7 @@ var moment = require('moment');
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
 const frame = Dimensions.get('window');
+const backAction = NavigationActions.back({})
 
 // Prepare Blob support
 const Blob = RNFetchBlob.polyfill.Blob
@@ -205,7 +207,7 @@ const PostRequirements = {
   }
  
     render() {
-      const {navigate} = this.props;
+      const {dispatch} = this.props;
       return(
        <View style={{alignSelf:'center', marginTop: (frame.height / 80),flexDirection:'column'}}>
          <Text style={{fontSize:12}}>Expiration Date</Text>
@@ -236,7 +238,7 @@ const PostRequirements = {
               maxLength={5}/>
          </View>
          <TouchableHighlight onPress={() => {newPost().then((result) => 
-           {if (result == true) {this.props.navigate("Home")}})}} 
+           {if (result == true) {this.props.dispatch(backAction)}})}} 
            style={{alignSelf:'center',paddingTop:(frame.height / 40)}}>
            <Text style={{fontSize:20}}>Upload Post</Text>
          </TouchableHighlight>
@@ -247,13 +249,13 @@ const PostRequirements = {
   
   class NewPostTemplate extends Component {
     render() {
-      const {navigate} = this.props;
+      const {dispatch} = this.props;
       return(
         <KeyboardAvoidingView  behavior='position'>
           <ImageContainer />
           <PostDetails />
           <DescriptionContainer />    
-          <Footer navigate={this.props.navigate}/>  
+          <Footer dispatch={this.props.dispatch}/>  
         </KeyboardAvoidingView>
       )
     } 
@@ -262,11 +264,9 @@ const PostRequirements = {
  export default class NewPostContainer extends Component {
    render() {
       return(
-        
           <ScrollView keyboardShouldPersistTaps="never" scrollEnabled={false}>
-            <NewPostTemplate navigate={this.props.navigation.navigate}/>
-          </ScrollView>
-        
+            <NewPostTemplate dispatch={this.props.navigation.dispatch}/>
+          </ScrollView>  
       )
    }
  }

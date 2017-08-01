@@ -1,4 +1,5 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
+import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
   AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,NetInfo
@@ -13,15 +14,6 @@ const Screen = {
 
 let previousValue = new Animated.Value(500)
 
-import { NavigationActions } from 'react-navigation'
-
-const resetAction = NavigationActions.reset({
-  index: 0,
-  actions: [
-    NavigationActions.navigate({ routeName: 'SignIn'})
-  ]
-})
-
 const navigateAction = NavigationActions.navigate({
 
   routeName: 'MainNavigation',
@@ -31,9 +23,9 @@ const navigateAction = NavigationActions.navigate({
   action: NavigationActions.reset({
   index: 0,
   actions: [
-    NavigationActions.navigate({ routeName: 'Feed'})
-  ]
-})
+      NavigationActions.navigate({ routeName: 'Feed'})
+    ]
+  })
 })
 
 export default class SignIn extends Component {
@@ -46,11 +38,10 @@ export default class SignIn extends Component {
   }
 
     componentWillMount() {
-      //this.props.navigation.dispatch(resetAction)
       firebaseApp.auth().onAuthStateChanged((user) => {
         if (user) {
             // User is signed in.
-            
+            alert('signed in')
             try {
                 AsyncStorage.setItem('@userID:key', user.uid);
             } catch (error) {

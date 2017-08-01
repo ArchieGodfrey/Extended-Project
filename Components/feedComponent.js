@@ -1,5 +1,6 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
+import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
@@ -10,6 +11,14 @@ var moment = require('moment');
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database"); require("firebase/storage");
 
 const frame = Dimensions.get('window');
+
+const resetAction = NavigationActions.reset({
+    index: 0,
+    actions: [
+        NavigationActions.navigate({ routeName: 'SignIn' }),
+    ],
+    key: null
+});
 
 export default class Timeline extends Component {
   constructor (props) {
@@ -32,7 +41,7 @@ export default class Timeline extends Component {
           saveCache(MostRecentPosts)
       }) 
       } else { //Not Logged In
-        this.props.navigation.navigate('SignIn')
+        this.props.navigation.dispatch(resetAction)
       } 
     })
   }
