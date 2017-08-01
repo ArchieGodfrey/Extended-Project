@@ -127,6 +127,23 @@ downloadProfileImages(ID) {
     })
 }
 
+getExpirationDate(UserID,Date) {
+    return new Promise(function(resolve, reject) {
+       getPostFromFireBase(UserID,Date,"/expiration").then((data) => {
+           if (data !== "") {
+                clearTimeout(timeOut)
+                resolve(data)
+           } else {
+                clearTimeout(timeOut)
+                resolve(null)
+           }
+       }) 
+    let timeOut = setTimeout(function() {
+        resolve(null)}
+        , 10000)
+    })
+}
+
 }
 
 function getFollowedUsers(UserID) {

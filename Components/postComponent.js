@@ -112,26 +112,41 @@ class DescriptionContainer extends Component {
 class Footer extends Component {
   constructor (props) {
     super(props);
+    this.state = {
+      expirationDate:null, 
+    }
   }
 
   componentWillMount() {
-    const { DATE } = this.props;
+    const { USERID,DATE } = this.props;
+    functions.getExpirationDate(USERID,DATE).then((data) => {
+      this.setState({expirationDate:data})
+    })
   }
 
   render() {
-    return(
-      <View style={{marginTop: (frame.height / 80), alignSelf:'flex-end',flexDirection:'row'}}>
-        <Text style={{alignSelf:'flex-start',paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>2 Comments</Text>
-        <View style={{flexDirection:'row',marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
+    if (this.state.expirationDate !== null) {
+      return(
+      <View style={{marginTop: (frame.height / 40), alignSelf:'center',flexDirection:'row'}}>
+        <Text style={{paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>2 Comments</Text>
+        <View style={{flexDirection:'row',marginBottom: (frame.height / 40)}} >
         <Image
-          style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
+          style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} 
+          source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
         <Text style={{paddingLeft:(frame.width / 80),fontSize:16,color:'grey'}}>
-          {moment(this.props.DATE, "MMDDYYYYHHmmss").format('MMMM Do YYYY, HH:mm')}
+          {moment(this.state.expirationDate, "MMDDYYYYHHmm").format('MMMM Do YYYY, HH:mm')}
         </Text>
         </View>
       </View>
-      
     )
+    } else {
+      return(
+      <View style={{marginTop: (frame.height / 40), alignSelf:'center',flexDirection:'row'}}>
+        <Text style={{paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>2 Comments</Text>
+      </View>
+    )
+    }
+    
   }
 }
 
@@ -227,12 +242,12 @@ export default class PostTemplate extends Component {
 
   render() {
     return(
-      <View style={{flex:1,backgroundColor:'white'}}>
+      <View style={{flex:1,backgroundColor:'white', paddingBottom:(frame.height / 40)}}>
         <ImageContainer USERID={this.props.USERID} DATE={this.props.DATE}/>
         <PostDetails navigate={this.props.navigate}
           USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
         <DescriptionContainer DESC={this.props.DESC}/>    
-        <Footer DATE={this.props.DATE}/>  
+        <Footer USERID={this.props.USERID} DATE={this.props.DATE}/>  
       </View>
     )
   }
