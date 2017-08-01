@@ -76,7 +76,7 @@ class PostDetails extends Component {
           <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
             marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
             <Text style={{fontSize:16,color:'grey'}}>
-              {moment(this.props.DATE, "MMDDYYYYhmmss").format('MMMM Do YYYY')}
+              {moment(this.props.DATE, "MMDDYYYYHHmmss").format('MMMM Do YYYY, HH:mm')}
             </Text>
           </View>
         </View>
@@ -126,7 +126,7 @@ class Footer extends Component {
         <Image
           style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
         <Text style={{paddingLeft:(frame.width / 80),fontSize:16,color:'grey'}}>
-          {moment(this.props.DATE, "MMDDYYYYhmmss").format('MMMM Do YYYY, h:mm')}
+          {moment(this.props.DATE, "MMDDYYYYHHmmss").format('MMMM Do YYYY, HH:mm')}
         </Text>
         </View>
       </View>
@@ -227,7 +227,7 @@ export default class PostTemplate extends Component {
 
   render() {
     return(
-      <View style={{flex:1,marginBottom:(frame.height / 40)}}>
+      <View style={{flex:1,backgroundColor:'white'}}>
         <ImageContainer USERID={this.props.USERID} DATE={this.props.DATE}/>
         <PostDetails navigate={this.props.navigate}
           USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
