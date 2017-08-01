@@ -1,4 +1,5 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
+import dismissKeyboard from 'dismissKeyboard'
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
@@ -14,19 +15,13 @@ const Screen = {
 
 let previousValue = new Animated.Value(500)
 
-const navigateAction = NavigationActions.navigate({
-
-  routeName: 'MainNavigation',
-
-  params: {},
-
-  action: NavigationActions.reset({
-  index: 0,
-  actions: [
-      NavigationActions.navigate({ routeName: 'Feed'})
-    ]
-  })
-})
+const resetAction = NavigationActions.reset({
+    index: 0,
+    actions: [
+        NavigationActions.navigate({ routeName: 'MainNavigation' }),
+    ],
+    key: null
+});
 
 export default class SignIn extends Component {
   constructor (props) {
@@ -41,14 +36,13 @@ export default class SignIn extends Component {
       firebaseApp.auth().onAuthStateChanged((user) => {
         if (user) {
             // User is signed in.
-            alert('signed in')
             try {
                 AsyncStorage.setItem('@userID:key', user.uid);
             } catch (error) {
                 // Error saving data
                 alert('error saving username')
             }
-        this.props.navigation.dispatch(navigateAction)
+        this.props.navigation.dispatch(resetAction)
         } else {
             // No user is signed in.     
         }
@@ -180,6 +174,7 @@ function login(Username,password) {
             alert(errorMessage);
             resolve(false)
         })
+        dismissKeyboard()
     })
   }
 
