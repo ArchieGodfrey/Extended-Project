@@ -10,6 +10,7 @@ import Search from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Compone
 import NewPost from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/newPostComponent'
 import Settings from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/settingsComponent'
 import AccountPosts from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/AccountPostsComponent'
+import EditAccount from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/editAccountComponent'
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
@@ -126,17 +127,16 @@ const MainNavigation = StackNavigator({
     screen: TopNavigation,
   },
   UserDetail: {
-    screen: UserDetailStack,
-    navigationOptions: ({ navigation }) => ({
-      title: `${navigation.state.params.USERID}`,
-      header: ({navigation}) => ({backTitle: null, tintColor:'black'})
-    }),
+    screen: UserDetail,
   },
   NewPost: {
     screen: NewPostStack,
   },
   AccountPosts: {
     screen: AccountPosts,
+  },
+  EditAccount: {
+    screen: EditAccount,
   },
 }, {
     headerMode: 'none',

@@ -22,6 +22,7 @@ class ImageContainer extends Component {
     }
 
     componentDidMount() {
+        const {navigate} = this.props;
         functions.getFromAsyncStorage("@profileCache:key").then((value) => {
             if (value === null) {
                 functions.getFromAsyncStorage("@userID:key").then((ID) => {
@@ -47,15 +48,18 @@ class ImageContainer extends Component {
 
     render() {
         return(
+            
             <View style={{flex:0.5,alignItems:'center',justifyContent:'center'}}>
                 <Image
                 style={{position: 'absolute', top:0, left:0, right:0,resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  
                 blurRadius={2} 
                 source={{uri: this.state.backgroundSource}}/>
                 <View style={{alignItems:'center'}}>
-                    <Image 
-                style={{resizeMode: 'cover', height: (frame.width / 4), width: (frame.width / 4)}}
-                source={{uri: this.state.avatarSource}}/>
+                    <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate('EditAccount')}}>
+                      <Image 
+                        style={{resizeMode: 'cover', height: (frame.width / 4), width: (frame.width / 4)}}
+                        source={{uri: this.state.avatarSource}}/>
+                    </TouchableHighlight>
                     <AccountDetails/>
                 </View>
                 
@@ -82,7 +86,7 @@ class PostPreview extends Component {
     render() {
         if (this.state.imageSource == "null") {
             return (
-                <TouchableHighlight onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
                 <View style={{alignSelf: 'flex-start', width:(frame.width / 2.5),borderColor:'grey',
                     borderBottomWidth:1}}>
                     <Text style={{fontSize: 25}}>{this.props.TITLE}</Text>
@@ -92,7 +96,7 @@ class PostPreview extends Component {
             )
         } else {
             return (
-                <TouchableHighlight onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
                 <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
                     <Image 
                         style={{resizeMode: 'cover', height: frame.height / 6}} 
@@ -187,7 +191,7 @@ export default class AccountContents extends Component {
         const {navigate} = this.props;
         return(
             <View style={{flex:1,justifyContent:'center'}}>
-                <ImageContainer />
+                <ImageContainer navigate={this.props.navigation.navigate}/>
                 <AccountPosts navigate={this.props.navigation.navigate}/>
             </View>
         )

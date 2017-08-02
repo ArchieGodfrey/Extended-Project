@@ -1,6 +1,8 @@
 import {
-  AsyncStorage,Platform
+  AsyncStorage,Platform,Dimensions
 } from 'react-native';
+import ImagePicker from 'react-native-image-crop-picker';
+const frame = Dimensions.get('window');
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database"); require("firebase/storage")
 
@@ -141,6 +143,19 @@ getExpirationDate(UserID,Date) {
     let timeOut = setTimeout(function() {
         resolve(null)}
         , 10000)
+    })
+}
+
+chooseImage(HEIGHT,WIDTH) {
+    return new Promise(function(resolve, reject) {
+        ImagePicker.openPicker({
+            width:WIDTH,
+            height:HEIGHT,
+            cropping: true,
+            compressImageQuality:1,
+        }).then(image => {
+            resolve(image.path)
+        });
     })
 }
 

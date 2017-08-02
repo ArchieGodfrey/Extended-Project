@@ -16,6 +16,14 @@ const resetAction = NavigationActions.reset({
     ],
     key: null
 });
+const navigateAction = NavigationActions.navigate({
+
+  routeName: 'EditAccount',
+
+  params: {},
+
+  action: NavigationActions.navigate({ routeName: 'EditAccount'})
+})
 
 class OptionsContainer extends Component {
     render() {
@@ -24,7 +32,11 @@ class OptionsContainer extends Component {
             <View>
                 <TouchableHighlight onPress={() => 
                     {logOut().then(() => {this.props.dispatch(resetAction)})}}>
-                    <Text style={{fontSize:20}}>Log Out</Text>
+                    <Text style={{fontSize:20,paddingBottom:(frame.height / 20)}}>Log Out</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={() => 
+                    {this.props.dispatch(navigateAction)}}>
+                    <Text style={{fontSize:20}}>Edit Account</Text>
                 </TouchableHighlight>
             </View>
         )
@@ -35,7 +47,7 @@ class RequestContainer extends Component {
     render() {
         return(
             <View>
-                <Text style={{fontSize:20}}>Requests</Text>
+                <Text style={{fontSize:20,paddingBottom:(frame.height / 20)}}>Requests</Text>
             </View>
         )
     }
