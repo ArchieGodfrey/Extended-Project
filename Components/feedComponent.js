@@ -3,7 +3,7 @@ import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
-  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
+  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView,RefreshControl, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
 
 var moment = require('moment');
@@ -26,6 +26,7 @@ export default class Timeline extends Component {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
       dataSource: ds.cloneWithRows([]),
+      refreshing: false,
     }
   }
 
@@ -50,6 +51,19 @@ export default class Timeline extends Component {
     this.props.navigation.navigate(location)
 }
 
+  _onRefresh() {
+      this.setState({refreshing: true});
+      functions.getFromAsyncStorage("@userID:key").then((UserID) => {
+        if (UserID !== null) {
+          functions.getTimeline(UserID,8).then((MostRecentPosts) => {
+            this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
+            //saveCache(MostRecentPosts)
+            this.setState({refreshing: false});
+          })
+        }
+      })  
+    }
+
   render() {
     return(
         <ListView
@@ -59,6 +73,11 @@ export default class Timeline extends Component {
         contentContainerStyle={{flexDirection: 'column'}}
         horizontal={false}
         dataSource={this.state.dataSource}
+        refreshControl={
+          <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh.bind(this)}
+          />}
         renderRow={(rowData, s, i) =>
         <View >
           <PostComponent USERID={rowData.USERID} TITLE={rowData.TITLE} 

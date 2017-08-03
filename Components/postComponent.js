@@ -20,10 +20,18 @@ class ImageContainer extends Component {
 
   componentWillMount() {
     const { USERID,DATE } = this.props;
-      functions.getPostPhoto(this.props.USERID,DATE).then((URI) => {
-        this.setState({imageSource:URI})
-      }) 
+    functions.getPostPhoto(this.props.USERID,this.props.DATE).then((URI) => {
+      this.setState({imageSource:URI})
+    }) 
   } 
+
+  componentWillReceiveProps(nextProps) {
+    functions.getPostPhoto(nextProps.USERID,nextProps.DATE).then((URI) => {
+        if (this.state.imageSource !== URI) {
+            this.setState({imageSource:URI})
+        }
+    }) 
+  }
 
   render() {
     if (this.state.imageSource !== null) {
@@ -56,6 +64,14 @@ class PostDetails extends Component {
     })
   }
 
+  componentWillReceiveProps(nextProps) {
+    functions.getProfilePicture(nextProps.USERID).then((URI) => {
+      if (this.state.avatarSource !== URI) {
+        this.setState({avatarSource:URI})
+      }
+    })
+  }
+
   transition(location) {
     this.props.navigate('UserDetail', { USERID:  this.props.USERID })
 }
@@ -76,7 +92,7 @@ class PostDetails extends Component {
           <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
             marginBottom: (frame.height / 40), marginRight:(frame.width / 10)}} >
             <Text style={{fontSize:16,color:'grey'}}>
-              {moment(this.props.DATE, "MMDDYYYYHHmmss").format('MMMM Do YYYY, HH:mm')}
+              {moment(this.props.DATE, "YYYYMMDDHHmmss").format('MMMM Do YYYY, HH:mm')}
             </Text>
           </View>
         </View>
@@ -136,7 +152,7 @@ class Footer extends Component {
           style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} 
           source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
         <Text style={{paddingLeft:(frame.width / 80),fontSize:16,color:'grey'}}>
-          {moment(this.state.expirationDate, "MMDDYYYYHHmm").format('MMMM Do YYYY, HH:mm')}
+          {moment(this.state.expirationDate, "YYYYMMDDHHmm").format('MMMM Do YYYY, HH:mm')}
         </Text>
         </View>
       </View>

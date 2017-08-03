@@ -192,11 +192,13 @@ chooseImage(HEIGHT,WIDTH) {
 function checkExpiration(UserID,Date) {
     return new Promise(function(resolve, reject) {
         getExpirationDate(UserID,Date).then((expirationDate) => {
-            if ((expirationDate <= moment().format('MMDDYYYYHHmm')) && (expirationDate !== "")) {
+            if ((expirationDate <= moment().format('YYYYMMDDHHmm')) && (expirationDate !== "")) {
                 var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts")
                 postsRef.child(Date).remove()
                 var imageRef = firebaseApp.storage().ref('Users/' + UserID).child(Date)
-                imageRef.child(Date).delete()
+                if (imageRef !== null) {
+                    imageRef.delete()
+                } 
                 clearTimeout(timeOut)
                 resolve(true)
             } else {
@@ -324,10 +326,10 @@ async function sortPosts(UserPosts) {
     return new Promise(function(resolve, reject) {
         UserPosts.sort((num1, num2) => {
         if (num1.DATE < num2.DATE) {
-            return 1;
+            return -1;
         }
         if (num1.DATE > num2.DATE) {
-            return -1;
+            return 1;
         }
         // a must be equal to b
         return 0;

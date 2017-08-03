@@ -2,7 +2,7 @@ import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Func
 import ImagePicker from 'react-native-image-crop-picker';
 import React, { Component } from 'react';
 import {
-  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
+  AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView,ScrollView,RefreshControl, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
 } from 'react-native';
 
 var moment = require('moment');
@@ -22,28 +22,18 @@ class ImageContainer extends Component {
     }
 
     componentDidMount() {
-        const {navigate} = this.props;
-        //functions.getFromAsyncStorage("@profileCache:key").then((value) => {//Cache needs to update across devices
-            //if (value === null) {
+        const {navigate,update} = this.props;
                 functions.getFromAsyncStorage("@userID:key").then((ID) => {
                     if (ID !== null) {
-                        functions.downloadProfileImages(ID).then((urls) => {
-                            this.setState({avatarSource:urls[0]})
-                            this.setState({backgroundSource:urls[1]})
-                            //functions.setItemAsyncStorage("@profileCache:key",urls[0])
-                            //functions.setItemAsyncStorage("@backgroundCache:key",urls[1])
+                        var updateRef = firebaseApp.database().ref("UserID/"+ ID)
+                        updateRef.on("value", (snapshot) => {
+                            functions.downloadProfileImages(ID).then((urls) => {
+                                this.setState({avatarSource:urls[0]})
+                                this.setState({backgroundSource:urls[1]})
+                            })
                         })
                     }
             })
-            //} else {
-               //this.setState({avatarSource:value}) 
-            //}
-        //})
-        //functions.getFromAsyncStorage("@backgroundCache:key").then((value) => {
-            //if (value !== null) {
-               // this.setState({backgroundSource:value})
-            //}
-        //})
     }
 
     render() {
@@ -83,6 +73,14 @@ class PostPreview extends Component {
         }) 
     } 
 
+    componentWillReceiveProps(nextProps) {
+        functions.getPostPhoto(nextProps.USERID,nextProps.DATE).then((URI) => {
+            if (this.state.imageSource !== URI) {
+                this.setState({imageSource:URI})
+            }
+        }) 
+    }
+
     render() {
         if (this.state.imageSource == null) {
             return (
@@ -115,19 +113,30 @@ class AccountPosts extends Component {
         this.state = {
             dataSource: ds.cloneWithRows([]),
             USERID:"",
+            refreshing: false,
         }
     }
 
     componentWillMount() { 
-        const {navigate} = this.props;
+        const {navigate,update} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
             functions.getAllUserPosts(ID).then((UserPosts) => { 
                 this.setState({USERID:ID})
                 this.setState({dataSource: this.state.dataSource.cloneWithRows(UserPosts)})
-            })
+            })        
         })
-        
-    } 
+    }
+
+    _onRefresh() {
+        this.setState({refreshing: true});
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            functions.getAllUserPosts(ID).then((UserPosts) => { 
+                this.setState({USERID:ID})
+                this.setState({dataSource: this.state.dataSource.cloneWithRows(UserPosts)})
+                this.setState({refreshing: false});
+            })        
+        })
+    }
 
     render() {
         return(
@@ -137,6 +146,11 @@ class AccountPosts extends Component {
                 style={{backgroundColor:'white'}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
+                refreshControl={
+                <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._onRefresh.bind(this)}
+                />}
                 renderRow={(rowData, sec, i) =>
                 <View style={{marginTop:(frame.width / 80), marginLeft:(frame.width / 80), 
                     marginRight:(frame.width / 40)}}>
@@ -166,11 +180,11 @@ class AccountDetails extends Component {
     componentWillMount() {
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
             var nameRef = firebaseApp.database().ref("UserID/"+ ID + "/Name")
-            nameRef.once('value', (nameSnapshot) => {
+            nameRef.on('value', (nameSnapshot) => {
                 this.setState({name: nameSnapshot.val()});
             });
             var descRef = firebaseApp.database().ref("UserID/"+ ID + "/ProfDesc")
-            descRef.once('value', (descSnapshot) => {
+            descRef.on('value', (descSnapshot) => {
                 this.setState({desc: descSnapshot.val()});
             });
         })

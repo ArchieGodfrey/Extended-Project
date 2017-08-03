@@ -237,7 +237,7 @@ const PostRequirements = {
               onChange={(event) => this.checkTime(event.nativeEvent.text)}
               maxLength={5}/>
          </View>
-         <TouchableHighlight onPress={() => {newPost().then((result) => 
+         <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {newPost().then((result) => 
            {if (result == true) {this.props.dispatch(backAction)}})}} 
            style={{alignSelf:'center',paddingTop:(frame.height / 40)}}>
            <Text style={{fontSize:20}}>Upload Post</Text>
@@ -251,7 +251,7 @@ const PostRequirements = {
     render() {
       const {dispatch} = this.props;
       return(
-        <KeyboardAvoidingView  behavior='position'>
+        <KeyboardAvoidingView  behavior='padding'>
           <ImageContainer />
           <PostDetails />
           <DescriptionContainer />    
@@ -264,7 +264,7 @@ const PostRequirements = {
  export default class NewPostContainer extends Component {
    render() {
       return(
-          <ScrollView keyboardShouldPersistTaps="never" scrollEnabled={false}>
+          <ScrollView keyboardShouldPersistTaps="never">
             <NewPostTemplate dispatch={this.props.navigation.dispatch}/>
           </ScrollView>  
       )
@@ -274,9 +274,9 @@ const PostRequirements = {
 function newPost () {
   return new Promise((resolve, reject) => {
   if (checkRequirements() == true) {
-    var timeKey = moment().format('MMDDYYYYHHmmss')
-    var expirationDate = (PostRequirements.Month +
-      PostRequirements.Day + PostRequirements.Year + PostRequirements.Time)
+    var timeKey = moment().format('YYYYMMDDHHmmss')
+    var expirationDate = (PostRequirements.Year +
+      PostRequirements.Month + PostRequirements.Day + PostRequirements.Time)
     var title = PostRequirements.Title
     var desc = PostRequirements.Desc
     functions.getFromAsyncStorage("@userID:key").then((UserID) => {
