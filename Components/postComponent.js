@@ -120,7 +120,9 @@ class Footer extends Component {
   componentWillMount() {
     const { USERID,DATE } = this.props;
     functions.getExpiration(USERID,DATE).then((data) => {
-      this.setState({expirationDate:data})
+      if (data !== "NEVER") {
+        this.setState({expirationDate:data})
+      }
     })
   }
 
