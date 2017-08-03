@@ -91,7 +91,41 @@ class PostDetails extends Component {
 
   transition(location) {
     this.props.navigate('UserDetail', { USERID:  this.props.USERID })
-}
+  }
+
+  postOptionsPressed() {
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      if (ID == this.props.USERID) {
+        Alert.alert(
+          'Post Options',
+          "Are you sure you would like to delete this post?",
+          [
+            {text: 'Delete', onPress: () => {
+              var postsRef = firebaseApp.database().ref("UserID/"+ ID + "/posts")
+              postsRef.child(this.props.DATE).remove()
+            }},
+            {text: 'Cancel', style: 'cancel'},
+          ],
+            { cancelable: true }
+        ) 
+      } else {
+        Alert.alert(
+        'Post Options',
+        "Whats wrong with this post?",
+        [
+          {text: 'Report', onPress: () => {
+            /*
+            var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts")
+            postsRef.child(postDate).remove()
+            resolve()*/
+          }},
+          {text: 'Cancel', style: 'cancel'},
+        ],
+        { cancelable: true }
+      )
+      }
+    })
+  }
 
   render() {
     return(
@@ -115,9 +149,11 @@ class PostDetails extends Component {
         </View>
         <View style={{flexDirection:"column", alignItems:'center',paddingLeft:(frame.height / 40)}}>
           <LikeComponent USERID={this.props.USERID} DATE={this.props.DATE} />
-          <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
-            width: (frame.width / 6),marginTop:(frame.height / 80)}} 
-            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
+           <TouchableHighlight onPress={() => this.postOptionsPressed()}>
+            <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
+              width: (frame.width / 6),marginTop:(frame.height / 80)}} 
+              source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
+          </TouchableHighlight>
         </View>
       </View>
       
