@@ -126,7 +126,14 @@ class AccountPosts extends Component {
             functions.getAllUserPosts(ID).then((UserPosts) => { 
                 this.setState({USERID:ID})
                 this.setState({dataSource: this.state.dataSource.cloneWithRows(UserPosts)})
-            })        
+            }) 
+            var updateRef = firebaseApp.database().ref("UserID/"+ ID + "/posts")
+            updateRef.on("child_removed", (snapshot) => {
+                functions.getAllUserPosts(ID).then((UserPosts) => { 
+                    this.setState({USERID:ID})
+                    this.setState({dataSource: this.state.dataSource.cloneWithRows(UserPosts)})
+                }) 
+            })       
         })
     }
 

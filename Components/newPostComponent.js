@@ -111,7 +111,7 @@ const PostRequirements = {
              placeholder={'Title'}
               maxHeight={frame.height / 10}
               minHeight={frame.height / 20}
-              maxLength={50}
+              maxLength={40}
               value={this.state.title}
               onEndEditing={(event) => this.checkTitle(event.nativeEvent.text)}
               onChange={(event) => this.checkTitle(event.nativeEvent.text)}
@@ -154,7 +154,7 @@ const PostRequirements = {
             placeholder={'Description'}
             maxHeight={frame.height / 5}
             minHeight={frame.height / 20}
-            maxLength={300}
+            maxLength={325}
             value={this.state.desc}
             onChange={(event) => this.checkDesc(event.nativeEvent.text)}
             onEndEditing={(event) => this.checkDesc(event.nativeEvent.text)}

@@ -129,7 +129,7 @@ class PostDetails extends Component {
 
   render() {
     return(
-      <View style={{flexDirection:'row',marginLeft:(frame.width / 40),marginTop:(frame.width / 40)}} >
+      <View style={{flexDirection:'row', flexWrap: 'wrap',marginLeft:(frame.width / 40),marginTop:(frame.width / 40), paddingRight:(frame.width / 40)}} >
         <TouchableHighlight onPress={() => {if (this.props.DATE !== null) {this.transition("UserDetail")}}}>
           <Image style={{resizeMode: 'cover', height: (frame.height / 10), 
             width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
@@ -137,7 +137,7 @@ class PostDetails extends Component {
         
         <View style={{flexDirection:'column',marginTop:(frame.height / 80),marginLeft:(frame.height / 80)
           ,marginBottom:(frame.height / 160)}}> 
-          <Text style={{fontSize:22}}>
+          <Text style={{fontSize:22,width:(frame.width / 2)}}>
             {this.props.TITLE}
           </Text>
           <View style={{alignSelf:'flex-end',flexDirection:'row', marginTop: (frame.height / 80), 
@@ -149,7 +149,7 @@ class PostDetails extends Component {
         </View>
         <View style={{flexDirection:"column", alignItems:'center',paddingLeft:(frame.height / 40)}}>
           <LikeComponent USERID={this.props.USERID} DATE={this.props.DATE} />
-           <TouchableHighlight onPress={() => this.postOptionsPressed()}>
+           <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => this.postOptionsPressed()}>
             <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
               width: (frame.width / 6),marginTop:(frame.height / 80)}} 
               source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
@@ -235,24 +235,7 @@ class LikeComponent extends Component {
     this.likeValue = new Animated.Value(0)
   }
 
-  render() {
-    return (
-      <TouchableHighlight underlayColor="#F1F1F1"  
-        onPress={() => likePost(this.props.USERID,this.props.DATE)}> 
-        <View style={{alignItems:'center'}}>
-          <Animated.Image style={{opacity: this.likeValue,
-            resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
-            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
-          <Animated.Image style={{opacity: 1 / this.likeValue, position:'absolute',
-            resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
-            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikeIcon.png')}/>
-          <Text style={{fontSize:18,paddingTop:(frame.height / 160)}}>{this.state.likeCount}</Text>
-        </View>
-      </TouchableHighlight>
-    );
-  }
-
-  updateImage(USERID,DATE) {
+    updateImage(USERID,DATE) {
     checkIfLiked(USERID,DATE ).then((value) => {
       if (value == true) {
         Animated.timing(
@@ -262,7 +245,7 @@ class LikeComponent extends Component {
             duration: 250,
             easing: Easing.linear
           }).start()
-      } else {
+      } else if (value == false) {
         Animated.timing(
           this.likeValue,
           {
@@ -286,6 +269,28 @@ class LikeComponent extends Component {
       }
       this.updateImage(this.props.USERID,this.props.DATE)
     })
+  }
+
+  componentWillUnmount() {
+    var likesRef = firebaseApp.database().ref("UserID/"+ this.props.USERID + "/posts/" + this.props.DATE).child("likedBy")
+    likesRef.off()
+  }
+
+  render() {
+    return (
+      <TouchableHighlight underlayColor="#F1F1F1"  
+        onPress={() => likePost(this.props.USERID,this.props.DATE)}> 
+        <View style={{alignItems:'center'}}>
+          <Animated.Image style={{opacity: this.likeValue,
+            resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
+          <Animated.Image style={{opacity: 1 / this.likeValue, position:'absolute',
+            resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikeIcon.png')}/>
+          <Text style={{fontSize:18,paddingTop:(frame.height / 160)}}>{this.state.likeCount}</Text>
+        </View>
+      </TouchableHighlight>
+    );
   }
 }
 
@@ -315,11 +320,15 @@ async function checkIfLiked(UserID, postDate) {
     var liked = false;
     var increment = 0;
     functions.getFromAsyncStorage("@userID:key").then((ID) => {
-      var likesRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate + "/likedBy/")
-      likesRef.once("value")
-        .then(function(snapshot) {
-          if (snapshot.val() !== null) {
-            snapshot.forEach(function(childSnapshot) {
+      var checkRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate + "/title")
+      checkRef.once("value")
+      .then(function(snapshotCheck) {
+        if (snapshotCheck.val() !== null) {
+          var likesRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate + "/likedBy/")
+          likesRef.once("value")
+          .then(function(snapshot) {
+            if (snapshot.val() !== null) {
+              snapshot.forEach(function(childSnapshot) {
               if (childSnapshot.key == ID) {
                 liked = true
               }
@@ -329,13 +338,18 @@ async function checkIfLiked(UserID, postDate) {
                 resolve(liked)
               }
             })
-          } else {
-            clearTimeout(timeOut)
-            resolve(false)
-          }
-        })
-        var timeOut = setTimeout(function() {
-        resolve(null)}, 10000)
+            } else {
+              clearTimeout(timeOut)
+              resolve(false)
+            }
+          })
+        } else {
+          clearTimeout(timeOut)
+          resolve(null)
+        }
+      })
+      var timeOut = setTimeout(function() {
+      resolve(null)}, 10000)
     })
     })
   }

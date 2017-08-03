@@ -10,6 +10,7 @@ var moment = require('moment');
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database"); require("firebase/storage");
 
+const backAction = NavigationActions.back({})
 const frame = Dimensions.get('window');
 
 export default class Timeline extends Component {
@@ -23,9 +24,22 @@ export default class Timeline extends Component {
 
   componentDidMount() {
     const {USERID} = this.props.navigation.state.params;
-    functions.getAllUserPosts(USERID).then((MostRecentPosts) => {
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      functions.getAllUserPosts(USERID).then((MostRecentPosts) => {
         this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
-    }) 
+      }) 
+      var updateRef = firebaseApp.database().ref("UserID/"+ ID + "/posts")
+      updateRef.on("child_removed", (snapshot) => {
+        this.props.navigation.dispatch(backAction)
+      })
+    })
+  }
+
+  componentWillUnmount() {
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      var updateRef = firebaseApp.database().ref("UserID/"+ ID + "/posts")
+      updateRef.off()
+    })
   }
 
   render() {
