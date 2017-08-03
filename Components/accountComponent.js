@@ -79,23 +79,26 @@ class PostPreview extends Component {
                 this.setState({imageSource:URI})
             }
         }) 
+        if (this.props.TITLE !== nextProps.TITLE) {
+
+        }
     }
 
     render() {
         if (this.state.imageSource == null) {
             return (
                 <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {if (this.props.DATE !== null) {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}}}  >
-                <View style={{alignSelf: 'flex-start', width:(frame.width / 2.5),borderColor:'grey',
+                <View style={{alignSelf: 'flex-start', width:(frame.width / 2.04),borderColor:'grey',
                     borderBottomWidth:1}}>
-                    <Text style={{fontSize: 25}}>{this.props.TITLE}</Text>
-                    <Text style={{fontSize: 15}}>{this.props.DESC !== null ? this.props.DESC.slice(0,50) : "Loading" }...</Text>
+                    <Text style={{fontSize: 25}}>{this.props.TITLE.slice(0,17)}...</Text>
+                    <Text style={{fontSize: 15}}>{this.props.DESC.slice(0,50)}...</Text>
                 </View>
                 </TouchableHighlight>
             )
         } else {
             return (
                 <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {if (this.props.DATE !== null) {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}}} >
-                <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
+                <View style={{alignSelf: 'flex-start', width:(frame.width / 2.04)}}>
                     <Image 
                         style={{resizeMode: 'cover', height: frame.height / 6}} 
                         source={{uri: this.state.imageSource}}/>
@@ -152,8 +155,7 @@ class AccountPosts extends Component {
                     onRefresh={this._onRefresh.bind(this)}
                 />}
                 renderRow={(rowData, sec, i) =>
-                <View style={{marginTop:(frame.width / 80), marginLeft:(frame.width / 80), 
-                    marginRight:(frame.width / 40)}}>
+                <View style={{marginTop:(frame.width / 160), marginLeft:(frame.width / 160)}}>
                     <PostPreview TITLE={rowData.TITLE} DESC={rowData.DESC} 
                         USERID={this.state.USERID} DATE={rowData.DATE}
                         navigate={this.props.navigate}/>
