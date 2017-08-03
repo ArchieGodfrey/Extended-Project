@@ -23,27 +23,27 @@ class ImageContainer extends Component {
 
     componentDidMount() {
         const {navigate} = this.props;
-        functions.getFromAsyncStorage("@profileCache:key").then((value) => {
-            if (value === null) {
+        //functions.getFromAsyncStorage("@profileCache:key").then((value) => {//Cache needs to update across devices
+            //if (value === null) {
                 functions.getFromAsyncStorage("@userID:key").then((ID) => {
                     if (ID !== null) {
                         functions.downloadProfileImages(ID).then((urls) => {
                             this.setState({avatarSource:urls[0]})
                             this.setState({backgroundSource:urls[1]})
-                            functions.setItemAsyncStorage("@profileCache:key",urls[0])
-                            functions.setItemAsyncStorage("@backgroundCache:key",urls[1])
+                            //functions.setItemAsyncStorage("@profileCache:key",urls[0])
+                            //functions.setItemAsyncStorage("@backgroundCache:key",urls[1])
                         })
                     }
             })
-            } else {
-               this.setState({avatarSource:value}) 
-            }
-        })
-        functions.getFromAsyncStorage("@backgroundCache:key").then((value) => {
-            if (value !== null) {
-                this.setState({backgroundSource:value})
-            }
-        })
+            //} else {
+               //this.setState({avatarSource:value}) 
+            //}
+        //})
+        //functions.getFromAsyncStorage("@backgroundCache:key").then((value) => {
+            //if (value !== null) {
+               // this.setState({backgroundSource:value})
+            //}
+        //})
     }
 
     render() {
@@ -72,7 +72,7 @@ class PostPreview extends Component {
     constructor (props) {
     super(props);
     this.state = {
-      imageSource:"null", 
+      imageSource:null, 
     }
   }
 
@@ -84,9 +84,9 @@ class PostPreview extends Component {
     } 
 
     render() {
-        if (this.state.imageSource == "null") {
+        if (this.state.imageSource == null) {
             return (
-                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {if (this.props.DATE !== null) {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}}}  >
                 <View style={{alignSelf: 'flex-start', width:(frame.width / 2.5),borderColor:'grey',
                     borderBottomWidth:1}}>
                     <Text style={{fontSize: 25}}>{this.props.TITLE}</Text>
@@ -96,7 +96,7 @@ class PostPreview extends Component {
             )
         } else {
             return (
-                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}} >
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {if (this.props.DATE !== null) {this.props.navigate("AccountPosts", { USERID:  this.props.USERID })}}} >
                 <View style={{alignSelf: 'flex-start', width:(frame.width / 2.2)}}>
                     <Image 
                         style={{resizeMode: 'cover', height: frame.height / 6}} 
@@ -138,7 +138,7 @@ class AccountPosts extends Component {
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
                 renderRow={(rowData, sec, i) =>
-                <View style={{marginTop:(frame.width / 40), marginLeft:(frame.width / 40), 
+                <View style={{marginTop:(frame.width / 80), marginLeft:(frame.width / 80), 
                     marginRight:(frame.width / 40)}}>
                     <PostPreview TITLE={rowData.TITLE} DESC={rowData.DESC} 
                         USERID={this.state.USERID} DATE={rowData.DATE}

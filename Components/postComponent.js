@@ -14,7 +14,7 @@ class ImageContainer extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      imageSource:"null", 
+      imageSource:null, 
     }
   }
 
@@ -26,7 +26,7 @@ class ImageContainer extends Component {
   } 
 
   render() {
-    if (this.state.imageSource !== "null") {
+    if (this.state.imageSource !== null) {
       return(
       <Image 
         style={{resizeMode: 'cover', height: (frame.height / 2), width: (frame.width)}}
@@ -34,7 +34,7 @@ class ImageContainer extends Component {
     )
     } else {
       return(
-      <View style={{marginTop:(frame.height / 40), marginBottom:(frame.height / 40),borderColor:'grey',borderBottomWidth:1,}}></View>
+      <View style={{marginBottom:(frame.height / 40),borderColor:'grey',borderBottomWidth:1,}}></View>
     )
     }
     
@@ -63,7 +63,7 @@ class PostDetails extends Component {
   render() {
     return(
       <View style={{flexDirection:'row',marginLeft:(frame.width / 40),marginTop:(frame.width / 40)}} >
-        <TouchableHighlight onPress={() => {this.transition("UserDetail")}}>
+        <TouchableHighlight onPress={() => {if (this.props.DATE !== null) {this.transition("UserDetail")}}}>
           <Image style={{resizeMode: 'cover', height: (frame.height / 10), 
             width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
         </TouchableHighlight>
@@ -119,7 +119,7 @@ class Footer extends Component {
 
   componentWillMount() {
     const { USERID,DATE } = this.props;
-    functions.getExpirationDate(USERID,DATE).then((data) => {
+    functions.getExpiration(USERID,DATE).then((data) => {
       this.setState({expirationDate:data})
     })
   }

@@ -5,7 +5,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 const frame = Dimensions.get('window');
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database"); require("firebase/storage")
-
+var moment = require('moment');
 
 class functions {
 
@@ -17,8 +17,7 @@ getFromAsyncStorage(key) {
                 resolve(value) 
             })
         } catch (error) {
-            // Error getting data
-            //alert('No data')
+            // Error getting data or no data
             clearTimeout(timeOut)
             resolve(null)
         }
@@ -39,40 +38,69 @@ setItemAsyncStorage(key, data) {
 getAllUserPosts(UserID) {
     return new Promise(function(resolve, reject) {
         getAllPostDetails(UserID).then((PostList) => {
-            sortPosts(PostList).then((Result) => {
-                resolve(Result)
-            })
+            if (PostList == null) {
+                var EmptyList = []
+                EmptyList.push({DESC:"This user has no posts",DATE:null})
+                resolve(EmptyList)
+            } else {
+                sortPosts(PostList).then((Result) => {
+                    resolve(Result)
+                })  
+            }
         })
+        var timeOut = setTimeout(function() {
+            var EmptyList = []
+            EmptyList.push({DESC:"This user has no posts",DATE:null})
+            resolve(EmptyList)
+        }, 10000)
     })
 }
 
 getTimeline(UserID,limit) {
     return new Promise(function(resolve, reject) {
         var MostRecentPosts = []
+        var expiredNum = 0
         getMostRecentPosts(UserID).then((postDates) => {
-            sortPosts(postDates).then((sortedDates) => {
-                sortedDates.map(function(item, i) {  
-                    getSinglePost(item.DATE,item.USERID).then((RecentPost) => {
-                        RecentPost.map(function(post, i) {
-                            MostRecentPosts.push({TITLE:post.TITLE,DESC:post.DESC,DATE:post.DATE,LIKES:post.LIKES,USERID:post.USERID,URI:post.URI})
-                            if (sortedDates.length < limit) {
-                                if (MostRecentPosts.length == sortedDates.length) {
-                                    clearTimeout(timeOut)
-                                    resolve(MostRecentPosts)
-                                } else {
-                                    if (MostRecentPosts.length == limit) {
-                                        clearTimeout(timeOut)
-                                        resolve(MostRecentPosts)
+            if (postDates !== null) {
+                sortPosts(postDates).then((sortedDates) => {
+                    sortedDates.map(function(item, i) {  
+                        getSinglePost(item.DATE,item.USERID).then((RecentPost) => {
+                            RecentPost.map(function(post, i) {
+                                checkExpiration(post.USERID,post.DATE).then((expired) => {
+                                    if (expired == false) {
+                                        MostRecentPosts.push({TITLE:post.TITLE,DESC:post.DESC,DATE:post.DATE,LIKES:post.LIKES,USERID:post.USERID,URI:post.URI})
+                                    } else {
+                                        expiredNum = expiredNum + 1
                                     }
-                                }
-                            }
-                            
+                                    if ((sortedDates.length - expiredNum) < limit) {
+                                        if (MostRecentPosts.length == (sortedDates.length - expiredNum)) {
+                                            clearTimeout(timeOut)
+                                            resolve(MostRecentPosts)
+                                        } else {
+                                            if (MostRecentPosts.length == limit) {
+                                                clearTimeout(timeOut)
+                                                resolve(MostRecentPosts)
+                                            }
+                                        }
+                                    }
+                                })    
+                            })
                         })
                     })
-                })
-            }) 
+                }) 
+            } else {
+                clearTimeout(timeOut)
+                var EmptyList = []
+                EmptyList.push({TITLE:"No posts?",
+                DESC:"We couldn't find any posts, try following some more people",DATE:null})
+                resolve(EmptyList)
+            }
             var timeOut = setTimeout(function() {
-            resolve(null)}, 10000)
+                var EmptyList = []
+                EmptyList.push({TITLE:"No posts?",
+                DESC:"We couldn't find any posts, try following some more people",DATE:null})
+                resolve(EmptyList)
+            }, 10000)
         })
     })
 }
@@ -129,7 +157,7 @@ downloadProfileImages(ID) {
     })
 }
 
-getExpirationDate(UserID,Date) {
+getExpiration(UserID,Date) {
     return new Promise(function(resolve, reject) {
        getPostFromFireBase(UserID,Date,"/expiration").then((data) => {
            if (data !== "") {
@@ -159,6 +187,44 @@ chooseImage(HEIGHT,WIDTH) {
     })
 }
 
+}
+
+function checkExpiration(UserID,Date) {
+    return new Promise(function(resolve, reject) {
+        getExpirationDate(UserID,Date).then((expirationDate) => {
+            if ((expirationDate <= moment().format('MMDDYYYYHHmm')) && (expirationDate !== "")) {
+                var postsRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts")
+                postsRef.child(Date).remove()
+                var imageRef = firebaseApp.storage().ref('Users/' + UserID).child(Date)
+                imageRef.child(Date).delete()
+                clearTimeout(timeOut)
+                resolve(true)
+            } else {
+                clearTimeout(timeOut)
+                resolve(false)
+            }
+        })
+        let timeOut = setTimeout(function() {
+        resolve(null)}
+        , 10000)
+    })
+}
+
+function getExpirationDate(UserID,Date) {
+    return new Promise(function(resolve, reject) {
+       getPostFromFireBase(UserID,Date,"/expiration").then((data) => {
+           if (data !== "") {
+                clearTimeout(timeOut)
+                resolve(data)
+           } else {
+                clearTimeout(timeOut)
+                resolve(null)
+           }
+       }) 
+    let timeOut = setTimeout(function() {
+        resolve(null)}
+        , 10000)
+    })
 }
 
 function getFollowedUsers(UserID) {
@@ -201,20 +267,25 @@ function getPostDates(UserID) {
 async function getMostRecentPosts(UserID) {
     return new Promise(function(resolve, reject) {
         getFollowedUsers(UserID).then((FollowedUsers) => {
-            var MostRecentPosts = []
-            var Iterations = 0
-            FollowedUsers.forEach(function(User) {//For each followed user
-                getPostDates(User.key).then((postDates) => {
-                    postDates.map(function(item, i) {
-                        MostRecentPosts.push({DATE:item.DATE,USERID:item.USERID})
+            if (FollowedUsers !== null) {
+                var MostRecentPosts = []
+                var Iterations = 0
+                FollowedUsers.forEach(function(User) {//For each followed user
+                    getPostDates(User.key).then((postDates) => {
+                        postDates.map(function(item, i) {
+                            MostRecentPosts.push({DATE:item.DATE,USERID:item.USERID})
+                        })
+                        Iterations ++
+                        if (Iterations == FollowedUsers.numChildren()) {
+                            clearTimeout(timeOut)
+                            resolve(MostRecentPosts)
+                        }
                     })
-                    Iterations ++
-                    if (Iterations == FollowedUsers.numChildren()) {
-                        clearTimeout(timeOut)
-                        resolve(MostRecentPosts)
-                    }
                 })
-            })
+            } else {
+                clearTimeout(timeOut)
+                resolve(null)
+            }
         })
         var timeOut = setTimeout(function() {
         resolve(null)}, 10000)
@@ -267,6 +338,7 @@ async function sortPosts(UserPosts) {
 async function getAllPostDetails(UserID) {
     return new Promise(function(resolve, reject) {
         var UserPosts = []
+        var expiredNum = 0
         var query = firebaseApp.database().ref("UserID/" + UserID + "/posts").orderByKey();
         query.once("value").then(function(snapshot) {
             snapshot.forEach(function(childSnapshot) {
@@ -279,13 +351,22 @@ async function getAllPostDetails(UserID) {
                 })
                 getPostFromFireBase(UserID,childSnapshot.key,"/likes").then((likes) => {
                     postLikes = likes
-                    UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:childSnapshot.key,LIKES:postLikes,USERID:UserID})
-                    if (UserPosts.length == snapshot.numChildren()) {
-                        clearTimeout(timeOut)
-                        resolve(UserPosts)
-                    }
-                })
+                    checkExpiration(UserID,childSnapshot.key).then((expired) => {
+                        if (expired == false) {
+                            UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:childSnapshot.key,LIKES:postLikes,USERID:UserID})
+                        } else {
+                            expiredNum = expiredNum + 1
+                        }
+                        if (UserPosts.length  == snapshot.numChildren()) {
+                            clearTimeout(timeOut)
+                            resolve(UserPosts)
+                        }
+                    })
+                })    
             })
+        }).catch((error) => {
+            clearTimeout(timeOut)
+            resolve(null)
         })
         var timeOut = setTimeout(function() {
         resolve(null)}, 10000)
@@ -294,16 +375,13 @@ async function getAllPostDetails(UserID) {
 
 function downloadImage(ID,date) {
     return new Promise(function(resolve, reject) {
-        var Realurl = ""
-        firebaseApp.storage().ref('Users/' + ID).child(date).getDownloadURL().then(function(url) {
-            Realurl = url
-            resolve(Realurl)
-        }).catch((error) => {
-            firebaseApp.storage().ref('greyBackground.png').getDownloadURL().then(function(url2) {
-            Realurl = url2
-            resolve("null")
+        if (date !== null) {
+            firebaseApp.storage().ref('Users/' + ID).child(date).getDownloadURL().then(function(url) {
+                resolve(url)
+            }).catch((error) => {
+                resolve(null)
             })
-        })
+        }
     })
   }
 
