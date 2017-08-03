@@ -330,7 +330,8 @@ function checkRequirements() {
     if (PostRequirements.PictureValid == true) {//Desc not needed
       if ((PostRequirements.Day == "") && (PostRequirements.Month == "") 
         && (PostRequirements.Year == "") && (PostRequirements.Time == "")) {//No expiration date given
-        return true
+          PostRequirements.Day = "NEVER"
+          return true
       } else {
         if (checkAllDates() == true) {
           return true
@@ -342,7 +343,8 @@ function checkRequirements() {
     } else if (PostRequirements.DescValid == true) {//Picture not needed
       if ((PostRequirements.Day == "") && (PostRequirements.Month == "") 
         && (PostRequirements.Year == "") && (PostRequirements.Time == "")) {//No expiration date given
-        return true
+          PostRequirements.Day = "NEVER"
+          return true
       } else {
         if (checkAllDates() == true) {
           return true
