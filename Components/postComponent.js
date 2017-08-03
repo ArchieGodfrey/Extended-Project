@@ -14,8 +14,22 @@ class ImageContainer extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      imageSource:null, 
+      imageSource:null,
+      lastPress:0, 
     }
+  }
+
+  onPhotoPress(USERID,DATE) {
+    var delta = new Date().getTime() - this.state.lastPress;
+
+    if  (delta < 200) {
+      // double tap happend
+      likePost(USERID,DATE)
+    }
+
+    this.setState({
+      lastPress: new Date().getTime()
+    })
   }
 
   componentWillMount() {
@@ -36,9 +50,12 @@ class ImageContainer extends Component {
   render() {
     if (this.state.imageSource !== null) {
       return(
-      <Image 
-        style={{resizeMode: 'cover', height: (frame.height / 2), width: (frame.width)}}
-        source={{uri: this.state.imageSource}}/>
+        <TouchableHighlight underlayColor="#F1F1F1" 
+          onPress={() => this.onPhotoPress(this.props.USERID,this.props.DATE)}>
+          <Image 
+            style={{resizeMode: 'cover', height: (frame.height / 2), width: (frame.width)}}
+            source={{uri: this.state.imageSource}}/>
+        </TouchableHighlight>
     )
     } else {
       return(
@@ -96,7 +113,12 @@ class PostDetails extends Component {
             </Text>
           </View>
         </View>
-        <LikeComponent style={{marginTop:(frame.height / 20), alignSelf:'flex-end'}} USERID={this.props.USERID} DATE={this.props.DATE} />
+        <View style={{flexDirection:"column", alignItems:'center',paddingLeft:(frame.height / 40)}}>
+          <LikeComponent USERID={this.props.USERID} DATE={this.props.DATE} />
+          <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
+            width: (frame.width / 6),marginTop:(frame.height / 80)}} 
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
+        </View>
       </View>
       
     )
@@ -171,86 +193,67 @@ class Footer extends Component {
 class LikeComponent extends Component {
   constructor(props) {
     super(props);
-    this.update = true
-    this.liked = false
+    this.state = {
+      likeCount:"", 
+    }
     this.likeValue = new Animated.Value(0)
   }
 
   render() {
     return (
-        <Animated.Image style={{opacity: this.likeValue}}
-             source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
+      <TouchableHighlight underlayColor="#F1F1F1"  
+        onPress={() => likePost(this.props.USERID,this.props.DATE)}> 
+        <View style={{alignItems:'center'}}>
+          <Animated.Image style={{opacity: this.likeValue,
+            resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
+          <Animated.Image style={{opacity: 1 / this.likeValue, position:'absolute',
+            resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikeIcon.png')}/>
+          <Text style={{fontSize:18,paddingTop:(frame.height / 160)}}>{this.state.likeCount}</Text>
+        </View>
+      </TouchableHighlight>
     );
   }
 
-  readyToGetLikes() {
-    if (this.update == true) {
-      const { USERID,DATE  } = this.props;
-      this.getLikes(this.props.USERID,this.props.DATE ).then((value) => {
-        if (value == true) {
-          Animated.timing(
-            this.likeValue,
-            {
-              toValue: 1,
-              duration: 250,
-              easing: Easing.linear
-            }).start()
-        } else {
-          Animated.timing(
-            this.likeValue,
-            {
-              toValue: 0,
-              duration: 350,
-              easing: Easing.linear
-            }).start()
-        }
-        this.readyToGetLikes()
-      })
-    }
+  updateImage(USERID,DATE) {
+    checkIfLiked(USERID,DATE ).then((value) => {
+      if (value == true) {
+        Animated.timing(
+          this.likeValue,
+          {
+            toValue: 1,
+            duration: 250,
+            easing: Easing.linear
+          }).start()
+      } else {
+        Animated.timing(
+          this.likeValue,
+          {
+            toValue: 0,
+            duration: 350,
+            easing: Easing.linear
+          }).start()
+      }
+    })
   }
 
   componentWillMount() {
-    this.readyToGetLikes()
-}
-  componentWillUnmount() {
-    this.update = false
-  }
-
-async getLikes(otherUserID, postDate) {
-  return new Promise(function(resolve, reject) {
-    var liked = false
-    try {
-      AsyncStorage.getItem('@userID:key').then((value) => {
-       var UserID = value
-       if (UserID !== null) {
-         var likesRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts/" + postDate + "/likedBy/")
-         likesRef.once("value")
-           .then(function(snapshot) {
-             if (snapshot.val() !== null) {
-               snapshot.forEach(function(childSnapshot) {
-                 if (childSnapshot.key == UserID) {
-                  resolve(true)
-                 }
-               })
-               resolve(false)
-             } else {
-               resolve(false)
-             }
-       })
-     }
-     })
-   } catch (error) {
-     // Error retrieving data
-     alert("There was a problem getting posts")
-     resolve(false)
-   }
-
-
-    setTimeout(function() {
-      resolve(false)}, 1000)
+    const { USERID,DATE  } = this.props;
+    this.updateImage(this.props.USERID,this.props.DATE)
+    var likesRef = firebaseApp.database().ref("UserID/"+ this.props.USERID + "/posts/" + this.props.DATE).child("likedBy")
+    likesRef.on("value", (snapshot) => {
+      if (snapshot.numChildren() !== 0) {
+        this.setState({likeCount: snapshot.numChildren()})
+      } else {
+        this.setState({likeCount: ""})
+      }
+      this.updateImage(this.props.USERID,this.props.DATE)
     })
   }
 }
+
+
 
 export default class PostTemplate extends Component {
   componentWillMount() {
@@ -269,4 +272,51 @@ export default class PostTemplate extends Component {
       </View>
     )
   }
+}
+
+async function checkIfLiked(UserID, postDate) {
+  return new Promise(function(resolve, reject) {
+    var liked = false;
+    var increment = 0;
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      var likesRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate + "/likedBy/")
+      likesRef.once("value")
+        .then(function(snapshot) {
+          if (snapshot.val() !== null) {
+            snapshot.forEach(function(childSnapshot) {
+              if (childSnapshot.key == ID) {
+                liked = true
+              }
+              increment = increment + 1;
+              if (increment == snapshot.numChildren()) {
+                clearTimeout(timeOut)
+                resolve(liked)
+              }
+            })
+          } else {
+            clearTimeout(timeOut)
+            resolve(false)
+          }
+        })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    })
+    })
+  }
+
+function likePost(UserID, postDate) {
+  var likesRef = firebaseApp.database().ref("UserID/"+ UserID + "/posts/" + postDate + "/likedBy")
+  checkIfLiked(UserID, postDate).then((result) => {
+    if (result == false) {
+      functions.getFromAsyncStorage("@userID:key").then((ID) => {
+        likesRef.child(ID).set({
+          user: ID,
+        });
+      })
+    } else {
+      functions.getFromAsyncStorage("@userID:key").then((ID) => {
+        likesRef.child(ID).remove()
+      })
+    }
+  })
 }

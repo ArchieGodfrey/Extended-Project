@@ -22,7 +22,7 @@ class ImageContainer extends Component {
     }
 
     componentDidMount() {
-        const {navigate,update} = this.props;
+        const {navigate} = this.props;
                 functions.getFromAsyncStorage("@userID:key").then((ID) => {
                     if (ID !== null) {
                         var updateRef = firebaseApp.database().ref("UserID/"+ ID)
@@ -121,7 +121,7 @@ class AccountPosts extends Component {
     }
 
     componentWillMount() { 
-        const {navigate,update} = this.props;
+        const {navigate} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
             functions.getAllUserPosts(ID).then((UserPosts) => { 
                 this.setState({USERID:ID})
