@@ -220,6 +220,62 @@ updateFollowStatus(accountUserID,viewerUserID) {
     })
 }
 
+getRequestList(UserID) {
+    return new Promise(function(resolve, reject) {
+        var RequestedUsers = []
+        var Iterations = 0
+        var query = firebaseApp.database().ref("UserID/" + UserID + "/requests").orderByKey();
+        query.once("value")
+        .then(function(requestList) {
+            if (requestList.val() !== null) {
+                requestList.forEach(function(Request) {//For each request
+                    RequestedUsers.push({USERID:Request.key})
+                    Iterations ++
+                    if (Iterations == requestList.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(RequestedUsers)
+                    }
+                })
+            } else {
+                clearTimeout(timeOut)
+                RequestedUsers.push({USERID:"null"})
+                resolve(RequestedUsers)
+            }
+            })
+        var timeOut = setTimeout(function() {
+        RequestedUsers.push({USERID:"null"})
+        resolve(RequestedUsers)}, 10000)
+    }) 
+}
+
+getDisplayName(UserID) {
+    return new Promise(function(resolve, reject) {
+        var query = firebaseApp.database().ref("UserID/" + UserID + "/Name").orderByKey();
+        query.once("value")
+        .then(function(name) {
+            resolve(name.val())
+        })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    }) 
+}
+
+followUser(followed,follower) {
+    var followRef = firebaseApp.database().ref("UserID/"+ followed + "/followers")
+    followRef.child(follower).set({
+        user: follower,
+    });
+    var followingRef = firebaseApp.database().ref("UserID/"+ follower + "/following")
+    followingRef.child(followed).set({
+        user: followed,
+    });
+    removeRequestToFollow(followed,follower)
+}
+
+declineRequest(follower,followed) {
+    removeRequestToFollow(followed,follower)
+}
+
 }
 
 function checkFollowStatus(accountUserID,viewerUserID) {
@@ -249,6 +305,8 @@ function checkFollowStatus(accountUserID,viewerUserID) {
 function unFollowUser(accountUserID,viewerUserID) {
     var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers").child(viewerUserID)
     followRef.remove()
+    var followingRef = firebaseApp.database().ref("UserID/"+ viewerUserID + "/following").child(accountUserID)
+    followingRef.remove()
 }
 
 function removeRequestToFollow(accountUserID,viewerUserID) {
@@ -279,7 +337,7 @@ function checkIfFollowed(accountUserID,viewerUserID) {
                         followed = true
                     }
                     increment = increment + 1;
-                    if (increment = followSnapshot.numChildren()) {
+                    if (increment == followSnapshot.numChildren()) {
                         clearTimeout(timeOut)
                         resolve(followed)
                     }
@@ -306,7 +364,7 @@ function checkIfRequested(accountUserID,viewerUserID) {
                         requested = true
                     }
                     increment = increment + 1;
-                    if (increment = requestSnapshot.numChildren()) {
+                    if (increment == requestSnapshot.numChildren()) {
                         clearTimeout(timeOut)
                         resolve(requested)
                     }
@@ -389,9 +447,7 @@ function getPostDates(UserID) {
                     })
                 } else {
                     resolve(postDates)
-                }
-                
-                
+                } 
             })
         var timeOut = setTimeout(function() {
         resolve(null)}, 10000)

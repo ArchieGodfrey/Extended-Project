@@ -12,7 +12,7 @@ var firebaseApp = require("firebase/app"); require("firebase/auth"); require("fi
 
 const frame = Dimensions.get('window');
 
-class ImageContainer extends Component {
+class OtherAccountImageContainer extends Component {
     constructor (props) {
         super(props);
         this.state = {
@@ -24,7 +24,7 @@ class ImageContainer extends Component {
     componentDidMount() {
         const {navigate,USERID} = this.props;
         var updateRef = firebaseApp.database().ref("UserID/"+ this.props.USERID)
-        updateRef.on("value", (snapshot) => {
+        updateRef.once("value", (snapshot) => {
             functions.downloadProfileImages(this.props.USERID).then((urls) => {
                 this.setState({avatarSource:urls[0]})
                 this.setState({backgroundSource:urls[1]})
@@ -129,6 +129,13 @@ class AnalyticsBar extends Component {
         })
     }
 
+    componentWillUnmount() { 
+        var followRef = firebaseApp.database().ref("UserID/"+ this.props.USERID + "/followers")
+        followRef.off()
+        var followingRef = firebaseApp.database().ref("UserID/"+ this.props.USERID + "/following")
+        followingRef.off()
+    }
+
     render() {
         return(
             <View style={{flex:0.1,flexDirection:'row',justifyContent:'center',alignItems:'center',
@@ -180,7 +187,7 @@ class AccountPosts extends Component {
     }
 
     render() {
-        if (this.props.FOLLOWED == true) {
+        if (this.props.FOLLOWED == "Followed") {
             return(
             <ListView
                 enableEmptySections={true}
@@ -256,7 +263,7 @@ export default class AccountContents extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            followed:false,
+            followed:"Request",
         }
     }
 
@@ -264,16 +271,21 @@ export default class AccountContents extends Component {
         const { USERID } = this.props.navigation.state.params;
         const {navigate} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
-            functions.getFollowStatus(this.props.navigation.state.params.USERID,ID).then((result) => {
+            if (ID !== this.props.navigation.state.params.USERID) {
+                functions.getFollowStatus(this.props.navigation.state.params.USERID,ID).then((result) => {
                 this.setState({followed:result})
             })
+            } else {
+                this.setState({followed:true})
+            }
         })
     }
 
     render() {
         return(
             <View style={{flex:1,justifyContent:'center'}}>
-                <ImageContainer USERID={this.props.navigation.state.params.USERID} navigate={this.props.navigation.navigate}/>
+                <OtherAccountImageContainer USERID={this.props.navigation.state.params.USERID} 
+                    navigate={this.props.navigation.navigate}/>
                 <AnalyticsBar USERID={this.props.navigation.state.params.USERID} />
                 <AccountPosts FOLLOWED={this.state.followed}
                     USERID={this.props.navigation.state.params.USERID} 
