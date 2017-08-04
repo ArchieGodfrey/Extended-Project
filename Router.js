@@ -71,7 +71,7 @@ const UserDetailStack = StackNavigator({
   UserDetail: {
     screen: UserDetail,
     navigationOptions: ({ navigation }) => ({
-      title: `${navigation.state.params.USERID}`,
+      title: "Profile",
     }),
   }
   }
@@ -127,7 +127,7 @@ const MainNavigation = StackNavigator({
     screen: TopNavigation,
   },
   UserDetail: {
-    screen: UserDetail,
+    screen: UserDetailStack,
   },
   NewPost: {
     screen: NewPostStack,

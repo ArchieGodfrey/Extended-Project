@@ -79,9 +79,6 @@ class PostPreview extends Component {
                 this.setState({imageSource:URI})
             }
         }) 
-        if (this.props.TITLE !== nextProps.TITLE) {
-
-        }
     }
 
     render() {
@@ -106,6 +103,46 @@ class PostPreview extends Component {
                 </TouchableHighlight>
             )
         }
+    }
+}
+
+class AnalyticsBar extends Component {
+    constructor (props) {
+        super(props);
+        this.state = {
+            followers:"",
+            following:"",
+        }
+    }
+
+    componentWillMount() { 
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            var followingRef = firebaseApp.database().ref("UserID/"+ ID + "/following")
+            followingRef.on('value', (followingSnapshot) => {
+                this.setState({following: followingSnapshot.numChildren()});
+            });
+            var followRef = firebaseApp.database().ref("UserID/"+ ID + "/followers")
+            followRef.on('value', (followSnapshot) => {
+                this.setState({followers: followSnapshot.numChildren()});
+            });
+        })
+    }
+
+    render() {
+        return(
+            <View style={{flex:0.1,flexDirection:'row',justifyContent:'center',alignItems:'center',
+                borderColor:'grey',borderTopWidth:0.5,borderBottomWidth:0.5,backgroundColor:'white'}} >
+                <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,}} >
+                    <Text style={{fontSize:24}}> {this.state.following} </Text>
+                </View>
+                <Image 
+                    style={{resizeMode: 'center'}} 
+                    source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/FriendsIcon.png")}/>
+                <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,paddingLeft:(frame.width / 80)}} >
+                    <Text style={{fontSize:24}}> {this.state.followers} </Text>
+                </View>
+            </View>
+        )
     }
 }
 
@@ -162,7 +199,7 @@ class AccountPosts extends Component {
                     onRefresh={this._onRefresh.bind(this)}
                 />}
                 renderRow={(rowData, sec, i) =>
-                <View style={{marginTop:(frame.width / 160), marginLeft:(frame.width / 160)}}>
+                <View style={{marginBottom:(frame.width / 160), marginLeft:(frame.width / 160)}}>
                     <PostPreview TITLE={rowData.TITLE} DESC={rowData.DESC} 
                         USERID={this.state.USERID} DATE={rowData.DATE}
                         navigate={this.props.navigate}/>
@@ -215,6 +252,7 @@ export default class AccountContents extends Component {
         return(
             <View style={{flex:1,justifyContent:'center'}}>
                 <ImageContainer navigate={this.props.navigation.navigate}/>
+                <AnalyticsBar/>
                 <AccountPosts navigate={this.props.navigation.navigate}/>
             </View>
         )
