@@ -106,6 +106,8 @@ class AnalyticsBar extends Component {
         this.state = {
             followers:"",
             following:"",
+            followed:"",
+            userID:""
         }
     }
 
@@ -119,6 +121,12 @@ class AnalyticsBar extends Component {
         followRef.on('value', (followSnapshot) => {
             this.setState({followers: followSnapshot.numChildren()});
         });
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            this.setState({userID:ID})
+            functions.getFollowStatus(this.props.USERID,ID).then((result) => {
+                this.setState({followed:result})
+            })
+        })
     }
 
     render() {
@@ -128,9 +136,10 @@ class AnalyticsBar extends Component {
                 <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,}} >
                     <Text style={{fontSize:24}}> {this.state.following} </Text>
                 </View>
-                <Image 
-                    style={{resizeMode: 'center'}} 
-                    source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/FriendsIcon.png")}/>
+                <TouchableHighlight onPress={() => {functions.updateFollowStatus(this.props.USERID,this.state.userID).then((result) => 
+                    {this.setState({followed:result})})}}>
+                    <Text style={{fontSize:20}}> {this.state.followed} </Text>
+                </TouchableHighlight>
                 <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,paddingLeft:(frame.width / 80)}} >
                     <Text style={{fontSize:24}}> {this.state.followers} </Text>
                 </View>
@@ -255,7 +264,7 @@ export default class AccountContents extends Component {
         const { USERID } = this.props.navigation.state.params;
         const {navigate} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
-            checkIfFollowed(this.props.navigation.state.params.USERID,ID).then((result) => {
+            functions.getFollowStatus(this.props.navigation.state.params.USERID,ID).then((result) => {
                 this.setState({followed:result})
             })
         })
@@ -272,31 +281,4 @@ export default class AccountContents extends Component {
             </View>
         )
     }
-}
-
-function checkIfFollowed(accountUserID,viewerUserID) {
-    return new Promise(function(resolve, reject) {
-        var followed = false
-        var increment = 0
-        var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers")
-        followRef.on('value', (followSnapshot) => {
-            if (followSnapshot.val() !== null) {
-                followSnapshot.forEach(function(Follower) {
-                    if (Follower.key == viewerUserID) {
-                        followed = true
-                    }
-                    increment = increment + 1;
-                    if (increment = followSnapshot.numChildren()) {
-                        clearTimeout(timeOut)
-                        resolve(followed)
-                    }
-                })
-            } else {
-               clearTimeout(timeOut)
-                resolve(followed) 
-            }
-        var timeOut = setTimeout(function() {
-        resolve(null)}, 10000)
-        }) 
-    })
 }

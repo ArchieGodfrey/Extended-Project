@@ -130,7 +130,7 @@ class PostDetails extends Component {
   render() {
     return(
       <View style={{flexDirection:'row', flexWrap: 'wrap',marginLeft:(frame.width / 40),marginTop:(frame.width / 40), paddingRight:(frame.width / 40)}} >
-        <TouchableHighlight onPress={() => {if (this.props.DATE !== null) {this.transition("UserDetail")}}}>
+        <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => {if (this.props.DATE !== null) {this.transition("UserDetail")}}}>
           <Image style={{resizeMode: 'cover', height: (frame.height / 10), 
             width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
         </TouchableHighlight>

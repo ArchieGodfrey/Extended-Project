@@ -187,6 +187,138 @@ chooseImage(HEIGHT,WIDTH) {
     })
 }
 
+getFollowStatus(accountUserID,viewerUserID) {
+    return new Promise(function(resolve, reject) {
+        checkFollowStatus(accountUserID,viewerUserID).then((result) => {
+            clearTimeout(timeOut)
+            resolve(result)
+        })
+        var timeOut = setTimeout(function() {
+        resolve("Request")}, 10000)
+    })
+}
+
+updateFollowStatus(accountUserID,viewerUserID) {
+    return new Promise(function(resolve, reject) {
+        checkFollowStatus(accountUserID,viewerUserID).then((result) => {
+            if (result == "Followed") {
+                unFollowUser(accountUserID,viewerUserID)
+                clearTimeout(timeOut)
+                resolve("Request")
+            } else if (result == "Requested") {
+                removeRequestToFollow(accountUserID,viewerUserID)
+                clearTimeout(timeOut)
+                resolve("Request")
+            } else if (result == "Request") {
+                requestToFollow(accountUserID,viewerUserID)
+                clearTimeout(timeOut)
+                resolve("Requested")
+            }
+        })
+        var timeOut = setTimeout(function() {
+        resolve("Request")}, 10000)
+    })
+}
+
+}
+
+function checkFollowStatus(accountUserID,viewerUserID) {
+    return new Promise(function(resolve, reject) {
+        checkIfFollowed(accountUserID,viewerUserID).then((followed) => {
+            if (followed == false) {
+                checkIfRequested(accountUserID,viewerUserID).then((requested) => {
+                    if (requested == false) {
+                        clearTimeout(timeOut)
+                        resolve("Request")
+                    } else {
+                        requestToFollow(accountUserID,viewerUserID)
+                        clearTimeout(timeOut)
+                        resolve("Requested")
+                    }
+                })
+            } else {
+                clearTimeout(timeOut)
+                resolve("Followed")
+            }
+        })
+        var timeOut = setTimeout(function() {
+        resolve("Request")}, 10000)
+    }) 
+}
+
+function unFollowUser(accountUserID,viewerUserID) {
+    var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers").child(viewerUserID)
+    followRef.remove()
+}
+
+function removeRequestToFollow(accountUserID,viewerUserID) {
+    var requestRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/requests").child(viewerUserID)
+    requestRef.remove()
+}
+
+function requestToFollow(accountUserID,viewerUserID) {
+    checkIfRequested(accountUserID,viewerUserID).then((result) => {
+        if (result == false) {
+            var requestRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/requests")
+            requestRef.child(viewerUserID).set({
+                user: viewerUserID,
+            });
+        } 
+    }) 
+}
+
+function checkIfFollowed(accountUserID,viewerUserID) {
+    return new Promise(function(resolve, reject) {
+        var followed = false
+        var increment = 0
+        var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers")
+        followRef.on('value', (followSnapshot) => {
+            if (followSnapshot.val() !== null) {
+                followSnapshot.forEach(function(Follower) {
+                    if (Follower.key == viewerUserID) {
+                        followed = true
+                    }
+                    increment = increment + 1;
+                    if (increment = followSnapshot.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(followed)
+                    }
+                })
+            } else {
+               clearTimeout(timeOut)
+                resolve(followed) 
+            }
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+        }) 
+    })
+}
+
+function checkIfRequested(accountUserID,viewerUserID) {
+    return new Promise(function(resolve, reject) {
+        var requested = false
+        var increment = 0
+        var requestRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/requests")
+        requestRef.on('value', (requestSnapshot) => {
+            if (requestSnapshot.val() !== null) {
+                requestSnapshot.forEach(function(request) {
+                    if (request.key == viewerUserID) {
+                        requested = true
+                    }
+                    increment = increment + 1;
+                    if (increment = requestSnapshot.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(requested)
+                    }
+                })
+            } else {
+               clearTimeout(timeOut)
+                resolve(requested) 
+            }
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+        }) 
+    })
 }
 
 function checkExpiration(UserID,Date) {
