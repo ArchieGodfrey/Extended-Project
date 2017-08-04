@@ -37,6 +37,45 @@ class CommentTemplate extends Component {
         }
         })
   }
+
+  postPressed() {
+    const {ORIGINALID,ORIGINALDATE,DATE,USERID} = this.props;
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      if ((ID == ORIGINALID) || (ID == USERID)){
+        Alert.alert(
+          'Comment Options',
+          "Whats wrong with this comment?",
+          [
+            {text: 'Delete', onPress: () => {
+              var commentRef = firebaseApp.database().ref("UserID/" + ORIGINALID + "/posts/" + ORIGINALDATE + "/comments")
+              commentRef.child(this.props.DATE).remove()
+            }},
+            {text: 'Report', onPress: () => {
+            /*
+              No report system in place yet
+            */
+          }},
+            {text: 'Cancel', style: 'cancel'},
+          ],
+            { cancelable: true }
+        ) 
+      } else {
+        Alert.alert(
+          'Comment Options',
+          "Whats wrong with this comment?",
+          [
+            {text: 'Report', onPress: () => {
+            /*
+              No report system in place yet
+            */
+          }},
+            {text: 'Cancel', style: 'cancel'},
+          ],
+            { cancelable: true }
+        ) 
+      }
+    })
+  }
     
     render() {
         if (this.props.USERID !== "null") {
@@ -48,12 +87,15 @@ class CommentTemplate extends Component {
                         style={{resizeMode: 'cover', height: (frame.width / 6), width: (frame.width / 6)}}
                         source={{uri: this.state.imageSource}}/>
                 </TouchableHighlight>
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => 
+                    {this.postPressed()}}>
                 <View style={{width:frame.width / 1.25,flexDirection:"column",flexWrap: 'wrap', paddingLeft:(frame.width / 80),
                   paddingRight:(frame.width / 80)}}>
                   <Text style={{fontSize:18}} >{this.props.DESC}</Text>
                   <Text style={{paddingLeft:(frame.width / 80),
                     fontSize:16,color:'grey'}}>{moment(this.props.DATE, "YYYYMMDDHHmmss").fromNow()}</Text>
                 </View>
+                </TouchableHighlight>
             </View>
         )
         } else {
@@ -163,7 +205,8 @@ class CommentContainer extends Component {
           renderRow={(rowData, sec, i) =>
           <View style={{marginBottom:(frame.width / 160), marginLeft:(frame.width / 160)}}>
               <CommentTemplate USERID={rowData.USERID} DESC={rowData.DESC} 
-                DATE={rowData.DATE} navigate={this.props.navigate}/>
+                DATE={rowData.DATE} navigate={this.props.navigate} ORIGINALID={this.props.USERID}
+                ORIGINALDATE={this.props.DATE}/>
           </View>
           }
         />
