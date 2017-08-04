@@ -1,5 +1,4 @@
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
-import ImagePicker from 'react-native-image-crop-picker';
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView,ScrollView,RefreshControl, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform

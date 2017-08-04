@@ -89,7 +89,7 @@ class RequestContainer extends Component {
                 enableEmptySections={true}
                 showsVerticalScrollIndicator={false}
                 style={{backgroundColor:'white'}}
-                contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
+                contentContainerStyle={{flexDirection: 'column', flexWrap: 'nowrap'}}
                 dataSource={this.state.dataSource}
                 refreshControl={
                 <RefreshControl

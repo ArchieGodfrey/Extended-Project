@@ -11,6 +11,7 @@ import NewPost from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Compon
 import Settings from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/settingsComponent'
 import AccountPosts from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/AccountPostsComponent'
 import EditAccount from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/editAccountComponent'
+import Comment from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/CommentComponent'
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
@@ -97,6 +98,16 @@ const NewPostStack = StackNavigator({
   }
 );
 
+const CommentStack = StackNavigator({
+  Comment: {
+    screen: Comment,
+    navigationOptions: {
+      title: 'Comments',
+    },
+  }
+  }
+);
+
 const TopNavigation = TabNavigator({
   Account: {
     screen:  AccountTab,
@@ -138,6 +149,9 @@ const MainNavigation = StackNavigator({
   EditAccount: {
     screen: EditAccount,
   },
+  Comment: {
+    screen: CommentStack,
+  }
 }, {
     headerMode: 'none',
     initialRouteName: "Home",

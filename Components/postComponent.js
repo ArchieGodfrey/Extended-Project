@@ -188,14 +188,23 @@ class Footer extends Component {
     super(props);
     this.state = {
       expirationDate:null, 
+      commentCount:0,
     }
   }
 
   componentWillMount() {
-    const { USERID,DATE } = this.props;
+    const { USERID,DATE,navigate } = this.props;
     functions.getExpiration(USERID,DATE).then((data) => {
       if (data !== "NEVER") {
         this.setState({expirationDate:data})
+      }
+    })
+    var commentRef = firebaseApp.database().ref("UserID/"+ this.props.USERID + "/posts/" + this.props.DATE).child("comments")
+    commentRef.on("value", (snapshot) => {
+      if (snapshot.numChildren() > 1) {
+        this.setState({commentCount: snapshot.numChildren() + " Comments"})
+      } else {
+        this.setState({commentCount: "Comment"})
       }
     })
   }
@@ -204,7 +213,10 @@ class Footer extends Component {
     if (this.state.expirationDate !== null) {
       return(
       <View style={{marginTop: (frame.height / 40), alignSelf:'center',flexDirection:'row'}}>
-        <Text style={{paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>2 Comments</Text>
+        <TouchableHighlight underlayColor="#F1F1F1"  
+          onPress={() => this.props.navigate("Comment",{USERID:this.props.USERID,DATE:this.props.DATE,TITLE:this.props.TITLE})}>
+          <Text style={{paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>{this.state.commentCount}</Text>
+        </TouchableHighlight>
         <View style={{flexDirection:'row',marginBottom: (frame.height / 40)}} >
         <Image
           style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} 
@@ -218,7 +230,10 @@ class Footer extends Component {
     } else {
       return(
       <View style={{marginTop: (frame.height / 40), alignSelf:'center',flexDirection:'row'}}>
-        <Text style={{paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>2 Comments</Text>
+        <TouchableHighlight underlayColor="#F1F1F1"  
+          onPress={() => this.props.navigate("Comment",{USERID:this.props.USERID,DATE:this.props.DATE,TITLE:this.props.TITLE})}>
+          <Text style={{paddingRight:(frame.width / 20),fontSize:18,color:'black'}}>{this.state.commentCount}</Text>
+      </TouchableHighlight>
       </View>
     )
     }
@@ -309,7 +324,8 @@ export default class PostTemplate extends Component {
         <PostDetails navigate={this.props.navigate}
           USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
         <DescriptionContainer DESC={this.props.DESC}/>    
-        <Footer USERID={this.props.USERID} DATE={this.props.DATE}/>  
+        <Footer USERID={this.props.USERID} DATE={this.props.DATE}
+          navigate={this.props.navigate} TITLE={this.props.TITLE}/>  
       </View>
     )
   }

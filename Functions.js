@@ -276,6 +276,46 @@ declineRequest(follower,followed) {
     removeRequestToFollow(followed,follower)
 }
 
+getPostComments(UserID,Date) {
+    return new Promise(function(resolve, reject) {
+        getComments(UserID,Date).then((result) => {
+            if (result !== null) {
+                sortPosts(result).then((sortedComments) => {
+                    resolve(result)
+                })
+            } else {
+                var EmptyList = [{USERID:"null"}]
+                resolve(EmptyList)
+            }
+        })
+    })
+}
+
+}
+
+function getComments(UserID,Date) {
+    return new Promise(function(resolve, reject) {
+        var commentQuery = firebaseApp.database().ref("UserID/" + UserID + "/posts/" + Date + "/comments")
+            commentQuery.once("value").then(function(AllComments) {
+                var CommentList = []
+                    AllComments.forEach(function(comment) {
+                        var commentDesc,commentUser = ""
+                        commentQuery.child(comment.key + "/desc").once("value").then(function(desc) {
+                            commentDesc = desc.val()
+                        })
+                        commentQuery.child(comment.key + "/userID").once("value").then(function(user) {
+                            commentUser = user.val()
+                            CommentList.push({DESC:commentDesc,DATE:comment.key,USERID:commentUser})
+                            if (CommentList.length == AllComments.numChildren()) {
+                                clearTimeout(timeOut)
+                                resolve(CommentList)
+                            }
+                        })
+                    })
+            })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    })
 }
 
 function checkFollowStatus(accountUserID,viewerUserID) {
@@ -523,12 +563,11 @@ async function sortPosts(UserPosts) {
         return 0;
         }).then(resolve(UserPosts))
     })
-  }
+}
 
 async function getAllPostDetails(UserID) {
     return new Promise(function(resolve, reject) {
         var UserPosts = []
-        var expiredNum = 0
         var query = firebaseApp.database().ref("UserID/" + UserID + "/posts").orderByKey();
         query.once("value").then(function(snapshot) {
             snapshot.forEach(function(childSnapshot) {
@@ -544,9 +583,7 @@ async function getAllPostDetails(UserID) {
                     checkExpiration(UserID,childSnapshot.key).then((expired) => {
                         if (expired == false) {
                             UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:childSnapshot.key,LIKES:postLikes,USERID:UserID})
-                        } else {
-                            expiredNum = expiredNum + 1
-                        }
+                        } 
                         if (UserPosts.length  == snapshot.numChildren()) {
                             clearTimeout(timeOut)
                             resolve(UserPosts)
@@ -573,7 +610,7 @@ function downloadImage(ID,date) {
             })
         }
     })
-  }
+}
 
 function getPostFromFireBase(UserID,Date,Type) {
     return new Promise(function(resolve, reject) {
@@ -604,8 +641,5 @@ function downloadProfile(ID) {
         resolve(null)}, 10000)
     })
 }
-
-
-
 
 export default new functions();
