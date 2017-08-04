@@ -150,7 +150,7 @@ class AccountPosts extends Component {
     }
 
     componentWillMount() { 
-        const {navigate,USERID} = this.props;
+        const {navigate,USERID,FOLLOWED} = this.props;
             functions.getAllUserPosts(this.props.USERID).then((UserPosts) => { 
                 this.setState({dataSource: this.state.dataSource.cloneWithRows(UserPosts)})
             }) 
@@ -171,7 +171,8 @@ class AccountPosts extends Component {
     }
 
     render() {
-        return(
+        if (this.props.FOLLOWED == true) {
+            return(
             <ListView
                 enableEmptySections={true}
                 showsVerticalScrollIndicator={false}
@@ -196,6 +197,18 @@ class AccountPosts extends Component {
                 </View>}
               />
         )
+        } else {
+            return(
+                <View style={{height:(frame.height / 1.75),justifyContent:'center',alignItems:'center',
+                flexDirection:'column'}} >
+                    <Image 
+                    style={{resizeMode: 'center'}} 
+                    source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/UserIcon.png")}/>
+                    <Text style={{fontSize:20}} >You must follow the user to see their posts</Text>
+                </View>
+            )
+        }
+        
     }
 }
 
@@ -231,15 +244,59 @@ class AccountDetails extends Component {
 }
 
 export default class AccountContents extends Component {
-    render() {
+    constructor (props) {
+        super(props);
+        this.state = {
+            followed:false,
+        }
+    }
+
+    componentWillMount() { 
         const { USERID } = this.props.navigation.state.params;
         const {navigate} = this.props;
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            checkIfFollowed(this.props.navigation.state.params.USERID,ID).then((result) => {
+                this.setState({followed:result})
+            })
+        })
+    }
+
+    render() {
         return(
             <View style={{flex:1,justifyContent:'center'}}>
                 <ImageContainer USERID={this.props.navigation.state.params.USERID} navigate={this.props.navigation.navigate}/>
                 <AnalyticsBar USERID={this.props.navigation.state.params.USERID} />
-                <AccountPosts USERID={this.props.navigation.state.params.USERID} navigate={this.props.navigation.navigate}/>
+                <AccountPosts FOLLOWED={this.state.followed}
+                    USERID={this.props.navigation.state.params.USERID} 
+                    navigate={this.props.navigation.navigate}/>
             </View>
         )
     }
+}
+
+function checkIfFollowed(accountUserID,viewerUserID) {
+    return new Promise(function(resolve, reject) {
+        var followed = false
+        var increment = 0
+        var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers")
+        followRef.on('value', (followSnapshot) => {
+            if (followSnapshot.val() !== null) {
+                followSnapshot.forEach(function(Follower) {
+                    if (Follower.key == viewerUserID) {
+                        followed = true
+                    }
+                    increment = increment + 1;
+                    if (increment = followSnapshot.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(followed)
+                    }
+                })
+            } else {
+               clearTimeout(timeOut)
+                resolve(followed) 
+            }
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+        }) 
+    })
 }
