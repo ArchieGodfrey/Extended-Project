@@ -48,7 +48,8 @@ class CommentTemplate extends Component {
                         style={{resizeMode: 'cover', height: (frame.width / 6), width: (frame.width / 6)}}
                         source={{uri: this.state.imageSource}}/>
                 </TouchableHighlight>
-                <View style={{flexDirection:"column", paddingLeft:(frame.width / 80),}}>
+                <View style={{width:frame.width / 1.25,flexDirection:"column",flexWrap: 'wrap', paddingLeft:(frame.width / 80),
+                  paddingRight:(frame.width / 80)}}>
                   <Text style={{fontSize:18}} >{this.props.DESC}</Text>
                   <Text style={{paddingLeft:(frame.width / 80),
                     fontSize:16,color:'grey'}}>{moment(this.props.DATE, "YYYYMMDDHHmmss").fromNow()}</Text>
@@ -89,14 +90,14 @@ class HeaderTemplate extends Component {
     
     render() {
         return(
-          <View style={{flexDirection:'row', flexWrap: 'wrap',marginLeft:(frame.width / 40),marginRight:(frame.width / 40),marginTop:(frame.width / 40)}} >
+          <View style={{flexDirection:'row', flexWrap: 'wrap',margin:(frame.width / 40)}} >
             <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => {this.props.navigate('UserDetail', { USERID:  this.props.USERID })}}>
               <Image style={{resizeMode: 'cover', height: (frame.height / 10), 
                 width: (frame.width / 6)}} source={{uri: this.state.imageSource}} />
             </TouchableHighlight>
             <View style={{flexDirection:'column',marginTop:(frame.height / 80),marginLeft:(frame.height / 80)
               ,marginBottom:(frame.height / 160)}}> 
-              <Text style={{fontSize:22,width:(frame.width / 2)}}>{this.props.TITLE}</Text>
+              <Text style={{fontSize:22}}>{this.props.TITLE}</Text>
               <Text style={{fontSize:16,color:'grey'}}>
                 {moment(this.props.DATE, "YYYYMMDDHHmmss").format('MMMM Do YYYY, HH:mm')}
               </Text>
@@ -197,14 +198,14 @@ class Composer extends Component {
 
   render() {
     return(
-      <KeyboardAvoidingView style={{width:frame.width,backgroundColor:'white',borderColor:'grey',borderTopWidth:0.5
+      <KeyboardAvoidingView style={{backgroundColor:'white',borderColor:'grey',borderTopWidth:0.5
         ,borderBottomWidth:0.5,flexDirection:'row',alignItems:'center'}} behavior='padding' >
         <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => {addComment(this.props.USERID,this.props.DATE),this.clearText()}}>
           <Image 
               style={{marginLeft:(frame.width / 40),resizeMode: 'center', height: (frame.width / 12), width: (frame.width / 12)}}
               source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/PlusIcon.png")}/>
         </TouchableHighlight>
-            <AutoGrowingTextInput style={{width:frame.width,marginLeft:(frame.width / 40), fontSize:22, height:(frame.height / 20)}} 
+            <AutoGrowingTextInput style={{width:frame.width / 1.25,marginLeft:(frame.width / 40), fontSize:22, height:(frame.height / 20)}} 
              placeholder={'Add a comment...'}
               maxHeight={frame.height / 10}
               minHeight={frame.height / 18}
