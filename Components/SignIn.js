@@ -3,15 +3,12 @@ import dismissKeyboard from 'dismissKeyboard'
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,NetInfo
+  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ScrollView, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions,NetInfo
 } from 'react-native';
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 
-const Screen = {
-  width: Dimensions.get('window').width,
-  height: Dimensions.get('window').height
-}
+const frame = Dimensions.get('window');
 
 let previousValue = new Animated.Value(500)
 
@@ -51,33 +48,36 @@ export default class SignIn extends Component {
 
   render() {
       return (
-          <View>
-            <View>
-                <Text style={{position: 'absolute', top: 25, left: 130, fontSize: 50}}>Login</Text>
+          <ScrollView keyboardShouldPersistTaps="never" scrollEnabled={false} 
+            style={{backgroundColor:'white'}}>
+            <View style={{width:(frame.width),alignItems:"center",justifyContent:"center"}}>
+                <Text style={{fontSize: 50,marginTop:(frame.height / 10)}}>Login</Text>
                 <TextInput
-                style={{position: 'absolute', top: 150, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                placeholder={' Enter email address'}
+                style={{height: (frame.height / 20), width: (frame.width / 1.5),marginTop:(frame.height / 6), borderColor: 'gray', borderBottomWidth: 1}}
+                placeholder={' Email address'}
                 onChange={(event) => this.setState({Username: event.nativeEvent.text})}
                 autoCapitalize={'none'}
                 />
                 <TextInput
-                    style={{position: 'absolute', top: 200, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                    placeholder={' Enter password'}
+                    style={{height: (frame.height / 20), width: (frame.width / 1.5),marginTop:(frame.height / 80), borderColor: 'gray', borderBottomWidth: 1}}
+                    placeholder={' Password'}
                     secureTextEntry={true}
                     onChange={(event) => this.setState({password: event.nativeEvent.text})}
                     />
-                <TouchableHighlight onPress={() => {login(this.state.Username,this.state.password)}} style={{position: 'absolute', top: 260, left: 100}} underlayColor="#f1f1f1">
-                    <Text style={{fontSize: 20}}>Login</Text>
+                <TouchableHighlight onPress={() => {login(this.state.Username,this.state.password)}} 
+                     style={{marginTop:(frame.height / 20)}} underlayColor="#f1f1f1">
+                    <Text style={{fontSize: 24}}>Login</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={() => {slidePageLeft()}} style={{position: 'absolute', top: 300, left: 100}} underlayColor="#f1f1f1">
-                    <Text style={{fontSize: 20}}>Create Account</Text>
+                <TouchableHighlight onPress={() => {slidePageLeft()}} 
+                     style={{marginTop:(frame.height / 40)}} underlayColor="#f1f1f1">
+                    <Text style={{fontSize: 24}}>Create an Account</Text>
                 </TouchableHighlight>
             </View>
 
-            <Animated.View style={{flex:1,backgroundColor:"white", transform: [{translateX: previousValue}]}}>
+            <Animated.View style={{position:'absolute',top:0,height:(frame.height),width:(frame.width),backgroundColor:"white", transform: [{translateX: previousValue}]}}>
                 <SignUpPage/>
             </Animated.View>
-        </View>
+        </ScrollView>
       )
   }
 }
@@ -135,30 +135,32 @@ class SignUpPage extends React.Component {
 
     render() {
         return(
-            <View style={{flex:1}}>
-                <Text style={{position: 'absolute', top: 25, left: 50, fontSize: 50}}>Create Account</Text>
+            <View style={{backgroundColor:"white",alignItems:"center",justifyContent:"center"}}>
+                <Text style={{fontSize: 50,marginTop:(frame.height / 10)}}>Create Account</Text>
                 <TextInput
-                    style={{position: 'absolute', top: 150, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                    placeholder={' Enter your name'}
+                    style={{height: (frame.height / 20), width: (frame.width / 1.5),marginTop:(frame.height / 6), borderColor: 'gray', borderBottomWidth: 1}}
+                    placeholder={' Name'}
                     onChange={(event) => this.setState({name: event.nativeEvent.text})}
                 />
                 <TextInput
-                style={{position: 'absolute', top: 200, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                placeholder={' Enter email address'}
+                style={{height: (frame.height / 20), width: (frame.width / 1.5),marginTop:(frame.height / 80), borderColor: 'gray', borderBottomWidth: 1}}
+                placeholder={' Email address'}
                 onChange={(event) => this.setState({Username: event.nativeEvent.text})}
                 autoCapitalize={'none'}
                 />
                 <TextInput
-                    style={{position: 'absolute', top: 250, left: 100, height: 40, width: 200, borderColor: 'gray', borderWidth: 1}}
-                    placeholder={' Enter password'}
+                    style={{height: (frame.height / 20), width: (frame.width / 1.5),marginTop:(frame.height / 80), borderColor: 'gray', borderBottomWidth: 1}}
+                    placeholder={' Password'}
                     secureTextEntry={true}
                     onChange={(event) => this.setState({password: event.nativeEvent.text})}
                 />
-                <TouchableHighlight onPress={() => {this.createUser().then((result) => {if (result == true) {this.moveRight()}})}} style={{position: 'absolute', top: 310, left: 100}} underlayColor="#f1f1f1">
-                    <Text style={{fontSize: 20}}>Create Account</Text>
+                <TouchableHighlight onPress={() => {this.createUser().then((result) => {if (result == true) {this.moveRight()}})}} 
+                     style={{marginTop:(frame.height / 20)}} underlayColor="#f1f1f1">
+                    <Text style={{fontSize: 24}}>Create</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={() => {slidePageRight()}} style={{position: 'absolute', top: 350, left: 100}} underlayColor="#f1f1f1">
-                    <Text style={{fontSize: 20}}>Back</Text>
+                <TouchableHighlight style={{marginTop:(frame.height / 40)}} onPress={() => {slidePageRight()}} 
+                     underlayColor="#f1f1f1">
+                    <Text style={{fontSize: 24}}>Back</Text>
                 </TouchableHighlight>
             </View>
         )
@@ -184,7 +186,7 @@ function slidePageLeft () {
         previousValue,
         {
           toValue: 0,
-          duration: 550,
+          duration: 150,
           easing: Easing.linear
         })
     ]).start()
@@ -196,7 +198,7 @@ function slidePageRight () {
         previousValue,
         {
           toValue: 500,
-          duration: 550,
+          duration: 150,
           easing: Easing.linear
         }
       )
