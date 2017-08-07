@@ -229,19 +229,30 @@ getRequestList(UserID) {
         .then(function(requestList) {
             if (requestList.val() !== null) {
                 requestList.forEach(function(Request) {//For each request
-                    RequestedUsers.push({USERID:Request.key})
-                    Iterations ++
-                    if (Iterations == requestList.numChildren()) {
-                        clearTimeout(timeOut)
-                        resolve(RequestedUsers)
-                    }
+                    checkIfBlocked(UserID,Request.key).then((blocked) => {
+                        if (blocked == false) {
+                            RequestedUsers.push({USERID:Request.key})
+                            Iterations ++
+                            if (Iterations == requestList.numChildren()) {
+                                clearTimeout(timeOut)
+                                resolve(RequestedUsers)
+                            }
+                        } else {
+                            alert(Request.key)
+                            Iterations ++
+                            if (Iterations == requestList.numChildren()) {
+                                clearTimeout(timeOut)
+                                resolve(RequestedUsers)
+                            }  
+                        }
+                    })        
                 })
             } else {
                 clearTimeout(timeOut)
                 RequestedUsers.push({USERID:"null"})
                 resolve(RequestedUsers)
             }
-            })
+        })
         var timeOut = setTimeout(function() {
         RequestedUsers.push({USERID:"null"})
         resolve(RequestedUsers)}, 10000)
@@ -316,6 +327,42 @@ reportForm(OPTION,DATE,OFFENDER,OFFENSEDATE,TITLE,DESC,MESSAGE) {
     }
 }
 
+blockUser(User,BlockedUser) {
+    var blockRef = firebaseApp.database().ref("UserID/"+ User + "/blocked")
+    blockRef.child(BlockedUser).set({
+        user: BlockedUser,
+    });
+    removeRequestToFollow(User,BlockedUser)
+}
+
+}
+
+function checkIfBlocked(accountUserID,BlockedUserID) {
+    return new Promise(function(resolve, reject) {
+        var blocked = false
+        var increment = 0
+        var blockRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/blocked")
+        blockRef.once('value', (blockedSnapshot) => {
+            if (blockedSnapshot.val() !== null) {
+                blockedSnapshot.forEach(function(User) {
+                    if (User.key == BlockedUserID) {
+                        alert(User.key + " " + BlockedUserID)
+                        blocked = true
+                    }
+                    increment = increment + 1;
+                    if (increment == blockedSnapshot.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(blocked)
+                    }
+                })
+            } else {
+               clearTimeout(timeOut)
+                resolve(blocked) 
+            }
+        var timeOut = setTimeout(function() {
+        resolve(false)}, 10000)
+        }) 
+    })
 }
 
 function getComments(UserID,Date) {
@@ -399,7 +446,7 @@ function checkIfFollowed(accountUserID,viewerUserID) {
         var followed = false
         var increment = 0
         var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers")
-        followRef.on('value', (followSnapshot) => {
+        followRef.once('value', (followSnapshot) => {
             if (followSnapshot.val() !== null) {
                 followSnapshot.forEach(function(Follower) {
                     if (Follower.key == viewerUserID) {
@@ -426,7 +473,7 @@ function checkIfRequested(accountUserID,viewerUserID) {
         var requested = false
         var increment = 0
         var requestRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/requests")
-        requestRef.on('value', (requestSnapshot) => {
+        requestRef.once('value', (requestSnapshot) => {
             if (requestSnapshot.val() !== null) {
                 requestSnapshot.forEach(function(request) {
                     if (request.key == viewerUserID) {

@@ -147,6 +147,24 @@ class RequestTemplate extends Component {
         }
         })
   }
+
+  optionsPressed() {
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      if (ID !== this.props.USERID) {
+        Alert.alert(
+          'Post Options',
+          "Are you sure you want to block this user?",
+          [
+            {text: 'Block', onPress: () => {
+              functions.blockUser(ID,this.props.USERID)
+            }},
+            {text: 'Cancel', style: 'cancel'},
+          ],
+            { cancelable: true }
+        ) 
+      }
+    })
+  }
     
     render() {
         if (this.props.USERID !== "null") {
@@ -160,6 +178,11 @@ class RequestTemplate extends Component {
                 </TouchableHighlight>
                 <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >{this.state.name}</Text>
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
+                    <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
+                        <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
+                        width: (frame.width / 6),marginTop:(frame.height / 80)}} 
+                        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
+                    </TouchableHighlight>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {acceptRequest(ID,this.props.USERID)})}>
                     <Image 

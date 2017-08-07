@@ -98,7 +98,7 @@ class PostDetails extends Component {
       if (ID == this.props.USERID) {
         Alert.alert(
           'Post Options',
-          "Are you sure you would like to delete this post?",
+          "Are you sure you want to delete this post?",
           [
             {text: 'Delete', onPress: () => {
               var postsRef = firebaseApp.database().ref("UserID/"+ ID + "/posts")
