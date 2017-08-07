@@ -16,14 +16,6 @@ const resetAction = NavigationActions.reset({
     ],
     key: null
 });
-const navigateAction = NavigationActions.navigate({
-
-  routeName: 'EditAccount',
-
-  params: {},
-
-  action: NavigationActions.navigate({ routeName: 'EditAccount'})
-})
 
 class OptionsContainer extends Component {
     render() {
@@ -33,10 +25,19 @@ class OptionsContainer extends Component {
                 <TouchableHighlight style={{height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5,
                     justifyContent:'center'}}
                     underlayColor="#f1f1f1" onPress={() => 
-                    {this.props.dispatch(navigateAction)}}>
+                    {this.props.navigate("EditAccount")}}>
                     <View style={{alignItems:'center',flexDirection:'row'}}>
                         <Text style={{fontSize:20,marginLeft:(frame.width / 80),
                             fontWeight:'bold'}} >Edit Account</Text>
+                    </View>
+                </TouchableHighlight>
+                <TouchableHighlight style={{height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5,
+                    justifyContent:'center'}}
+                    underlayColor="#f1f1f1" onPress={() => 
+                    {this.props.navigate("UserList", {TYPE:"Blocked Users"})}}>
+                    <View style={{alignItems:'center',flexDirection:'row'}}>
+                        <Text style={{fontSize:20,marginLeft:(frame.width / 80),
+                            fontWeight:'bold'}} >Edit Blocked Users</Text>
                     </View>
                 </TouchableHighlight>
                 <TouchableHighlight style={{height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5,
@@ -151,18 +152,34 @@ class RequestTemplate extends Component {
   optionsPressed() {
     functions.getFromAsyncStorage("@userID:key").then((ID) => {
       if (ID !== this.props.USERID) {
-        Alert.alert(
-          'Post Options',
-          "Are you sure you want to block this user?",
-          [
-            {text: 'Block', onPress: () => {
-              functions.blockUser(ID,this.props.USERID)
-            }},
-            {text: 'Cancel', style: 'cancel'},
-          ],
-            { cancelable: true }
-        ) 
-      }
+        functions.checkIfUserBlocked(ID,this.props.USERID).then((blocked) => {
+            if (blocked == false) {
+                Alert.alert(
+                    'Post Options',
+                    "Are you sure you want to block this user?",
+                    [
+                        {text: 'Block', onPress: () => {
+                        functions.blockUser(ID,this.props.USERID)
+                        }},
+                        {text: 'Cancel', style: 'cancel'},
+                    ],
+                        { cancelable: true }
+                    ) 
+            } else {
+                Alert.alert(
+                    'Post Options',
+                    "Are you sure you want to unblock this user?",
+                    [
+                        {text: 'Unblock', onPress: () => {
+                        functions.unblockUser(ID,this.props.USERID)
+                        }},
+                        {text: 'Cancel', style: 'cancel'},
+                    ],
+                        { cancelable: true }
+                    ) 
+            }
+        })
+      }      
     })
   }
     
@@ -179,9 +196,8 @@ class RequestTemplate extends Component {
                 <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >{this.state.name}</Text>
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
-                        <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
-                        width: (frame.width / 6),marginTop:(frame.height / 80)}} 
-                        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
+                        <Image style={{resizeMode: 'contain', resizeMode:'center',marginTop:(frame.height / 80)}} 
+                        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')} />
                     </TouchableHighlight>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {acceptRequest(ID,this.props.USERID)})}>
@@ -212,7 +228,8 @@ export default class SettingsContents extends Component {
         return(
             <View style={{flex:1,backgroundColor:'white'}}>
                 <RequestContainer navigate={this.props.navigation.navigate}/>
-                <OptionsContainer dispatch={this.props.navigation.dispatch}/>
+                <OptionsContainer navigate={this.props.navigation.navigate}
+                    dispatch={this.props.navigation.dispatch}/>
             </View>
         )
     }

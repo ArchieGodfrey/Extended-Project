@@ -1,6 +1,7 @@
 import React from 'react';
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import { StackNavigator,TabNavigator,NavigationActions  } from 'react-navigation';
-import { Image,TouchableHighlight,Text,Dimensions } from 'react-native';
+import { Alert,Image,TouchableHighlight,Text,Dimensions } from 'react-native';
 
 import Feed from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/feedComponent'
 import UserDetail from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/otherUserAccount'
@@ -13,6 +14,7 @@ import AccountPosts from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/C
 import EditAccount from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/editAccountComponent'
 import Comment from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/CommentComponent'
 import ReportPage from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/ReportPage'
+import UserList from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/UserList'
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 const frame = Dimensions.get('window');
@@ -20,8 +22,49 @@ const frame = Dimensions.get('window');
 const backAction = NavigationActions.back({})
 const BackButton = ({ onPress }) => (
   <TouchableHighlight underlayColor="#f1f1f1" style={{marginLeft:(frame.width / 20),width:(frame.width/6)}} onPress={onPress}>
-    <Image
+    <Image style={{resizeMode:'center'}} 
       source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/BackIcon.png')}
+    />
+  </TouchableHighlight>
+);
+
+function menuPressed(USERID) {
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {
+      if (ID !== USERID) {
+        functions.checkIfUserBlocked(ID,USERID).then((blocked) => {
+            if (blocked == false) {
+                Alert.alert(
+                    'Post Options',
+                    "Are you sure you want to block this user?",
+                    [
+                        {text: 'Block', onPress: () => {
+                        functions.blockUser(ID,USERID)
+                        }},
+                        {text: 'Cancel', style: 'cancel'},
+                    ],
+                        { cancelable: true }
+                    ) 
+            } else {
+                Alert.alert(
+                    'Post Options',
+                    "Are you sure you want to unblock this user?",
+                    [
+                        {text: 'Unblock', onPress: () => {
+                        functions.unblockUser(ID,USERID)
+                        }},
+                        {text: 'Cancel', style: 'cancel'},
+                    ],
+                        { cancelable: true }
+                    ) 
+            }
+        })
+      }      
+    })
+  }
+const MenuButton = ({ onPress }) => (
+  <TouchableHighlight underlayColor="#f1f1f1" style={{width:(frame.width/6)}} onPress={onPress}>
+    <Image style={{resizeMode:'center',position:'absolute',right:(frame.width / 20)}} 
+      source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')}
     />
   </TouchableHighlight>
 );
@@ -87,6 +130,9 @@ const UserDetailStack = StackNavigator({
       headerLeft: (
         <BackButton onPress={() => navigation.dispatch(backAction)}/>
       ),
+      headerRight: (
+        <MenuButton onPress={() => menuPressed(navigation.state.params.USERID)}/>
+      ),
     }),
   }
   }
@@ -144,6 +190,19 @@ const ReportPageStack = StackNavigator({
   }
 );
 
+const UserListStack = StackNavigator({
+  ReportPage: {
+    screen: UserList,
+    navigationOptions: ({navigation}) => ({
+      title: navigation.state.params.TYPE,
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
+    }),
+  }
+  }
+);
+
 const TopNavigation = TabNavigator({
   Account: {
     screen:  AccountTab,
@@ -190,6 +249,9 @@ const MainNavigation = StackNavigator({
   },
   ReportPage: {
     screen: ReportPageStack,
+  }, 
+  UserList: {
+    screen: UserListStack,
   }
 }, {
     headerMode: 'none',

@@ -116,6 +116,7 @@ class AnalyticsBar extends Component {
     }
 
     componentWillMount() { 
+        const {navigate} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
             var followingRef = firebaseApp.database().ref("UserID/"+ ID + "/following")
             followingRef.on('value', (followingSnapshot) => {
@@ -132,15 +133,17 @@ class AnalyticsBar extends Component {
         return(
             <View style={{flex:0.1,flexDirection:'row',justifyContent:'center',alignItems:'center',
                 borderColor:'grey',borderTopWidth:0.5,borderBottomWidth:0.5,backgroundColor:'white'}} >
-                <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,}} >
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.props.navigate("UserList", {TYPE:"Users you follow"})} 
+                    style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,}} >
                     <Text style={{fontSize:24}}> {this.state.following} </Text>
-                </View>
+                </TouchableHighlight>
                 <Image 
                     style={{resizeMode: 'center'}} 
                     source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/FriendsIcon.png")}/>
-                <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,paddingLeft:(frame.width / 80)}} >
+                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.props.navigate("UserList", {TYPE:"Users who follow you"})} 
+                    style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,paddingLeft:(frame.width / 80)}} >
                     <Text style={{fontSize:24}}> {this.state.followers} </Text>
-                </View>
+                </TouchableHighlight>
             </View>
         )
     }
@@ -252,7 +255,7 @@ export default class AccountContents extends Component {
         return(
             <View style={{flex:1,justifyContent:'center'}}>
                 <ImageContainer navigate={this.props.navigation.navigate}/>
-                <AnalyticsBar/>
+                <AnalyticsBar navigate={this.props.navigation.navigate}/>
                 <AccountPosts navigate={this.props.navigation.navigate}/>
             </View>
         )

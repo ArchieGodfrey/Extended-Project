@@ -333,6 +333,51 @@ blockUser(User,BlockedUser) {
         user: BlockedUser,
     });
     removeRequestToFollow(User,BlockedUser)
+    unFollowUser(User,BlockedUser)
+}
+
+unblockUser(User,BlockedUser) {
+    var blockRef = firebaseApp.database().ref("UserID/"+ User + "/blocked")
+    blockRef.child(BlockedUser).remove()
+}
+
+getList(UserID,Type) {
+    return new Promise(function(resolve, reject) {
+        var UserList = []
+        var Iterations = 0
+        var query = firebaseApp.database().ref("UserID/" + UserID + "/" + Type).orderByKey();
+        query.once("value")
+        .then(function(allUsers) {
+            if (allUsers.val() !== null) {
+                allUsers.forEach(function(User) {//For each user  
+                    UserList.push({USERID:User.key})
+                    Iterations ++
+                    if (Iterations == allUsers.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(UserList)
+                    }      
+                })
+            } else {
+                clearTimeout(timeOut)
+                UserList.push({USERID:"null"})
+                resolve(UserList)
+            }
+        })
+        var timeOut = setTimeout(function() {
+        UserList.push({USERID:"null"})
+        resolve(UserList)}, 10000)
+    }) 
+}
+
+checkIfUserBlocked(accountUserID,BlockedUserID) {
+    return new Promise(function(resolve, reject) {
+        checkIfBlocked(accountUserID,BlockedUserID).then((result) => {
+            clearTimeout(timeOut)
+            resolve(result)
+        })
+        var timeOut = setTimeout(function() {
+            resolve(false)}, 10000)
+    }) 
 }
 
 }
@@ -346,7 +391,6 @@ function checkIfBlocked(accountUserID,BlockedUserID) {
             if (blockedSnapshot.val() !== null) {
                 blockedSnapshot.forEach(function(User) {
                     if (User.key == BlockedUserID) {
-                        alert(User.key + " " + BlockedUserID)
                         blocked = true
                     }
                     increment = increment + 1;
