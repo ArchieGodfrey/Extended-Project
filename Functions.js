@@ -313,8 +313,8 @@ getPostComments(UserID,Date) {
 
 reportForm(OPTION,DATE,OFFENDER,OFFENSEDATE,TITLE,DESC,MESSAGE) {
     var reportRef = firebaseApp.database().ref("Reports/"+ OPTION + "/" + DATE)
-    if (MESSAGE !== null) {
-            reportRef.child(OFFENSEDATE).set({
+    if (MESSAGE == null) {
+        reportRef.child(OFFENSEDATE).set({
             offender: OFFENDER,
             title:TITLE,
             desc:DESC,
