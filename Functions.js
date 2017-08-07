@@ -269,7 +269,16 @@ followUser(followed,follower) {
     followingRef.child(followed).set({
         user: followed,
     });
+    var followRef = firebaseApp.database().ref("UserID/"+ follower + "/followers")
+    followRef.child(followed).set({
+        user: followed,
+    });
+    var followingRef = firebaseApp.database().ref("UserID/"+ followed + "/following")
+    followingRef.child(follower).set({
+        user: follower,
+    });
     removeRequestToFollow(followed,follower)
+    removeRequestToFollow(follower,followed)
 }
 
 declineRequest(follower,followed) {
@@ -346,6 +355,10 @@ function unFollowUser(accountUserID,viewerUserID) {
     var followRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/followers").child(viewerUserID)
     followRef.remove()
     var followingRef = firebaseApp.database().ref("UserID/"+ viewerUserID + "/following").child(accountUserID)
+    followingRef.remove()
+    var followRef = firebaseApp.database().ref("UserID/"+ viewerUserID + "/followers").child(accountUserID)
+    followRef.remove()
+    var followingRef = firebaseApp.database().ref("UserID/"+ accountUserID + "/following").child(viewerUserID)
     followingRef.remove()
 }
 
