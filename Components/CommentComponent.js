@@ -51,9 +51,8 @@ class CommentTemplate extends Component {
               commentRef.child(this.props.DATE).remove()
             }},
             {text: 'Report', onPress: () => {
-            /*
-              No report system in place yet
-            */
+            this.props.navigate('ReportPage', { OFFENDER:this.props.USERID,POSTDATE:this.props.DATE,
+                MESSAGE:this.props.DESC })
           }},
             {text: 'Cancel', style: 'cancel'},
           ],
@@ -65,9 +64,8 @@ class CommentTemplate extends Component {
           "Whats wrong with this comment?",
           [
             {text: 'Report', onPress: () => {
-            /*
-              No report system in place yet
-            */
+              this.props.navigate('ReportPage', { OFFENDER:this.props.USERID,POSTDATE:this.props.DATE,
+                MESSAGE:this.props.DESC })
           }},
             {text: 'Cancel', style: 'cancel'},
           ],

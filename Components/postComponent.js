@@ -114,10 +114,8 @@ class PostDetails extends Component {
         "Whats wrong with this post?",
         [
           {text: 'Report', onPress: () => {
-            /*
-            var postsRef = firebaseApp.database().ref("UserID/"+ otherUserID + "/posts")
-            postsRef.child(postDate).remove()
-            resolve()*/
+            this.props.navigate('ReportPage', { OFFENDER:this.props.USERID,POSTDATE:this.props.DATE,
+                POSTTITLE:this.props.TITLE,POSTDESC:this.props.DESC})
           }},
           {text: 'Cancel', style: 'cancel'},
         ],
@@ -130,7 +128,7 @@ class PostDetails extends Component {
   render() {
     return(
       <View style={{flexDirection:'row', flexWrap: 'wrap',marginLeft:(frame.width / 40),marginTop:(frame.width / 40), paddingRight:(frame.width / 40)}} >
-        <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => {if (this.props.DATE !== null) {this.transition("UserDetail")}}}>
+        <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => {if (this.props.DATE !== null) {this.transition("UserDetail", {USERID:this.props.USERID})}}}>
           <Image style={{resizeMode: 'cover', height: (frame.height / 10), 
             width: (frame.width / 6)}} source={{uri: this.state.avatarSource}} />
         </TouchableHighlight>
@@ -322,7 +320,7 @@ export default class PostTemplate extends Component {
       <View style={{flex:1,backgroundColor:'white', paddingBottom:(frame.height / 40)}}>
         <ImageContainer USERID={this.props.USERID} DATE={this.props.DATE}/>
         <PostDetails navigate={this.props.navigate}
-          USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} />
+          USERID={this.props.USERID} DATE={this.props.DATE} TITLE={this.props.TITLE} DESC={this.props.DESC}/>
         <DescriptionContainer DESC={this.props.DESC}/>    
         <Footer USERID={this.props.USERID} DATE={this.props.DATE}
           navigate={this.props.navigate} TITLE={this.props.TITLE}/>  

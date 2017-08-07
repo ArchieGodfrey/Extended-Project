@@ -1,6 +1,6 @@
 import React from 'react';
-import { StackNavigator,TabNavigator  } from 'react-navigation';
-import { Image } from 'react-native';
+import { StackNavigator,TabNavigator,NavigationActions  } from 'react-navigation';
+import { Image,TouchableHighlight,Text,Dimensions } from 'react-native';
 
 import Feed from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/feedComponent'
 import UserDetail from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/otherUserAccount'
@@ -12,8 +12,19 @@ import Settings from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Compo
 import AccountPosts from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/AccountPostsComponent'
 import EditAccount from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/editAccountComponent'
 import Comment from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/CommentComponent'
+import ReportPage from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/ReportPage'
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
+const frame = Dimensions.get('window');
+
+const backAction = NavigationActions.back({})
+const BackButton = ({ onPress }) => (
+  <TouchableHighlight underlayColor="#f1f1f1" style={{marginLeft:(frame.width / 20)}} onPress={onPress}>
+    <Image
+      source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/BackIcon.png')}
+    />
+  </TouchableHighlight>
+);
 
 const FeedStack = StackNavigator({
   Feed: {
@@ -71,8 +82,11 @@ const SearchStack = StackNavigator({
 const UserDetailStack = StackNavigator({
   UserDetail: {
     screen: UserDetail,
-    navigationOptions: ({ navigation }) => ({
-      title: "Profile",
+    navigationOptions: ({navigation}) => ({
+      title: 'Profile',
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
     }),
   }
   }
@@ -81,8 +95,11 @@ const UserDetailStack = StackNavigator({
 const AccountPostsStack = StackNavigator({
   AccountPosts: {
     screen: AccountPosts,
-    navigationOptions: ({ navigation }) => ({
-      title: "Posts",
+    navigationOptions: ({navigation}) => ({
+      title: 'Posts',
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
     }),
   }
   }
@@ -91,9 +108,12 @@ const AccountPostsStack = StackNavigator({
 const NewPostStack = StackNavigator({
   NewPost: {
     screen: NewPost,
-    navigationOptions: {
+    navigationOptions: ({navigation}) => ({
       title: 'Edit Post',
-    },
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
+    }),
   }
   }
 );
@@ -101,9 +121,25 @@ const NewPostStack = StackNavigator({
 const CommentStack = StackNavigator({
   Comment: {
     screen: Comment,
-    navigationOptions: {
+    navigationOptions: ({navigation}) => ({
       title: 'Comments',
-    },
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
+    }),
+  }
+  }
+);
+
+const ReportPageStack = StackNavigator({
+  ReportPage: {
+    screen: ReportPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Report',
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
+    }),
   }
   }
 );
@@ -151,6 +187,9 @@ const MainNavigation = StackNavigator({
   },
   Comment: {
     screen: CommentStack,
+  },
+  ReportPage: {
+    screen: ReportPageStack,
   }
 }, {
     headerMode: 'none',
