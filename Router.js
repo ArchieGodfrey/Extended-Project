@@ -19,7 +19,7 @@ const frame = Dimensions.get('window');
 
 const backAction = NavigationActions.back({})
 const BackButton = ({ onPress }) => (
-  <TouchableHighlight underlayColor="#f1f1f1" style={{marginLeft:(frame.width / 20)}} onPress={onPress}>
+  <TouchableHighlight underlayColor="#f1f1f1" style={{marginLeft:(frame.width / 20),width:(frame.width/6)}} onPress={onPress}>
     <Image
       source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/BackIcon.png')}
     />

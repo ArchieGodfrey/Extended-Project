@@ -29,16 +29,24 @@ class OptionsContainer extends Component {
     render() {
         const {dispatch} = this.props;
         return(
-            <View style={{alignItems:'center'}}>
-                <TouchableHighlight style={{paddingBottom:(frame.height / 20),borderColor:'grey',borderBottomWidth:0.5}}
+            <View style={{marginTop:(frame.height / 10)}}>
+                <TouchableHighlight style={{height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5,
+                    justifyContent:'center'}}
                     underlayColor="#f1f1f1" onPress={() => 
                     {this.props.dispatch(navigateAction)}}>
-                    <Text style={{fontSize:20}}>Edit Account</Text>
+                    <View style={{alignItems:'center',flexDirection:'row'}}>
+                        <Text style={{fontSize:20,marginLeft:(frame.width / 80),
+                            fontWeight:'bold'}} >Edit Account</Text>
+                    </View>
                 </TouchableHighlight>
-                <TouchableHighlight style={{paddingBottom:(frame.height / 20),borderColor:'grey',borderBottomWidth:0.5}}
+                <TouchableHighlight style={{height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5,
+                    justifyContent:'center'}}
                     underlayColor="#f1f1f1" onPress={() => 
                     {logOut().then(() => {this.props.dispatch(resetAction)})}}>
-                    <Text style={{fontSize:20}}>Log Out</Text>
+                    <View style={{alignItems:'center',flexDirection:'row'}}>
+                        <Text style={{fontSize:20,marginLeft:(frame.width / 80),
+                            fontWeight:'bold'}} >Log Out</Text>
+                    </View>
                 </TouchableHighlight>
             </View>
         )
@@ -151,7 +159,8 @@ class RequestTemplate extends Component {
                         source={{uri: this.state.imageSource}}/>
                 </TouchableHighlight>
                 <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >{this.state.name}</Text>
-                <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
+                <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
+                    <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {acceptRequest(ID,this.props.USERID)})}>
                     <Image 
                         style={{resizeMode: 'center', height: (frame.width / 10), width: (frame.width / 10)}}
@@ -164,6 +173,7 @@ class RequestTemplate extends Component {
                         height: (frame.width / 10), width: (frame.width / 10)}}
                     source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/Off.png")}/>
                 </TouchableHighlight>
+                </View>
             </View>
         )
         } else {

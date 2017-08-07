@@ -5,10 +5,39 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-/* Listens for changes in the database
-exports.checkExpirationDate = functions.database.ref('UserID/{userID}/posts/{postDate}/expiration')
+// Listens for changes in the database
+exports.bullyingReport = functions.database.ref('Reports/Harrassment or bullying/{DATE}/{postDate}')
     .onUpdate(event => {
-        const expired = event.data.val()
+        console.log(event.data.val())
         
     });
-*/
+
+exports.nudityReport = functions.database.ref('Reports/Nudity or pornography/{DATE}/{postDate}')
+    .onUpdate(event => {
+        console.log(event.data.val())
+        
+    });
+
+exports.violenceReport = functions.database.ref('Reports/Violence or harm/{DATE}/{postDate}')
+    .onUpdate(event => {
+        console.log(event.data.val())
+        
+    });
+
+exports.racismReport = functions.database.ref('Reports/Hate speech or symbols/{DATE}/{postDate}')
+    .onUpdate(event => {
+        console.log(event.data.val())
+        
+    });
+
+exports.intellectualPropertyReport = functions.database.ref('Reports/Intellectual property violation/{DATE}/{postDate}')
+    .onUpdate(event => {
+        console.log(event.data.val())
+        
+    });
+
+exports.generalReport = functions.database.ref("Reports/I just don't like it/{DATE}/{postDate}")
+    .onUpdate(event => {
+        console.log(event.data.val())
+        
+    });

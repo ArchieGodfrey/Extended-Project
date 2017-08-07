@@ -1,0 +1,217 @@
+[debug] [2017-08-07T11:28:40.272Z] ----------------------------------------------------------------------
+[debug] [2017-08-07T11:28:40.276Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy --only functions
+[debug] [2017-08-07T11:28:40.277Z] CLI Version:   3.9.2
+[debug] [2017-08-07T11:28:40.277Z] Platform:      darwin
+[debug] [2017-08-07T11:28:40.277Z] Node Version:  v6.11.2
+[debug] [2017-08-07T11:28:40.278Z] Time:          Mon Aug 07 2017 12:28:40 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:40.278Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2017-08-07T11:28:40.364Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2017-08-07T11:28:40.364Z] > authorizing via signed-in user
+[debug] [2017-08-07T11:28:40.367Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2017-08-07T11:28:40.368Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token { refresh_token: '1/rbua0GDDdSOXOLxThubOsuzRTGvD89fQaWOQPH7mbu4',
+  client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+  client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+  grant_type: 'refresh_token',
+  scope: 'email https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/firebase openid' } 
+ Mon Aug 07 2017 12:28:40 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:40.882Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:28:40.986Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/epproject-a2ea7  
+ Mon Aug 07 2017 12:28:40 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:42.615Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:28:42.616Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/epproject-a2ea7/tokens  
+ Mon Aug 07 2017 12:28:42 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:43.469Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Deploying to 'epproject-a2ea7'...
+[info] 
+[info] i  deploying functions
+[debug] [2017-08-07T11:28:44.868Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "dependencies": {
+    "firebase-admin": "~4.2.1",
+    "firebase-functions": "^0.5.7"
+  },
+  "private": true
+}
+[info] i  functions: ensuring necessary APIs are enabled...
+[info] i  runtimeconfig: ensuring necessary APIs are enabled...
+[debug] [2017-08-07T11:28:44.870Z] >>> HTTP REQUEST GET https://servicemanagement.googleapis.com/v1/services/cloudfunctions.googleapis.com/projectSettings/epproject-a2ea7?view=CONSUMER_VIEW  
+ Mon Aug 07 2017 12:28:44 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:44.871Z] >>> HTTP REQUEST GET https://servicemanagement.googleapis.com/v1/services/runtimeconfig.googleapis.com/projectSettings/epproject-a2ea7?view=CONSUMER_VIEW  
+ Mon Aug 07 2017 12:28:44 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:46.336Z] <<< HTTP RESPONSE 200
+[info] ✔  runtimeconfig: all necessary APIs are enabled
+[debug] [2017-08-07T11:28:46.372Z] <<< HTTP RESPONSE 200
+[info] ✔  functions: all necessary APIs are enabled
+[debug] [2017-08-07T11:28:46.374Z] >>> HTTP REQUEST GET https://appengine.googleapis.com/v1/apps/epproject-a2ea7  
+ Mon Aug 07 2017 12:28:46 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:46.375Z] >>> HTTP REQUEST GET https://apikeys.googleapis.com/v1/projects/epproject-a2ea7/apiKeys  
+ Mon Aug 07 2017 12:28:46 GMT+0100 (BST)
+[debug] [2017-08-07T11:28:47.365Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:28:47.368Z] <<< HTTP RESPONSE 200
+[info] i  functions: preparing functions directory for uploading...
+[debug] [2017-08-07T11:29:07.222Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/epproject-a2ea7/configs  
+ Mon Aug 07 2017 12:29:07 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:08.046Z] <<< HTTP RESPONSE 200
+[info] i  functions: packaged functions (1.06 KB) for uploading
+[debug] [2017-08-07T11:29:09.936Z] >>> HTTP REQUEST GET https://www.googleapis.com/storage/v1/b/staging.epproject-a2ea7.appspot.com  
+ Mon Aug 07 2017 12:29:09 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:10.450Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:10.451Z] >>> HTTP REQUEST POST https://www.googleapis.com/upload/storage/v1/b/staging.epproject-a2ea7.appspot.com/o?uploadType=media&name=firebase-functions-source ReadStream {
+  _readableState: 
+   ReadableState {
+     objectMode: false,
+     highWaterMark: 65536,
+     buffer: BufferList { head: [Object], tail: [Object], length: 1 },
+     length: 1089,
+     pipes: null,
+     pipesCount: 0,
+     flowing: null,
+     ended: true,
+     endEmitted: false,
+     reading: false,
+     sync: false,
+     needReadable: false,
+     emittedReadable: true,
+     readableListening: false,
+     resumeScheduled: false,
+     defaultEncoding: 'utf8',
+     ranOut: false,
+     awaitDrain: 0,
+     readingMore: false,
+     decoder: null,
+     encoding: null },
+  readable: true,
+  domain: null,
+  _events: { end: [Function] },
+  _eventsCount: 1,
+  _maxListeners: undefined,
+  path: '/var/folders/gh/fqn3tx2922s___kcx8lhbq8r0000gn/T/firebase-functions-3272bSFtD5e6kuZV.zip',
+  fd: 18,
+  flags: 'r',
+  mode: 438,
+  start: undefined,
+  end: undefined,
+  autoClose: true,
+  pos: undefined,
+  bytesRead: 1089 } 
+ Mon Aug 07 2017 12:29:10 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:11.737Z] <<< HTTP RESPONSE 200
+[info] ✔  functions: functions folder uploaded successfully
+[info] i  starting release process (may take several minutes)...
+[debug] [2017-08-07T11:29:11.741Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions  
+ Mon Aug 07 2017 12:29:11 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:12.958Z] <<< HTTP RESPONSE 200
+[info] i  functions: creating function bullyingReport...
+[debug] [2017-08-07T11:29:12.964Z] Trigger is: 
+[info] i  functions: creating function nudityReport...
+[debug] [2017-08-07T11:29:12.965Z] Trigger is: 
+[info] i  functions: creating function violenceReport...
+[debug] [2017-08-07T11:29:12.966Z] Trigger is: 
+[info] i  functions: creating function racismReport...
+[debug] [2017-08-07T11:29:12.966Z] Trigger is: 
+[info] i  functions: creating function intellectualPropertyReport...
+[debug] [2017-08-07T11:29:12.967Z] Trigger is: 
+[info] i  functions: creating function generalReport...
+[debug] [2017-08-07T11:29:12.967Z] Trigger is: 
+[debug] [2017-08-07T11:29:12.970Z] >>> HTTP REQUEST POST https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions { sourceArchiveUrl: 'gs://staging.epproject-a2ea7.appspot.com/firebase-functions-source',
+  name: 'projects/epproject-a2ea7/locations/us-central1/functions/bullyingReport',
+  entryPoint: 'bullyingReport',
+  eventTrigger: 
+   { resource: 'projects/_/instances/epproject-a2ea7/refs/Reports/Harrassment or bullying/{DATE}/{postDate}',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.update' } } 
+ Mon Aug 07 2017 12:29:12 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:12.972Z] >>> HTTP REQUEST POST https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions { sourceArchiveUrl: 'gs://staging.epproject-a2ea7.appspot.com/firebase-functions-source',
+  name: 'projects/epproject-a2ea7/locations/us-central1/functions/nudityReport',
+  entryPoint: 'nudityReport',
+  eventTrigger: 
+   { resource: 'projects/_/instances/epproject-a2ea7/refs/Reports/Nudity or pornography/{DATE}/{postDate}',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.update' } } 
+ Mon Aug 07 2017 12:29:12 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:12.974Z] >>> HTTP REQUEST POST https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions { sourceArchiveUrl: 'gs://staging.epproject-a2ea7.appspot.com/firebase-functions-source',
+  name: 'projects/epproject-a2ea7/locations/us-central1/functions/violenceReport',
+  entryPoint: 'violenceReport',
+  eventTrigger: 
+   { resource: 'projects/_/instances/epproject-a2ea7/refs/Reports/Violence or harm/{DATE}/{postDate}',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.update' } } 
+ Mon Aug 07 2017 12:29:12 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:12.975Z] >>> HTTP REQUEST POST https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions { sourceArchiveUrl: 'gs://staging.epproject-a2ea7.appspot.com/firebase-functions-source',
+  name: 'projects/epproject-a2ea7/locations/us-central1/functions/racismReport',
+  entryPoint: 'racismReport',
+  eventTrigger: 
+   { resource: 'projects/_/instances/epproject-a2ea7/refs/Reports/Hate speech or symbols/{DATE}/{postDate}',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.update' } } 
+ Mon Aug 07 2017 12:29:12 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:12.977Z] >>> HTTP REQUEST POST https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions { sourceArchiveUrl: 'gs://staging.epproject-a2ea7.appspot.com/firebase-functions-source',
+  name: 'projects/epproject-a2ea7/locations/us-central1/functions/intellectualPropertyReport',
+  entryPoint: 'intellectualPropertyReport',
+  eventTrigger: 
+   { resource: 'projects/_/instances/epproject-a2ea7/refs/Reports/Intellectual property violation/{DATE}/{postDate}',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.update' } } 
+ Mon Aug 07 2017 12:29:12 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:12.978Z] >>> HTTP REQUEST POST https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions { sourceArchiveUrl: 'gs://staging.epproject-a2ea7.appspot.com/firebase-functions-source',
+  name: 'projects/epproject-a2ea7/locations/us-central1/functions/generalReport',
+  entryPoint: 'generalReport',
+  eventTrigger: 
+   { resource: 'projects/_/instances/epproject-a2ea7/refs/Reports/I just don\'t like it/{DATE}/{postDate}',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.update' } } 
+ Mon Aug 07 2017 12:29:12 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.779Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:13.810Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:13.825Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:13.862Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:13.881Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:13.882Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:13.885Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/projects/epproject-a2ea7/locations/us-central1/functions  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.887Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2J1bGx5aW5nUmVwb3J0L2ZubFFTTS0yYjhV  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.888Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL251ZGl0eVJlcG9ydC9lYkdYZkVsMzVZWQ  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.889Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3Zpb2xlbmNlUmVwb3J0L2tpcVc4MVR6aFVj  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.889Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3JhY2lzbVJlcG9ydC9KalBwVUdtbG5aVQ  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.890Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2ludGVsbGVjdHVhbFByb3BlcnR5UmVwb3J0L1FnZjVIeWVOQ0Vz  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:13.890Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2dlbmVyYWxSZXBvcnQvcU1TRGFsSTdmcmc  
+ Mon Aug 07 2017 12:29:13 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:14.172Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:15.015Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:15.017Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:15.018Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:15.021Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:15.022Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:15.022Z] [functions] operation poll: bullyingReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2J1bGx5aW5nUmVwb3J0L2ZubFFTTS0yYjhV is not done.
+[debug] [2017-08-07T11:29:15.023Z] [functions] operation poll: nudityReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL251ZGl0eVJlcG9ydC9lYkdYZkVsMzVZWQ is not done.
+[debug] [2017-08-07T11:29:15.023Z] [functions] operation poll: violenceReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3Zpb2xlbmNlUmVwb3J0L2tpcVc4MVR6aFVj is not done.
+[debug] [2017-08-07T11:29:15.023Z] [functions] operation poll: racismReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3JhY2lzbVJlcG9ydC9KalBwVUdtbG5aVQ is not done.
+[debug] [2017-08-07T11:29:15.023Z] [functions] operation poll: intellectualPropertyReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2ludGVsbGVjdHVhbFByb3BlcnR5UmVwb3J0L1FnZjVIeWVOQ0Vz is not done.
+[debug] [2017-08-07T11:29:15.024Z] [functions] operation poll: generalReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2dlbmVyYWxSZXBvcnQvcU1TRGFsSTdmcmc is not done.
+[debug] [2017-08-07T11:29:15.024Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:20.028Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2J1bGx5aW5nUmVwb3J0L2ZubFFTTS0yYjhV  
+ Mon Aug 07 2017 12:29:20 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:20.029Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL251ZGl0eVJlcG9ydC9lYkdYZkVsMzVZWQ  
+ Mon Aug 07 2017 12:29:20 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:20.029Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3Zpb2xlbmNlUmVwb3J0L2tpcVc4MVR6aFVj  
+ Mon Aug 07 2017 12:29:20 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:20.029Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3JhY2lzbVJlcG9ydC9KalBwVUdtbG5aVQ  
+ Mon Aug 07 2017 12:29:20 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:20.030Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2ludGVsbGVjdHVhbFByb3BlcnR5UmVwb3J0L1FnZjVIeWVOQ0Vz  
+ Mon Aug 07 2017 12:29:20 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:20.030Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1beta2/operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2dlbmVyYWxSZXBvcnQvcU1TRGFsSTdmcmc  
+ Mon Aug 07 2017 12:29:20 GMT+0100 (BST)
+[debug] [2017-08-07T11:29:20.569Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:21.160Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:21.160Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:21.164Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:21.164Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:21.165Z] <<< HTTP RESPONSE 200
+[debug] [2017-08-07T11:29:21.166Z] [functions] operation poll: bullyingReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2J1bGx5aW5nUmVwb3J0L2ZubFFTTS0yYjhV is not done.
+[debug] [2017-08-07T11:29:21.166Z] [functions] operation poll: nudityReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL251ZGl0eVJlcG9ydC9lYkdYZkVsMzVZWQ is not done.
+[debug] [2017-08-07T11:29:21.166Z] [functions] operation poll: violenceReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3Zpb2xlbmNlUmVwb3J0L2tpcVc4MVR6aFVj is not done.
+[debug] [2017-08-07T11:29:21.166Z] [functions] operation poll: racismReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL3JhY2lzbVJlcG9ydC9KalBwVUdtbG5aVQ is not done.
+[debug] [2017-08-07T11:29:21.166Z] [functions] operation poll: intellectualPropertyReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2ludGVsbGVjdHVhbFByb3BlcnR5UmVwb3J0L1FnZjVIeWVOQ0Vz is not done.
+[debug] [2017-08-07T11:29:21.166Z] [functions] operation poll: generalReport: create operations/ZXBwcm9qZWN0LWEyZWE3L3VzLWNlbnRyYWwxL2dlbmVyYWxSZXBvcnQvcU1TRGFsSTdmcmc is not done.

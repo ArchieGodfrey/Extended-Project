@@ -270,13 +270,9 @@ export default class AccountContents extends Component {
         const { USERID } = this.props.navigation.state.params;
         const {navigate} = this.props;
         functions.getFromAsyncStorage("@userID:key").then((ID) => {
-            if (ID !== this.props.navigation.state.params.USERID) {
-                functions.getFollowStatus(this.props.navigation.state.params.USERID,ID).then((result) => {
+            functions.getFollowStatus(this.props.navigation.state.params.USERID,ID).then((result) => {
                 this.setState({followed:result})
             })
-            } else {
-                this.setState({followed:true})
-            }
         })
     }
 
