@@ -176,7 +176,7 @@ class SuggestionsContainer extends Component {
   render() {
     return(
       <View style={{flex:0.5,marginTop:(frame.height / 40),backgroundColor:'white'
-          ,borderColor:'grey',borderTopWidth:0.5}} >
+          }} >
         <Text style={{fontSize:24,marginLeft:(frame.width / 80)}}>Suggestions:</Text>
         <ListView
           enableEmptySections={true}
