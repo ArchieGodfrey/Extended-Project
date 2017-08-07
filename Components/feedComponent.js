@@ -85,12 +85,15 @@ export default class Timeline extends Component {
           navigate={this.props.navigation.navigate}/>
         </View>
         }
-        renderHeader={() => <View style={{backgroundColor:'white', marginTop:(frame.height / 20), 
-        marginBottom:(frame.height / 20),  alignSelf: 'center'}}>
-        <TouchableHighlight onPress={() => {this.transition("NewPost") }}>
-          <Text style={{fontSize: 20}}>New Post</Text>
-        </TouchableHighlight>
-          
+        renderHeader={() => <View style={{flex:0.25,backgroundColor:'white', marginTop:(frame.height / 80), 
+        marginBottom:(frame.height / 80), alignItems: 'center'}}>
+        <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.transition("NewPost") }}>
+          <View style={{flexDirection:'row',alignItems:'center'}} >
+             <Image style={{resizeMode: 'center'}} 
+                  source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/PlusIcon.png')}/>
+            <Text style={{fontSize: 24}}>New Post</Text>
+          </View>
+         </TouchableHighlight>
         </View>}
       />     
     )

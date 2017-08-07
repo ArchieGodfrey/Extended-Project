@@ -91,7 +91,7 @@ class SearchItem extends Component {
                 </TouchableHighlight>
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
-                        <Image style={{resizeMode: 'contain',resizeMode:'center',marginTop:(frame.height / 80)}} 
+                        <Image style={{resizeMode:'center',marginTop:(frame.height / 80)}} 
                         source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')}/>
                     </TouchableHighlight>
                 </View>
