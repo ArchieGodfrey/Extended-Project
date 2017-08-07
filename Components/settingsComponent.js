@@ -155,7 +155,7 @@ class RequestTemplate extends Component {
         functions.checkIfUserBlocked(ID,this.props.USERID).then((blocked) => {
             if (blocked == false) {
                 Alert.alert(
-                    'Post Options',
+                    'User Options',
                     "Are you sure you want to block this user?",
                     [
                         {text: 'Block', onPress: () => {
@@ -167,7 +167,7 @@ class RequestTemplate extends Component {
                     ) 
             } else {
                 Alert.alert(
-                    'Post Options',
+                    'User Options',
                     "Are you sure you want to unblock this user?",
                     [
                         {text: 'Unblock', onPress: () => {
@@ -194,9 +194,9 @@ class RequestTemplate extends Component {
                         source={{uri: this.state.imageSource}}/>
                 </TouchableHighlight>
                 <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >{this.state.name}</Text>
-                <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
+                <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row',alignItems:'center'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
-                        <Image style={{resizeMode: 'contain', resizeMode:'center',marginTop:(frame.height / 80)}} 
+                        <Image style={{resizeMode: 'contain', resizeMode:'center'}} 
                         source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')} />
                     </TouchableHighlight>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(

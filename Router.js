@@ -34,7 +34,7 @@ function menuPressed(USERID) {
         functions.checkIfUserBlocked(ID,USERID).then((blocked) => {
             if (blocked == false) {
                 Alert.alert(
-                    'Post Options',
+                    'User Options',
                     "Are you sure you want to block this user?",
                     [
                         {text: 'Block', onPress: () => {
@@ -46,7 +46,7 @@ function menuPressed(USERID) {
                     ) 
             } else {
                 Alert.alert(
-                    'Post Options',
+                    'User Options',
                     "Are you sure you want to unblock this user?",
                     [
                         {text: 'Unblock', onPress: () => {
