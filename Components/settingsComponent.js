@@ -93,7 +93,7 @@ class RequestContainer extends Component {
         return(
             <View style={{backgroundColor:'white'
                 ,borderColor:'grey',borderBottomWidth:0.5}}>
-                <Text style={{fontSize:28}}>Requests:</Text>
+                <Text style={{fontSize:28,marginLeft:(frame.width / 80)}}>Requests:</Text>
                 <ListView
                 enableEmptySections={true}
                 showsVerticalScrollIndicator={false}

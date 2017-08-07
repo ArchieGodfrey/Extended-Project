@@ -2,7 +2,7 @@ import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Func
 import dismissKeyboard from 'dismissKeyboard'
 import React, { Component } from 'react';
 import {
-  AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView,ScrollView,RefreshControl, TouchableOpacity, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
+  Alert,AppRegistry,StyleSheet,Text,View,Animated,Easing,Modal,Image,ListView,ScrollView,RefreshControl, TouchableOpacity, TouchableHighlight, TextInput,Button,AsyncStorage,Dimensions
 } from 'react-native';
 
 var moment = require('moment');
@@ -129,7 +129,7 @@ class SearchContainer extends Component {
 
   render() {
     return(
-      <View>
+      <View style={{flex:0.5}}>
         <TextInput
           style={{fontSize:24, height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5
             ,paddingLeft:(frame.width / 80)}}
@@ -140,7 +140,6 @@ class SearchContainer extends Component {
           <ListView
             enableEmptySections={true}
             showsVerticalScrollIndicator={false}
-            style={{flex:1}}
             contentContainerStyle={{flexDirection: 'column'}}
             horizontal={false}
             dataSource={this.state.dataSource}
@@ -168,45 +167,31 @@ class SuggestionsContainer extends Component {
   }
 
   componentWillMount() {
+    getSuggestions().then((result) => {
+      this.setState({dataSource: this.state.dataSource.cloneWithRows(result)})
+    })
     
   }
 
-  searchForUser(searchQuery) {
-      this.setState({search: searchQuery})
-      if (searchQuery !== "") {
-        functions.searchForUser(searchQuery).then((result) => {
-          if (result !== null) {
-            this.setState({dataSource: this.state.dataSource.cloneWithRows(result)})
-          }
-        })
-      }
-    }
-
   render() {
     return(
-      <View>
-        <TextInput
-          style={{fontSize:24, height:(frame.height / 16),borderColor:'grey',borderBottomWidth:0.5
-            ,paddingLeft:(frame.width / 80)}}
-          placeholder={"Search"}
-          value={this.state.search}
-          onChange={(event) => this.searchForUser(event.nativeEvent.text)}
-          maxLength={20}/>
-          <ListView
-            enableEmptySections={true}
-            showsVerticalScrollIndicator={false}
-            style={{flex:1}}
-            contentContainerStyle={{flexDirection: 'column'}}
-            horizontal={false}
-            dataSource={this.state.dataSource}
-            renderRow={(rowData, s, i) =>
-            <View >
-              <SearchItem USERID={rowData.USERID}
-              navigate={this.props.navigate}/>
-            </View>
-            }
-          />     
-      </View>
+      <View style={{flex:0.5,marginTop:(frame.height / 40),backgroundColor:'white'
+          ,borderColor:'grey',borderTopWidth:0.5}} >
+        <Text style={{fontSize:24,marginLeft:(frame.width / 80)}}>Suggestions:</Text>
+        <ListView
+          enableEmptySections={true}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{flexDirection: 'column'}}
+          horizontal={false}
+          dataSource={this.state.dataSource}
+          renderRow={(rowData, s, i) =>
+          <View >
+            <SearchItem USERID={rowData.USERID}
+            navigate={this.props.navigate}/>
+          </View>
+          }
+        /> 
+      </View>    
     )
   }
 }
@@ -216,9 +201,46 @@ export default class SearchPage extends Component {
     return(
       <ScrollView keyboardShouldPersistTaps="never" scrollEnabled={false} style={{flex:1,backgroundColor:"white"}}>
         <SearchContainer navigate={this.props.navigation.navigate}/>
+        <SuggestionsContainer navigate={this.props.navigation.navigate}/>
       </ScrollView>
     )
   }
+}
+
+function getSuggestions() {
+  return new Promise(function(resolve, reject) {
+    var suggestions = []
+    var increment = 0
+    functions.getFromAsyncStorage("@userID:key").then((ID) => {//get ID
+      functions.getArray(ID,"following").then((originalList) => {//get first list
+        originalList.map(function(item, index,arr) {//for every user in the original list
+          increment = increment + 1 
+          functions.getArray(item,"following").then((firstList) => {//get the first list
+            if (arr[index+1] !== null) {
+              functions.getArray(arr[index+1],"following").then((secondList) => {//get the second list
+                firstList.map(function(first, i) { //for every user in the first list
+                  secondList.map(function(second, i) {//for every user in the second list
+                    if (first == second) {//if there's a match
+                      if (first !== ID) {
+                        suggestions.push({USERID:first})//add it to suggestions
+                      }
+                    }
+                    if (increment == originalList.length) {
+                      clearTimeout(timeOut)
+                      resolve(suggestions)
+                    }
+                  })
+                })
+              })
+            }
+          })
+        })
+      })
+    })
+    let timeOut = setTimeout(function() {
+        resolve(null)}
+    , 100000)
+    })
 }
 
 /*export default class SearchContents extends Component {
