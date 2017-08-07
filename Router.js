@@ -1,4 +1,5 @@
 import React from 'react';
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import { StackNavigator,TabNavigator,NavigationActions  } from 'react-navigation';
 import { Alert,Image,TouchableHighlight,Text,Dimensions } from 'react-native';

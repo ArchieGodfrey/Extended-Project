@@ -1,4 +1,3 @@
-import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
 import dismissKeyboard from 'dismissKeyboard'
 import RNFetchBlob from 'react-native-fetch-blob'

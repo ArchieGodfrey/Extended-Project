@@ -238,7 +238,6 @@ getRequestList(UserID) {
                                 resolve(RequestedUsers)
                             }
                         } else {
-                            alert(Request.key)
                             Iterations ++
                             if (Iterations == requestList.numChildren()) {
                                 clearTimeout(timeOut)
@@ -261,10 +260,9 @@ getRequestList(UserID) {
 
 getDisplayName(UserID) {
     return new Promise(function(resolve, reject) {
-        var query = firebaseApp.database().ref("UserID/" + UserID + "/Name").orderByKey();
-        query.once("value")
-        .then(function(name) {
-            resolve(name.val())
+        getUserDisplayName(UserID).then((result) => {
+            clearTimeout(timeOut)
+            resolve(result)
         })
         var timeOut = setTimeout(function() {
         resolve(null)}, 10000)
@@ -380,6 +378,49 @@ checkIfUserBlocked(accountUserID,BlockedUserID) {
     }) 
 }
 
+searchForUser(query) {
+    return new Promise(function(resolve, reject) {
+        var foundUsers = []
+        var increment = 0
+        var userRef = firebaseApp.database().ref("UserID").orderByKey()
+        userRef.once('value', (usersSnapshot) => {
+            if (usersSnapshot.val() !== null) {
+                usersSnapshot.forEach(function(User) {
+                    getUserDisplayName(User.key).then((displayName) => {
+                        if (displayName.toLowerCase().includes(query.toLowerCase())) {
+                            foundUsers.push({USERID:User.key})
+                        }
+                        increment = increment + 1;
+                        if (increment == usersSnapshot.numChildren()) {
+                            clearTimeout(timeOut)
+                            resolve(foundUsers)
+                        }
+                    })
+                })
+            } else {
+               clearTimeout(timeOut)
+               foundUsers.push({USERID:"null"})
+                resolve(foundUsers) 
+            }
+        var timeOut = setTimeout(function() {
+            foundUsers.push({USERID:"null"})
+            resolve(foundUsers)}, 10000)
+        }) 
+    })
+}
+
+}
+
+function getUserDisplayName(UserID) {
+    return new Promise(function(resolve, reject) {
+        var query = firebaseApp.database().ref("UserID/" + UserID + "/Name").orderByKey();
+        query.once("value")
+        .then(function(name) {
+            resolve(name.val())
+        })
+        var timeOut = setTimeout(function() {
+        resolve(null)}, 10000)
+    }) 
 }
 
 function checkIfBlocked(accountUserID,BlockedUserID) {
