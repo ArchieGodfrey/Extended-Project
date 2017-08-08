@@ -26,7 +26,9 @@ export default class Timeline extends Component {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
       dataSource: ds.cloneWithRows([]),
+      tempList:[],
       refreshing: false,
+      limit:"",
     }
   }
 
@@ -38,8 +40,10 @@ export default class Timeline extends Component {
     functions.getFromAsyncStorage("@userID:key").then((UserID) => {
       if (UserID !== null) {
         functions.getTimeline(UserID,8).then((MostRecentPosts) => {
-          this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
-          saveCache(MostRecentPosts)
+            this.setState({dataSource: this.state.dataSource.cloneWithRows(dedupe(MostRecentPosts))})
+            this.setState({tempList: MostRecentPosts})
+            this.setState({limit: (Number(MostRecentPosts.length) + Number(this.state.limit)).toString()})
+          //saveCache(MostRecentPosts)
       }) 
       } else { //Not Logged In
         this.props.navigation.dispatch(resetAction)
@@ -49,16 +53,40 @@ export default class Timeline extends Component {
 
   transition(location) {
     this.props.navigation.navigate(location)
-}
+  }
 
   _onRefresh() {
       this.setState({refreshing: true});
       functions.getFromAsyncStorage("@userID:key").then((UserID) => {
         if (UserID !== null) {
           functions.getTimeline(UserID,8).then((MostRecentPosts) => {
-            this.setState({dataSource: this.state.dataSource.cloneWithRows(MostRecentPosts)})
-            //saveCache(MostRecentPosts)
+            this.setState({dataSource: this.state.dataSource.cloneWithRows(dedupe(MostRecentPosts))})
             this.setState({refreshing: false});
+            this.setState({limit: (Number(MostRecentPosts.length) + Number(this.state.limit)).toString()})
+          //saveCache(MostRecentPosts)
+          }) 
+        }
+      })  
+    }
+
+    returnLastValue(arr) {
+      return new Promise(function(resolve, reject) {
+        var increment = 0
+        arr.map(function(item) {
+          increment ++
+            if (increment == arr.length) {
+              resolve(item.DATE)
+            }
+        })
+      })
+    }
+
+    endReached() {
+      functions.getFromAsyncStorage("@userID:key").then((UserID) => {
+        if (UserID !== null) {
+          functions.getTimeline(UserID,this.state.limit).then((MostRecentPosts) => {
+            this.setState({dataSource: this.state.dataSource.cloneWithRows(dedupe(MostRecentPosts))})
+            this.setState({limit: (Number(MostRecentPosts.length) + Number(this.state.limit)).toString()})
           })
         }
       })  
@@ -95,6 +123,10 @@ export default class Timeline extends Component {
           </View>
          </TouchableHighlight>
         </View>}
+        onEndReached={() => {
+          //this.endReached()
+        }}
+        onEndReachedThreshold={frame.height / 4}
       />     
     )
   }
@@ -126,4 +158,23 @@ function tryLoadCache() {
     var timeOut = setTimeout(function() {
     resolve(null)}, 10000)
   })
+}
+
+function dedupe(arr) {
+  return arr.reduce(function (p, c) {
+
+    // create an identifying id from the object values
+    var id = [c.DATE].join('|');
+
+    // if the id is not found in the temp array
+    // add the object to the output array
+    // and add the key to the temp array
+    if (p.temp.indexOf(id) === -1) {
+      p.out.push(c);
+      p.temp.push(id);
+    }
+    return p;
+
+  // return the deduped array
+  }, { temp: [], out: [] }).out;
 }

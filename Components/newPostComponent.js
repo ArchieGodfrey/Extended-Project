@@ -63,7 +63,7 @@ const PostRequirements = {
         <View style={{marginTop:(frame.height / 40), marginBottom:(frame.height / 40),
           alignItems:'center', borderColor:'grey',borderBottomWidth:1,}}>
          <TouchableHighlight onPress={() => this.chooseImage()} underlayColor="#f1f1f1">
-            <Text style={{fontSize:20,marginBottom:(frame.height / 40)}}>Add an Image or Video</Text>
+            <Text style={{fontSize:20,marginBottom:(frame.height / 40)}}>Add an Image</Text>
           </TouchableHighlight>
         </View>
       )
@@ -287,6 +287,10 @@ function newPost () {
       });
       if (PostRequirements.PictureURI !== "") {
         uploadImage(UserID, timeKey, PostRequirements.PictureURI)
+      }
+      PostRequirements = {
+        PictureValid:false,PictureURI:"",TitleValid:false,Title:"",
+        DescValid:false,Desc:"",Day:"",Month:"",Year:"",Time:""
       }
       clearTimeout(timeOut)
       resolve(true)

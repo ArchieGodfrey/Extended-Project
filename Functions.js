@@ -43,7 +43,7 @@ getAllUserPosts(UserID) {
                 EmptyList.push({DESC:"This user has no posts",DATE:null})
                 resolve(EmptyList)
             } else {
-                sortPosts(PostList).then((Result) => {
+                sortPosts(PostList,1).then((Result) => {
                     resolve(Result)
                 })  
             }
@@ -56,38 +56,39 @@ getAllUserPosts(UserID) {
     })
 }
 
-getTimeline(UserID,limit) {
+async getTimeline(UserID,limit) {
     return new Promise(function(resolve, reject) {
         var MostRecentPosts = []
-        var expiredNum = 0
-        getMostRecentPosts(UserID).then((postDates) => {
+        var increment = 0
+        getMostRecentPosts(UserID).then((postDates) => {//gets all posts
             if (postDates !== null) {
-                sortPosts(postDates).then((sortedDates) => {
+                sortPosts(postDates,-1).then((sortedDates) => {//sorts them 
                     sortedDates.map(function(item, i) {  
-                        getSinglePost(item.DATE,item.USERID).then((RecentPost) => {
+                        getSinglePost(item.DATE,item.USERID).then((RecentPost) => {//gets all single post information
                             RecentPost.map(function(post, i) {
-                                checkExpiration(post.USERID,post.DATE).then((expired) => {
-                                    if (expired == false) {
-                                        MostRecentPosts.push({TITLE:post.TITLE,DESC:post.DESC,DATE:post.DATE,LIKES:post.LIKES,USERID:post.USERID,URI:post.URI})
-                                    } else {
-                                        expiredNum = expiredNum + 1
-                                    }
-                                    if ((sortedDates.length - expiredNum) < limit) {
-                                        if (MostRecentPosts.length == (sortedDates.length - expiredNum)) {
-                                            clearTimeout(timeOut)
-                                            resolve(MostRecentPosts)
-                                        } else {
-                                            if (MostRecentPosts.length == limit) {
+                                checkExpiration(post.USERID,post.DATE).then((expired) => {//checks if expired
+                                    if (expired == false) {//adds it to return array
+                                        MostRecentPosts.push({TITLE:post.TITLE,DESC:post.DESC,DATE:post.DATE,USERID:post.USERID}) 
+                                    } 
+                                    increment ++
+                                    sortPosts(MostRecentPosts,1).then((sortedRecentDates) => {
+                                        if (postDates.length > limit) {
+                                            if (sortedDates.length == increment) {
                                                 clearTimeout(timeOut)
-                                                resolve(MostRecentPosts)
+                                                resolve(sortedRecentDates)
+                                            }
+                                        } else {
+                                            if (sortedDates.length == increment) {
+                                                clearTimeout(timeOut)
+                                                resolve(sortedRecentDates)
                                             }
                                         }
-                                    }
+                                    })
                                 })    
                             })
                         })
                     })
-                }) 
+                })
             } else {
                 clearTimeout(timeOut)
                 var EmptyList = []
@@ -298,7 +299,7 @@ getPostComments(UserID,Date) {
     return new Promise(function(resolve, reject) {
         getComments(UserID,Date).then((result) => {
             if (result !== null) {
-                sortPosts(result).then((sortedComments) => {
+                sortPosts(result,1).then((sortedComments) => {
                     resolve(result)
                 })
             } else {
@@ -664,20 +665,20 @@ function getFollowedUsers(UserID) {
 function getPostDates(UserID) {
     return new Promise(function(resolve, reject) {
         var postDates = []
-        var dateQuery = firebaseApp.database().ref("UserID/" + UserID + "/posts").orderByKey();
-            dateQuery.once("value").then(function(AllDates) {
-                if (AllDates.val() !== null) {
-                    AllDates.forEach(function(Date) {//Push each of the dates into one array with UserID
-                        postDates.push({DATE:Date.key,USERID:UserID})
-                        if (postDates.length == AllDates.numChildren()) {
-                            clearTimeout(timeOut)
-                            resolve(postDates)
-                        }
-                    })
-                } else {
-                    resolve(postDates)
-                } 
-            })
+        var dateQuery = firebaseApp.database().ref("UserID/" + UserID + "/posts").orderByKey()
+        dateQuery.once("value").then(function(AllDates) {
+            if (AllDates.val() !== null) {
+                AllDates.forEach(function(Date) {//Push each of the dates into one array with UserID
+                    postDates.push({DATE:Date.key,USERID:UserID})
+                    if (postDates.length == AllDates.numChildren()) {
+                        clearTimeout(timeOut)
+                        resolve(postDates)
+                    }
+                })
+            } else {
+                resolve(postDates)
+            } 
+        })
         var timeOut = setTimeout(function() {
         resolve(null)}, 10000)
     })
@@ -691,14 +692,17 @@ async function getMostRecentPosts(UserID) {
                 var Iterations = 0
                 FollowedUsers.forEach(function(User) {//For each followed user
                     getPostDates(User.key).then((postDates) => {
-                        postDates.map(function(item, i) {
-                            MostRecentPosts.push({DATE:item.DATE,USERID:item.USERID})
+                        sortPosts(postDates,1).then((sortedDates) => {
+                            sortedDates.map(function(item, i) {
+                                MostRecentPosts.push({DATE:item.DATE,USERID:item.USERID})
+                            })
+                            Iterations ++
+                            if (Iterations == FollowedUsers.numChildren()) {
+                                clearTimeout(timeOut)
+                                
+                                resolve(MostRecentPosts)
+                            }
                         })
-                        Iterations ++
-                        if (Iterations == FollowedUsers.numChildren()) {
-                            clearTimeout(timeOut)
-                            resolve(MostRecentPosts)
-                        }
                     })
                 })
             } else {
@@ -724,9 +728,6 @@ function getSinglePost(Date,UserID) {
                         })
                         getPostFromFireBase(UserID,postDetails.key,"/desc").then((desc) => {
                             postDesc = desc
-                        })
-                        getPostFromFireBase(UserID,postDetails.key,"/likes").then((likes) => {
-                            postLikes = likes
                             UserPosts.push({TITLE:postTitle,DESC:postDesc,DATE:postDetails.key,LIKES:postLikes,USERID:UserID})
                             clearTimeout(timeOut)
                             resolve(UserPosts)
@@ -739,14 +740,14 @@ function getSinglePost(Date,UserID) {
     })
 } 
 
-async function sortPosts(UserPosts) {
+async function sortPosts(UserPosts,invert) {
     return new Promise(function(resolve, reject) {
         UserPosts.sort((num1, num2) => {
         if (num1.DATE < num2.DATE) {
-            return -1;
+            return 1 * invert;
         }
         if (num1.DATE > num2.DATE) {
-            return 1;
+            return -1 * invert;
         }
         // a must be equal to b
         return 0;
