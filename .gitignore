@@ -30,7 +30,7 @@ build/
 local.properties
 *.iml
 
-/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig.js
+/API-Keys
 
 # BUCK
 buck-out/
