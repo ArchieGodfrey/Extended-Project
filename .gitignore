@@ -30,7 +30,7 @@ build/
 local.properties
 *.iml
 
-firebaseConfig.js
+/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig.js
 
 # BUCK
 buck-out/
