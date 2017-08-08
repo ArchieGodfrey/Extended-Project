@@ -154,7 +154,7 @@ class SignUpPage extends React.Component {
                     secureTextEntry={true}
                     onChange={(event) => this.setState({password: event.nativeEvent.text})}
                 />
-                <TouchableHighlight onPress={() => {this.createUser().then((result) => {if (result == true) {this.moveRight()}})}} 
+                <TouchableHighlight onPress={() => {this.createUser()}} 
                      style={{marginTop:(frame.height / 20)}} underlayColor="#f1f1f1">
                     <Text style={{fontSize: 24}}>Create</Text>
                 </TouchableHighlight>

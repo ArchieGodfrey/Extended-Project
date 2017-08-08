@@ -17,42 +17,64 @@ class ImageContainer extends Component {
         super(props);
         this.state = {
            backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png",
-           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
+           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png",
+           refreshing: false, 
         }
+    }
+
+    _onRefresh() {
+        this.setState({refreshing: true});
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            if (ID !== null) {
+                var updateRef = firebaseApp.database().ref("UserID/"+ ID)
+                updateRef.on("value", (snapshot) => {
+                    functions.downloadProfileImages(ID).then((urls) => {
+                        this.setState({avatarSource:urls[0]})
+                        this.setState({backgroundSource:urls[1]})
+                        this.setState({refreshing: false});
+                    })
+                })
+            }
+        })
     }
 
     componentDidMount() {
         const {navigate} = this.props;
-                functions.getFromAsyncStorage("@userID:key").then((ID) => {
-                    if (ID !== null) {
-                        var updateRef = firebaseApp.database().ref("UserID/"+ ID)
-                        updateRef.on("value", (snapshot) => {
-                            functions.downloadProfileImages(ID).then((urls) => {
-                                this.setState({avatarSource:urls[0]})
-                                this.setState({backgroundSource:urls[1]})
-                            })
-                        })
-                    }
-            })
+        functions.getFromAsyncStorage("@userID:key").then((ID) => {
+            if (ID !== null) {
+                var updateRef = firebaseApp.database().ref("UserID/"+ ID)
+                updateRef.on("value", (snapshot) => {
+                    functions.downloadProfileImages(ID).then((urls) => {
+                        this.setState({avatarSource:urls[0]})
+                        this.setState({backgroundSource:urls[1]})
+                    })
+                })
+            }
+        })
     }
 
     render() {
         return(
-            
-            <View style={{flex:0.5,alignItems:'center',justifyContent:'center'}}>
-                <Image
-                style={{position: 'absolute', top:0, left:0, right:0,resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  
-                blurRadius={2} 
-                source={{uri: this.state.backgroundSource}}/>
-                <View style={{alignItems:'center'}}>
-                    <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate('EditAccount')}}>
-                      <Image 
-                        style={{resizeMode: 'cover', height: (frame.width / 4), width: (frame.width / 4)}}
-                        source={{uri: this.state.avatarSource}}/>
-                    </TouchableHighlight>
-                    <AccountDetails/>
-                </View>
-                
+            <View style={{flex:0.5}}>
+                <ScrollView contentContainerStyle={{alignItems:'center',justifyContent:'center'}}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh.bind(this)}
+                    />}>
+                    <Image
+                    style={{position: 'absolute', top:0, left:0, right:0,resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  
+                    blurRadius={2} 
+                    source={{uri: this.state.backgroundSource}}/>
+                    <View style={{alignItems:'center',justifyContent:'center'}}>
+                        <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.props.navigate('EditAccount')}}>
+                        <Image 
+                            style={{resizeMode: 'cover',marginTop:(frame.height / 24), height: (frame.width / 4), width: (frame.width / 4)}}
+                            source={{uri: this.state.avatarSource}}/>
+                        </TouchableHighlight>
+                        <AccountDetails/>
+                    </View> 
+                </ScrollView>
             </View>
         )
     }

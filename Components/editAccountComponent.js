@@ -70,7 +70,7 @@ class ImageContainer extends Component {
                   <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {functions.chooseImage((frame.width / 4),(frame.width / 4)).then((image) => {
                 this.setState({avatarSource:image}), AccountRequirements.ProfileURI = image})}}>
                   <Image 
-                    style={{marginTop:(frame.height / 16), alignSelf:'center',
+                    style={{marginTop:(frame.height / 24), alignSelf:'center',
                     resizeMode: 'cover', height: (frame.width / 4), 
                     width: (frame.width / 4)}}
                     source={{uri: this.state.avatarSource}}/>
@@ -186,7 +186,6 @@ export default class AccountContents extends Component {
 function checkChanges() {
   return new Promise(function(resolve, reject) {
     if (AccountRequirements.NameValid == true) {
-      if (AccountRequirements.DescValid == true) {
         var name = AccountRequirements.Name
         var desc = AccountRequirements.Desc
         functions.getFromAsyncStorage("@userID:key").then((UserID) => {
@@ -212,8 +211,9 @@ function checkChanges() {
           clearTimeout(timeOut)
           resolve(true)
         })
+      } else {
+        alert("You need a name")
       }
-    }
      var timeOut = setTimeout(function() {
       resolve(null)}, 10000)
   })

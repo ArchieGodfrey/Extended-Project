@@ -1,5 +1,5 @@
 import React from 'react';
-import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/API-Keys/firebaseConfig'
 import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import { StackNavigator,TabNavigator,NavigationActions  } from 'react-navigation';
 import { Alert,Image,TouchableHighlight,Text,Dimensions } from 'react-native';
@@ -204,6 +204,19 @@ const UserListStack = StackNavigator({
   }
 );
 
+const EditAccountStack = StackNavigator({
+  ReportPage: {
+    screen: EditAccount,
+    navigationOptions: ({navigation}) => ({
+      title: "Edit Profile",
+      headerLeft: (
+        <BackButton onPress={() => navigation.dispatch(backAction)}/>
+      ),
+    }),
+  }
+  }
+);
+
 const TopNavigation = TabNavigator({
   Account: {
     screen:  AccountTab,
@@ -243,7 +256,7 @@ const MainNavigation = StackNavigator({
     screen: AccountPostsStack,
   },
   EditAccount: {
-    screen: EditAccount,
+    screen: EditAccountStack,
   },
   Comment: {
     screen: CommentStack,
