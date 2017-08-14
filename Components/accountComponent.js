@@ -160,7 +160,7 @@ class AnalyticsBar extends Component {
                     <Text style={{fontSize:24}}> {this.state.following} </Text>
                 </TouchableHighlight>
                 <Image 
-                    style={{resizeMode: 'contain'}} 
+                    style={{resizeMode: 'cover'}} 
                     source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/FriendsIcon.png")}/>
                 <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.props.navigate("UserList", {TYPE:"Users who follow you"})} 
                     style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,paddingLeft:(frame.width / 80)}} >

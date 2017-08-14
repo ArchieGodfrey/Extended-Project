@@ -217,7 +217,7 @@ class AccountPosts extends Component {
                 <View style={{height:(frame.height / 1.75),justifyContent:'center',alignItems:'center',
                 flexDirection:'column'}} >
                     <Image 
-                    style={{resizeMode: 'center'}} 
+                    style={{resizeMode: 'cover'}} 
                     source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/UserIcon.png")}/>
                     <Text style={{fontSize:20}} >You must follow the user to see their posts</Text>
                 </View>

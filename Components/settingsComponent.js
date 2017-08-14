@@ -196,19 +196,19 @@ class RequestTemplate extends Component {
                 <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >{this.state.name}</Text>
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row',alignItems:'center'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
-                        <Image style={{resizeMode: 'contain', resizeMode:'center'}} 
+                        <Image style={{marginRight:(frame.width / 20),resizeMode: 'cover'}} 
                         source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')} />
                     </TouchableHighlight>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {acceptRequest(ID,this.props.USERID)})}>
                     <Image 
-                        style={{resizeMode: 'center', height: (frame.width / 10), width: (frame.width / 10)}}
+                        style={{resizeMode: 'cover', height: (frame.width / 10), width: (frame.width / 10)}}
                         source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/CheckedActive.png")}/>
                 </TouchableHighlight>
                 <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {declineRequest(ID,this.props.USERID)})}>
                 <Image 
-                    style={{marginLeft:(frame.width / 40),resizeMode: 'center', 
+                    style={{resizeMode: 'cover', 
                         height: (frame.width / 10), width: (frame.width / 10)}}
                     source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/Off.png")}/>
                 </TouchableHighlight>
