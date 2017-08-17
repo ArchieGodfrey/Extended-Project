@@ -40,7 +40,7 @@ getAllUserPosts(UserID) {
         getAllPostDetails(UserID).then((PostList) => {
             if (PostList == null) {
                 var EmptyList = []
-                EmptyList.push({DESC:"This user has no posts",DATE:null})
+                EmptyList.push({TITLE:"Nothing to show",DESC:"This user has no posts",DATE:null})
                 resolve(EmptyList)
             } else {
                 sortPosts(PostList,1).then((Result) => {
@@ -50,7 +50,7 @@ getAllUserPosts(UserID) {
         })
         var timeOut = setTimeout(function() {
             var EmptyList = []
-            EmptyList.push({DESC:"This user has no posts",DATE:null})
+            EmptyList.push({TITLE:"Nothing to show",DESC:"This user has no posts",DATE:null})
             resolve(EmptyList)
         }, 10000)
     })
@@ -180,7 +180,6 @@ chooseImage(HEIGHT,WIDTH) {
         ImagePicker.openPicker({
             width:WIDTH,
             height:HEIGHT,
-            cropping: true,
             compressImageQuality:1,
         }).then(image => {
             resolve(image.path)

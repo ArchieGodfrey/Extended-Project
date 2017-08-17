@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
 import {NavigationActions} from 'react-navigation';
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import dismissKeyboard from 'dismissKeyboard'

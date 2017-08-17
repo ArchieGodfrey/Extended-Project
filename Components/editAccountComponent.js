@@ -1,5 +1,5 @@
 
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
 import RNFetchBlob from 'react-native-fetch-blob'
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import { NavigationActions } from 'react-navigation'
@@ -29,8 +29,8 @@ class ImageContainer extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png",
-           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
+           backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png",
+           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
         }
     }
 

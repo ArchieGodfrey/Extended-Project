@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView,ScrollView,RefreshControl, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
@@ -15,8 +15,8 @@ class OtherAccountImageContainer extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png",
-           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
+           backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png",
+           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
         }
     }
 
@@ -34,14 +34,14 @@ class OtherAccountImageContainer extends Component {
     render() {
         return(
             
-            <View style={{flex:0.5,alignItems:'center',justifyContent:'center'}}>
+            <View style={{height: (frame.width / 4),alignItems:'center',justifyContent:'center'}}>
                 <Image
-                style={{position: 'absolute', top:0, left:0, right:0,resizeMode: 'cover', width: frame.width, height: (frame.height / 3) }}  
+                style={{position: 'absolute', top:0, left:0, right:0,resizeMode: 'cover', width: frame.width, height: (frame.height / 4) }}  
                 blurRadius={2} 
                 source={{uri: this.state.backgroundSource}}/>
-                <View style={{alignItems:'center'}}>
+                <View style={{alignItems:'center',justifyContent:"center",marginTop:(frame.height / 24)}}>
                     <Image 
-                    style={{resizeMode: 'cover', height: (frame.width / 4), width: (frame.width / 4)}}
+                    style={{resizeMode: 'cover',marginTop:(frame.height / 24), height: (frame.width / 4), width: (frame.width / 4)}}
                     source={{uri: this.state.avatarSource}}/>
                     <AccountDetails USERID={this.props.USERID}/>
                 </View>
@@ -137,7 +137,7 @@ class AnalyticsBar extends Component {
 
     render() {
         return(
-            <View style={{flex:0.1,flexDirection:'row',justifyContent:'center',alignItems:'center',
+            <View style={{marginTop:(frame.height / 10),flexDirection:'row',justifyContent:'center',alignItems:'center',
                 borderColor:'grey',borderTopWidth:0.5,borderBottomWidth:0.5,backgroundColor:'white'}} >
                 <View style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,}} >
                     <Text style={{fontSize:24}}> {this.state.following} </Text>
@@ -191,7 +191,7 @@ class AccountPosts extends Component {
             <ListView
                 enableEmptySections={true}
                 showsVerticalScrollIndicator={false}
-                style={{backgroundColor:'white'}}
+                style={{flex:0.4,backgroundColor:'white'}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
                 refreshControl={
@@ -216,9 +216,6 @@ class AccountPosts extends Component {
             return(
                 <View style={{height:(frame.height / 1.75),justifyContent:'center',alignItems:'center',
                 flexDirection:'column'}} >
-                    <Image 
-                    style={{resizeMode: 'cover'}} 
-                    source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/UserIcon.png")}/>
                     <Text style={{fontSize:20}} >You must follow the user to see their posts</Text>
                 </View>
             )
@@ -278,7 +275,7 @@ export default class AccountContents extends Component {
 
     render() {
         return(
-            <View style={{flex:1,justifyContent:'center'}}>
+            <View style={{flex:1}}>
                 <OtherAccountImageContainer USERID={this.props.navigation.state.params.USERID} 
                     navigate={this.props.navigation.navigate}/>
                 <AnalyticsBar USERID={this.props.navigation.state.params.USERID} />

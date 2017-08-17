@@ -1,5 +1,5 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
-import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
+import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Project/Components/postComponent"
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {

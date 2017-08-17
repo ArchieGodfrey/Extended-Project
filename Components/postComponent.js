@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
 import React, { Component } from 'react';
 import {
   AppRegistry,Alert,StyleSheet,Text,View,Animated,Easing,Image,ListView, TouchableHighlight, TouchableOpacity,TextInput,Button,AsyncStorage,Dimensions,Platform
@@ -14,7 +14,7 @@ class ImageContainer extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      imageSource:null,
+      imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png",
       lastPress:0, 
     }
   }
@@ -70,7 +70,7 @@ class PostDetails extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png", 
+      avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png", 
     }
   }
 
@@ -150,7 +150,7 @@ class PostDetails extends Component {
            <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => this.postOptionsPressed()}>
             <Image style={{resizeMode: 'contain', height: (frame.height / 24), 
               width: (frame.width / 6),marginTop:(frame.height / 80)}} 
-              source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/OptionsIcon.png')} />
+              source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/OptionsIcon.png')} />
           </TouchableHighlight>
         </View>
       </View>
@@ -218,7 +218,7 @@ class Footer extends Component {
         <View style={{flexDirection:'row',marginBottom: (frame.height / 40)}} >
         <Image
           style={{resizeMode: 'cover', height: (frame.height / 34), width:(frame.width / 18)}} 
-          source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/ClockIcon.png')}/>
+          source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/ClockIcon.png')}/>
         <Text style={{paddingLeft:(frame.width / 80),fontSize:16,color:'grey'}}>
           {moment(this.state.expirationDate, "YYYYMMDDHHmm").format('MMMM Do YYYY, HH:mm')}
         </Text>
@@ -296,10 +296,10 @@ class LikeComponent extends Component {
         <View style={{alignItems:'center'}}>
           <Animated.Image style={{opacity: this.likeValue,
             resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
-            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikedIcon.png')}/>
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/LikedIcon.png')}/>
           <Animated.Image style={{opacity: 1 / this.likeValue, position:'absolute',
             resizeMode: 'contain', height: (frame.height / 20), width: (frame.width / 6)}}
-            source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/LikeIcon.png')}/>
+            source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/LikeIcon.png')}/>
           <Text style={{fontSize:18,paddingTop:(frame.height / 160)}}>{this.state.likeCount}</Text>
         </View>
       </TouchableHighlight>

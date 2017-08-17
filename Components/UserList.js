@@ -1,5 +1,5 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
-import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
+import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Project/Components/postComponent"
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
@@ -17,7 +17,7 @@ class ListItem extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
+           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
            name:"",
         }
     }
@@ -93,7 +93,7 @@ class ListItem extends Component {
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
                         <Image style={{resizeMode: 'contain',resizeMode:'center',marginTop:(frame.height / 80)}} 
-                        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')}/>
+                        source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/MenuIcon.png')}/>
                     </TouchableHighlight>
                 </View>
             </View>

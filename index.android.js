@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { AppRegistry } from 'react-native';
-import Router from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Router.js'
+import Router from '/Users/archiegodfrey/Desktop/GitHub/Project/Router.js'
 
-export default class EPRouter extends Component {
+export default class Project extends Component {
   render() {
     return (
         <Router ref={nav => { this.navigator = nav; }}/>   
@@ -10,4 +10,4 @@ export default class EPRouter extends Component {
   }
 }
 
-AppRegistry.registerComponent('EPQ', () => EPRouter);
+AppRegistry.registerComponent('Project', () => Project);

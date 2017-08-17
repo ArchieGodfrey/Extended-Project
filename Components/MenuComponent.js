@@ -1,5 +1,5 @@
-import actions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Actions"
-import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/firebaseConfig'
+import actions from "/Users/archiegodfrey/Desktop/GitHub/Project/Actions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Project/firebaseConfig'
 import dismissKeyboard from 'dismissKeyboard'
 import Interactable from 'react-native-interactable';
 import React, { Component } from 'react';
@@ -300,7 +300,7 @@ render() {
         underlayColor="#f1f1f1">
         <Animated.Image
          style={{position: 'absolute',top: 0, height:25, width:25, left: 0, transform: [{rotate: cross}]}}
-         source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/PlusIcon.png')}/>
+         source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/PlusIcon.png')}/>
       </TouchableHighlight>
       <ListView
         enableEmptySections={true}
