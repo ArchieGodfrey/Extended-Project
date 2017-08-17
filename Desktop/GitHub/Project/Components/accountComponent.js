@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import ImagePicker from 'react-native-image-crop-picker';
 import React, { Component } from 'react';
 import {
@@ -16,8 +16,8 @@ class ImageContainer extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png",
-           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png",
+           backgroundSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png",
+           avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png",
            refreshing: false, 
         }
     }
@@ -84,7 +84,7 @@ class PostPreview extends Component {
     constructor (props) {
     super(props);
     this.state = {
-      imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png", 
+      imageSource:null, 
     }
   }
 
@@ -160,10 +160,10 @@ class AnalyticsBar extends Component {
                     <Text style={{fontSize:24}}> {this.state.following} </Text>
                 </TouchableHighlight>
                 <Image 
-                    style={{resizeMode: 'contain',height:(frame.height / 24),width:(frame.width / 24)}} 
-                    source={require("/Users/archiegodfrey/Desktop/GitHub/Project/Images/FriendsIcon.png")}/>
+                    style={{resizeMode: 'cover'}} 
+                    source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/FriendsIcon.png")}/>
                 <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.props.navigate("UserList", {TYPE:"Users who follow you"})} 
-                    style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5}} >
+                    style={{borderColor:'grey',borderLeftWidth:0.5,borderRightWidth:0.5,paddingLeft:(frame.width / 80)}} >
                     <Text style={{fontSize:24}}> {this.state.followers} </Text>
                 </TouchableHighlight>
             </View>
@@ -215,7 +215,7 @@ class AccountPosts extends Component {
             <ListView
                 enableEmptySections={true}
                 showsVerticalScrollIndicator={false}
-                style={{flex:0.4,backgroundColor:'white'}}
+                style={{backgroundColor:'white'}}
                 contentContainerStyle={{flexDirection: 'row', flexWrap: 'wrap'}}
                 dataSource={this.state.dataSource}
                 refreshControl={

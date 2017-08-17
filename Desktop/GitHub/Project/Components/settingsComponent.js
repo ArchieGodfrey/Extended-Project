@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
@@ -121,7 +121,7 @@ class RequestTemplate extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
+           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
            name:"",
         }
     }
@@ -196,21 +196,21 @@ class RequestTemplate extends Component {
                 <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >{this.state.name}</Text>
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row',alignItems:'center'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
-                        <Image style={{resizeMode: 'contain', resizeMode:'center'}} 
-                        source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/MenuIcon.png')} />
+                        <Image style={{marginRight:(frame.width / 20),resizeMode: 'cover'}} 
+                        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')} />
                     </TouchableHighlight>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {acceptRequest(ID,this.props.USERID)})}>
                     <Image 
-                        style={{marginLeft:(frame.width / 80),resizeMode: 'center', height: (frame.width / 10), width: (frame.width / 10)}}
-                        source={require("/Users/archiegodfrey/Desktop/GitHub/Project/Images/CheckedActive.png")}/>
+                        style={{resizeMode: 'cover', height: (frame.width / 10), width: (frame.width / 10)}}
+                        source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/CheckedActive.png")}/>
                 </TouchableHighlight>
                 <TouchableHighlight underlayColor="#f1f1f1" onPress={() => functions.getFromAsyncStorage("@userID:key").then(
                     (ID) => {declineRequest(ID,this.props.USERID)})}>
                 <Image 
-                    style={{marginLeft:(frame.width / 80),resizeMode: 'center', 
+                    style={{resizeMode: 'cover', 
                         height: (frame.width / 10), width: (frame.width / 10)}}
-                    source={require("/Users/archiegodfrey/Desktop/GitHub/Project/Images/Off.png")}/>
+                    source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/Off.png")}/>
                 </TouchableHighlight>
                 </View>
             </View>

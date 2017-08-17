@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions.js"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
 import dismissKeyboard from 'dismissKeyboard'
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';

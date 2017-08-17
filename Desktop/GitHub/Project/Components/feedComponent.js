@@ -1,5 +1,5 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
-import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Project/Components/postComponent"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
+import PostComponent from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/postComponent"
 import { NavigationActions } from 'react-navigation'
 import React, { Component } from 'react';
 import {
@@ -117,8 +117,8 @@ export default class Timeline extends Component {
         marginBottom:(frame.height / 80), alignItems: 'center'}}>
         <TouchableHighlight underlayColor="#f1f1f1" onPress={() => {this.transition("NewPost") }}>
           <View style={{flexDirection:'row',alignItems:'center'}} >
-             <Image style={{resizeMode: 'center',marginRight:(frame.width / 80)}} 
-                  source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/PlusIcon.png')}/>
+             <Image style={{paddingRight:(frame.width /14),resizeMode: 'cover'}} 
+                  source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/PlusIcon.png')}/>
             <Text style={{fontSize: 24}}>New Post</Text>
           </View>
          </TouchableHighlight>

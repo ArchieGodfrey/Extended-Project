@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions.js"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
 import dismissKeyboard from 'dismissKeyboard'
 import RNFetchBlob from 'react-native-fetch-blob'
 import ImagePicker from 'react-native-image-crop-picker';
@@ -40,9 +40,9 @@ const PostRequirements = {
      ImagePicker.openPicker({
        width:(frame.width),
        height:(frame.height / 2),
+       cropping: true,
        compressImageQuality:1,
      }).then(image => {
-       alert(image.mime)
        PostRequirements.PictureValid = true
        PostRequirements.PictureURI = image.path
        this.setState({imageSource: image.path})
@@ -75,7 +75,7 @@ const PostRequirements = {
    constructor (props) {
      super(props);
      this.state = {
-       avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/greyBackground.png",
+       avatarSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/greyBackground.png",
        title:"", 
      }
    }

@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import dismissKeyboard from 'dismissKeyboard'
 import React, { Component } from 'react';
@@ -18,7 +18,7 @@ class CommentTemplate extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
+           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
            name:"",
         }
     }
@@ -108,7 +108,7 @@ class HeaderTemplate extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
+           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
            name:"",
         }
     }
@@ -244,7 +244,7 @@ class Composer extends Component {
         <TouchableHighlight underlayColor="#F1F1F1"  onPress={() => {addComment(this.props.USERID,this.props.DATE),this.clearText()}}>
           <Image 
               style={{marginLeft:(frame.width / 40),resizeMode: 'center', height: (frame.width / 12), width: (frame.width / 12)}}
-              source={require("/Users/archiegodfrey/Desktop/GitHub/Project/Images/PlusIcon.png")}/>
+              source={require("/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/PlusIcon.png")}/>
         </TouchableHighlight>
             <AutoGrowingTextInput style={{width:frame.width / 1.25,marginLeft:(frame.width / 40), fontSize:22, height:(frame.height / 20)}} 
              placeholder={'Add a comment...'}

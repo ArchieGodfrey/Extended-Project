@@ -1,21 +1,21 @@
 import React from 'react';
-import firebase from '/Users/archiegodfrey/Desktop/GitHub/Project/API-Keys/firebaseConfig'
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions"
+import firebase from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/API-Keys/firebaseConfig'
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions"
 import { StackNavigator,TabNavigator,NavigationActions  } from 'react-navigation';
 import { Alert,Image,TouchableHighlight,Text,Dimensions } from 'react-native';
 
-import Feed from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/feedComponent'
-import UserDetail from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/otherUserAccount'
-import Account from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/accountComponent'
-import SignIn from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/SignIn'
-import Search from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/searchComponent'
-import NewPost from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/newPostComponent'
-import Settings from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/settingsComponent'
-import AccountPosts from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/AccountPostsComponent'
-import EditAccount from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/editAccountComponent'
-import Comment from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/CommentComponent'
-import ReportPage from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/ReportPage'
-import UserList from '/Users/archiegodfrey/Desktop/GitHub/Project/Components/UserList'
+import Feed from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/feedComponent'
+import UserDetail from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/otherUserAccount'
+import Account from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/accountComponent'
+import SignIn from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/SignIn'
+import Search from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/searchComponent'
+import NewPost from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/newPostComponent'
+import Settings from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/settingsComponent'
+import AccountPosts from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/AccountPostsComponent'
+import EditAccount from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/editAccountComponent'
+import Comment from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/CommentComponent'
+import ReportPage from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/ReportPage'
+import UserList from '/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Components/UserList'
 
 var firebaseApp = require("firebase/app"); require("firebase/auth"); require("firebase/database")
 const frame = Dimensions.get('window');
@@ -24,7 +24,7 @@ const backAction = NavigationActions.back({})
 const BackButton = ({ onPress }) => (
   <TouchableHighlight underlayColor="#f1f1f1" style={{marginLeft:(frame.width / 20),width:(frame.width/6)}} onPress={onPress}>
     <Image style={{resizeMode:'center'}} 
-      source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/BackIcon.png')}
+      source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/BackIcon.png')}
     />
   </TouchableHighlight>
 );
@@ -65,7 +65,7 @@ function menuPressed(USERID) {
 const MenuButton = ({ onPress }) => (
   <TouchableHighlight underlayColor="#f1f1f1" style={{width:(frame.width/6)}} onPress={onPress}>
     <Image style={{resizeMode:'center',position:'absolute',right:(frame.width / 20)}} 
-      source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/MenuIcon.png')}
+      source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')}
     />
   </TouchableHighlight>
 );

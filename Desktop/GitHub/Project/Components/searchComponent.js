@@ -1,4 +1,4 @@
-import functions from "/Users/archiegodfrey/Desktop/GitHub/Project/Functions.js"
+import functions from "/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Functions.js"
 import dismissKeyboard from 'dismissKeyboard'
 import React, { Component } from 'react';
 import {
@@ -13,7 +13,7 @@ class SearchItem extends Component {
     constructor (props) {
         super(props);
         this.state = {
-           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Project/Images/blackBackground.png", 
+           imageSource:"/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/blackBackground.png", 
            name:"",
         }
     }
@@ -92,14 +92,14 @@ class SearchItem extends Component {
                 <View style={{position:'absolute',right:(frame.width/40),flexDirection:'row'}}>
                     <TouchableHighlight underlayColor="#f1f1f1" onPress={() => this.optionsPressed()}>
                         <Image style={{resizeMode:'center',marginTop:(frame.height / 80)}} 
-                        source={require('/Users/archiegodfrey/Desktop/GitHub/Project/Images/MenuIcon.png')}/>
+                        source={require('/Users/archiegodfrey/Desktop/GitHub/Extended-Project/Images/MenuIcon.png')}/>
                     </TouchableHighlight>
                 </View>
             </View>
         )
         } else {
             return(
-                <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >No users to show</Text>
+                <Text style={{fontSize:24,paddingLeft:(frame.height / 80)}} >No users on this list</Text>
             )
         }
     }
@@ -238,8 +238,7 @@ function getSuggestions() {
       })
     })
     let timeOut = setTimeout(function() {
-      suggestions.push({USERID:"null"})
-        resolve(suggestions)}
+        resolve(null)}
     , 100000)
     })
 }
