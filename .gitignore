@@ -1,6 +1,6 @@
 # OSX
 #
-
+.DS_Store
 
 # Xcode
 #
@@ -30,7 +30,11 @@ build/
 local.properties
 *.iml
 
-/API-Keys
+# node.js
+#
+node_modules/
+npm-debug.log
+yarn-error.log
 
 # BUCK
 buck-out/
